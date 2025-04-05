@@ -1,0 +1,12 @@
+@keyframes loading {
+  0% {
+    opacity: 18%;
+  }
+  50% {
+    opacity: 60%;
+  }
+  100% {
+    opacity: 18%;
+  }
+    
+}
