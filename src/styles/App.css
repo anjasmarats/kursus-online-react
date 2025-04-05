@@ -18,6 +18,11 @@ main.app .container .loading-main >div div {
     height: 50vh;
     animation: loading 1.5s infinite;
 }
+
+main.app .courses {
+    height: 100vh;
+    background-color: rgb(222, 219, 219);
+}
 /*
 @media only screen and (max-width: 992px) {
 

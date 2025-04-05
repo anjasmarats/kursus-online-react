@@ -1,6 +1,5 @@
 import axios from "axios"
 
-
 const auth = async ()=>{
     try {
         const session = localStorage.getItem("session")
@@ -12,13 +11,13 @@ const auth = async ()=>{
             localStorage.removeItem("expiration")
             return false
         }
-        const { data } = await axios.get("/auth", {
+        const { data,admin } = await axios.get("/api/auth", {
             headers: {
-                Authorization: `${session}`
+                Authorization: `Bearer ${session}`
             }
         })
 
-        return data
+        return {data,admin}
     } catch (e) {
         console.error(`auth : ${e}`)
         return false       
