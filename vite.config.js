@@ -7,7 +7,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'https://courses.hiapps.my.id',
+        target: 'https://course.hiapps.my.id',
         // changeOrigin: true,
       },
     },

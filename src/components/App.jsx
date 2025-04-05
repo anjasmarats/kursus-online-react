@@ -27,6 +27,8 @@ function App() {
       if (error.response && error.response.status === 500) {
         setError("Internal Server Error")
       }
+      console.error(`error app ${error}`)
+      setLoading(false)
     } finally {
       setLoading(false)
     }
@@ -38,7 +40,7 @@ function App() {
   return (
     <>
       <main className='app'>
-        <NavbarComponent />
+        <NavbarComponent admin={admin}/>
         {!authorized&&(<section className="my-5 brand p-3 d-lg-flex flex-row-reverse justify-content-between align-items-center">
           <aside className='text-center col-12 col-lg-6 my-4'>
             <img src="/dev-hiapps.jpg" className='rounded-circle' alt=""/>
