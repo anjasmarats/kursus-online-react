@@ -12,10 +12,11 @@ function App() {
   const [error, setError] = useState(null)
   const [admin, setAdmin] = useState(false)
   const [profleData, setProfileData] = useState({
+    name: "",
     email: "",
-    confirmPassword: "",
     start_time: "",
     duration: "",
+    photo: "",
   })
 
   const fetchData = async () => {
@@ -28,8 +29,21 @@ function App() {
           }
         })
         const result = await res.data
-        const {} = result.user
-        setProfileData(result.user)
+        const { name,email,activation_time,photo } = result.user
+        if (activation_time) {
+          const { time,date } = JSON.parse(activation_time)
+          setProfileData({
+            ...profleData,
+            start_time: date,
+            duration: time?JSON.parse(time).month:"",
+          })
+        }
+        setProfileData({
+          ...profleData,
+          name: name,
+          email: email,
+          photo: photo
+        })
         if (admin) {
           setAdmin(true)
         }
@@ -56,7 +70,26 @@ function App() {
     <>
       <main className='app'>
         <NavbarComponent admin={admin}/>
-        {!authorized&&(<section className="my-5 brand p-3 d-lg-flex flex-row-reverse justify-content-between align-items-center">
+        {authorized?(
+          <>
+          <section className="my-5 brand p-3 d-lg-flex flex-row-reverse justify-content-between align-items-center">
+            <aside className='text-center col-12 col-lg-6 my-4'>
+              <img src={profleData.photo} className='rounded-circle' alt=""/>
+            </aside>
+            <aside className='col-12 col-lg-6 text-center font-brand my-4'>
+              <div className="name">
+                <h3 className='text-center fw-bolder display-4'>{profleData.name}</h3>
+              </div>
+              <div className="email">
+                <h5 className='text-center fw-bolder display-5'>{profleData.email}</h5>
+              </div>
+              <div className="periode">
+                <h5 className='text-center fw-bolder display-5'>Masa berlaku {profleData.duration} (sejak {profleData.start_time})</h5>
+              </div>
+            </aside>
+          </section>
+          </>
+        ):(<section className="my-5 brand p-3 d-lg-flex flex-row-reverse justify-content-between align-items-center">
           <aside className='text-center col-12 col-lg-6 my-4'>
             <img src="/dev-hiapps.jpg" className='rounded-circle' alt=""/>
           </aside>
