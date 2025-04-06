@@ -22,7 +22,12 @@ function Register() {
     const register = async (e) => {
         try {
             e.preventDefault()
-            await axios.post('/api/user', data)
+            const res = await axios.post('/api/user', data)
+            const data = await res.data
+            const expiration = new Date().getTime() + 1000* 60 * 10
+            localStorage.setItem("session", data.session)
+            localStorage.setItem("expiration", expiration)
+            setError(null)
             navigate('/')
         } catch (error) {
             if (error.response && error.response.status === 500) {
@@ -80,9 +85,10 @@ function Register() {
                                             </InputGroup>
                                         </Form.Group>
                                         <Button variant="primary" type="submit">
-                                            Submit
+                                            Daftar
                                         </Button>
                                     </Form>
+                                    <div className='text-center my-3'>Sudah punya akun? <a href='/login' className='text-success text-decoration-none'>Login di sini</a></div>
                                 </aside>
                             </>
                     )}

@@ -1,0 +1,1 @@
+export const server_url = 'https://course.hiapps.my.id';

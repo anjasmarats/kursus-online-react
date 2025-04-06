@@ -3,6 +3,7 @@ import '../styles/App.css'
 import NavbarComponent from './NavbarComponent.jsx'
 import axios from 'axios'
 import auth from '../scripts/auth.js'
+import { server_url } from '../scripts/url.js'
 
 function App() {
   const [data, setData] = useState([])
@@ -10,17 +11,31 @@ function App() {
   const [authorized, setAuthorized] = useState(false)
   const [error, setError] = useState(null)
   const [admin, setAdmin] = useState(false)
+  const [profleData, setProfileData] = useState({
+    email: "",
+    confirmPassword: "",
+    start_time: "",
+    duration: "",
+  })
 
   const fetchData = async () => {
     try {
       const {data,admin} = await auth()
       if (data) {
+        const res = await axios.get(`${server_url}/api/user`, {
+          headers: {
+            Authorization: `Bearer ${data.session}`
+          }
+        })
+        const result = await res.data
+        const {} = result.user
+        setProfileData(result.user)
         if (admin) {
           setAdmin(true)
         }
         setAuthorized(true)
       }
-      const response = await axios.get('/api/courses')
+      const response = await axios.get(`${server_url}/api/courses`)
       const result = await response.data
       setData(result.courses)
     } catch (error) {
