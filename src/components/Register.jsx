@@ -13,8 +13,7 @@ function Register(props) {
     const navigate = useNavigate()
     const [error, setError] = useState(null)
     const [showPassword, setShowPassword] = useState(false)
-    const [login,setLogin] = useState(false)
-    const [register,setRegister] = useState(false)
+    const [register,setRegister] = useState(true)
     const [data, setData] = useState({
         name: "",
         email: "",
@@ -29,15 +28,6 @@ function Register(props) {
             e.preventDefault()
             const res = await axios.post(`${server_url}/api/login`, data)
             const data_response = await res.data
-            if (res.status===404) {
-                setError("pengguna tidak ditemukan")
-                return
-            }
-
-            if (res.status===400) {
-                setError("password salah")
-                return
-            }
             localStorage.setItem("session", data_response.data)
             localStorage.setItem("expiration", expiration)
             setError(null)
@@ -46,6 +36,16 @@ function Register(props) {
             if (error.response) {
                 if (error.response.status === 500) {
                     setError("Internal Server Error")
+                }
+
+                if (error.response.status===404) {
+                    setError("pengguna tidak ditemukan")
+                    return 
+                }
+    
+                if (error.response.status===400) {
+                    setError("password salah")
+                    return
                 }
             }
             console.error(error)
@@ -93,7 +93,7 @@ function Register(props) {
     useEffect(() => {
         cekAuth()
         if (loginPage) {
-            setLogin(true)
+            setRegister(false)
         }
     }, [])
     return(
@@ -108,8 +108,8 @@ function Register(props) {
                                     <div className="d-flex justify-content-between align-items-center mt-3">
                                         <hr className='border-3 me-3 w-100'/>ATAU<hr className='border-3 ms-3 w-100'/>
                                     </div>
-                                    <Form onSubmit={Register}>
-                                        {!login&&(
+                                    <Form onSubmit={register?Register:Login}>
+                                        {register&&(
                                             <Form.Group className="mb-3" controlId="formBasicName">
                                                 <Form.Label>Nama</Form.Label>
                                                 <Form.Control required={true} type="search" onChange={(e)=>setData({...data,name:e.target.value})} placeholder="Nama" />
@@ -131,10 +131,10 @@ function Register(props) {
                                             </InputGroup>
                                         </Form.Group>
                                         <Button variant="primary" type="submit">
-                                            Daftar
+                                            {register?"Daftar":"Login"}
                                         </Button>
                                     </Form>
-                                    <div className='text-center my-3'>{register?"Sudah punya akun?":"Belum punya akun?"} <a onClick={()=>register?setLogin(true):setRegister(true)} style={{ "cursor":"pointer" }} className='text-success text-decoration-none'>{register?"Login di sini":"Daftar di sini"}</a></div>
+                                    <div className='text-center my-3'>{register?"Sudah punya akun?":"Belum punya akun?"} <a onClick={()=>setRegister(!register)} style={{ "cursor":"pointer" }} className='text-success text-decoration-none'>{register?"Login di sini":"Daftar di sini"}</a></div>
                                 </aside>
                 </section>
             </article>
