@@ -22,7 +22,7 @@ const NavbarComponent = (props) => {
         <>
             <Navbar key={'lg'} expand={'lg'} className="navbar-app mb-3">
                 <Container fluid>
-                    <Navbar.Brand href="#" className='text-light'>HiAppS</Navbar.Brand>
+                    <Navbar.Brand href="/" className='text-light'>HiAppS</Navbar.Brand>
                     <Navbar.Toggle aria-controls={`offcanvasNavbar-expand-${'lg'}`} />
                     <Navbar.Offcanvas
                     id={`offcanvasNavbar-expand-${'lg'}`}
