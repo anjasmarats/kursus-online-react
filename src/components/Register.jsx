@@ -1,6 +1,6 @@
 import { FcGoogle } from 'react-icons/fc'
 import NavbarComponent from './NavbarComponent';
-import { Form,Button, InputGroup } from 'react-bootstrap';
+import { Form,Button, InputGroup, Alert } from 'react-bootstrap';
 import auth from '../scripts/auth';
 import { useNavigate } from 'react-router-dom'
 import { useEffect, useState } from 'react';
@@ -23,15 +23,19 @@ function Register() {
         try {
             e.preventDefault()
             const res = await axios.post('/api/user', data)
-            const data = await res.data
+            const data_response = await res.data
             const expiration = new Date().getTime() + 1000* 60 * 10
-            localStorage.setItem("session", data.session)
+            localStorage.setItem("session", data_response.session)
             localStorage.setItem("expiration", expiration)
             setError(null)
             navigate('/')
         } catch (error) {
-            if (error.response && error.response.status === 500) {
-                setError("Internal Server Error")
+            if (error.response) {
+                if (error.response.status === 500) {
+                    setError("Internal Server Error")
+                } else {
+                    setError("Error")
+                }
             }
             console.error(error)
         }
@@ -58,6 +62,7 @@ function Register() {
         <main className='register'>
             <NavbarComponent/>
             <article>
+                {error&&(<Alert variant='danger' key={"danger"} dismissible={true}>{error}</Alert>)}
                 <section className='row'>
                     {error ? (
                     <div className='fw-bolder text-danger display-5 text-center mx-auto mt-5'>{error}</div>

@@ -11,13 +11,35 @@ function App() {
   const [authorized, setAuthorized] = useState(false)
   const [error, setError] = useState(null)
   const [admin, setAdmin] = useState(false)
-  const [profleData, setProfileData] = useState({
+  const [photo, setPhoto] = useState(null)
+  const [profileData, setProfileData] = useState({
     name: "",
     email: "",
     start_time: "",
     duration: "",
     photo: "",
   })
+
+  const getPhoto = async()=>{
+    try {
+      const res = await fetch(`${server_url}/api/user/photo`, {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("session")}`
+        }
+      })
+      const blob = await res.blob()
+      setPhoto(URL.createObjectURL(blob))
+    } catch (error) {
+      if (error.response && error.response.status === 500) {
+        setError("Internal Server Error")
+      }
+      console.error(`error app ${error}`)
+      setLoading(false)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const fetchData = async () => {
     try {
@@ -33,17 +55,18 @@ function App() {
         if (activation_time) {
           const { time,date } = JSON.parse(activation_time)
           setProfileData({
-            ...profleData,
+            ...profileData,
             start_time: date,
             duration: time?JSON.parse(time).month:"",
           })
         }
         setProfileData({
-          ...profleData,
+          ...profileData,
           name: name,
           email: email,
           photo: photo
         })
+        await getPhoto()
         if (admin) {
           setAdmin(true)
         }
@@ -70,31 +93,30 @@ function App() {
     <>
       <main className='app'>
         <NavbarComponent admin={admin}/>
-        {authorized?(
-          <>
-          <section className="my-5 brand p-3 d-lg-flex flex-row-reverse justify-content-between align-items-center">
-            <aside className='text-center col-12 col-lg-6 my-4'>
-              <img src={profleData.photo} className='rounded-circle' alt=""/>
-            </aside>
-            <aside className='col-12 col-lg-6 text-center font-brand my-4'>
+        <section className="my-5 brand p-3 d-lg-flex flex-row-reverse justify-content-between align-items-center">
+          <aside className='text-center col-12 col-lg-6 my-4'>
+            <img src={authorized?photo:`/dev-hiapps.jpg`} className='rounded-circle' alt=""/>
+          </aside>
+          <aside className={`col-12 col-lg-6 text-center ${!authorized&&'font-brand'} my-4`}>
+            {authorized ?
+            (
+            <>
               <div className="name">
-                <h3 className='text-center fw-bolder display-4'>{profleData.name}</h3>
+                <h3 className='text-center fw-bolder display-4'>{profileData.name}</h3>
               </div>
               <div className="email">
-                <h5 className='text-center fw-bolder display-5'>{profleData.email}</h5>
+                <h5 className='text-center fw-bolder display-5'>{profileData.email}</h5>
               </div>
               <div className="periode">
-                <h5 className='text-center fw-bolder display-5'>Masa berlaku {profleData.duration} (sejak {profleData.start_time})</h5>
+                {profileData.duration&&profileData.start_time&&<h5 className='text-center fw-bolder display-5'>Masa berlaku {profileData.duration} (sejak {profileData.start_time})</h5>}
               </div>
-            </aside>
-          </section>
-          </>
-        ):(<section className="my-5 brand p-3 d-lg-flex flex-row-reverse justify-content-between align-items-center">
-          <aside className='text-center col-12 col-lg-6 my-4'>
-            <img src="/dev-hiapps.jpg" className='rounded-circle' alt=""/>
-          </aside>
-          <aside className='col-12 col-lg-6 text-center font-brand my-4'>Hi AppS<br/>Belajar Membuat Program Software<br/>dengan Mudah dan Nyaman</aside>
-        </section>)}
+            </>
+          ):(
+            <>
+              Hi AppS<br/>Belajar Membuat Program Software<br/>dengan Mudah dan Nyaman
+            </>
+          )}</aside>
+        </section>
         <section className="courses container-fluid">
           <div className='container my-5'>
               <h1 className='text-center fw-bolder display-4'>Courses</h1>
