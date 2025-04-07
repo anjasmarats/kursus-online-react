@@ -89,6 +89,8 @@ function App() {
   useEffect(() => {
     fetchData()
   }, [])
+
+  console.log("admin = ",admin)
   return (
     <>
       <main className='app'>

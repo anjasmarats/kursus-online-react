@@ -27,7 +27,7 @@ function Register() {
             const res = await axios.post(`${server_url}/api/user`, data)
             const data_response = await res.data
             const expiration = new Date().getTime() + 1000* 60 * 10
-            localStorage.setItem("session", data_response.logind)
+            localStorage.setItem("session", data_response.data)
             localStorage.setItem("expiration", expiration)
             setError(null)
             navigate('/')
@@ -36,7 +36,7 @@ function Register() {
                 if (error.response.status === 500) {
                     setError("Internal Server Error")
                 } else {
-                    setError("emakil sudah ada, silahkan login")
+                    setError("email sudah ada, silahkan login")
                 }
             }
             console.error(error)
