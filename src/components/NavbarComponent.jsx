@@ -57,15 +57,16 @@ const NavbarComponent = () => {
                     </Offcanvas.Header>
                     <Offcanvas.Body className='nav-mobile'>
                         {authorized ? (
+                            
+                            <Nav.Link style={{ "cursor":"pointer" }} onClick={()=>handleLogout()} className='text-light text-center'>Logout</Nav.Link>
+                        ):(
                             <>
                                 <Nav className="justify-content-end flex-grow-1 pe-3">
                                 <Button variant="outline-light" onClick={()=>register()} className='fw-bolder'>Daftar</Button>
                                 <Nav.Link href="/login" className='text-light text-center'>Masuk</Nav.Link>
                                 </Nav>
                             </>
-                        ):
-                        <Nav.Link style={{ "cursor":"pointer" }} onClick={()=>handleLogout()} className='text-light text-center'>Logout</Nav.Link>
-                        }
+                        )}
                     </Offcanvas.Body>
                     </Navbar.Offcanvas>
                 </Container>
