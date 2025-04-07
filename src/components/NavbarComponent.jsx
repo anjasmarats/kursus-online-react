@@ -5,12 +5,29 @@ import Navbar from 'react-bootstrap/Navbar';
 import Offcanvas from 'react-bootstrap/Offcanvas';
 import "../styles/NavbarComponent.css";
 import { useNavigate } from 'react-router-dom';
+import auth from '../scripts/auth';
+import { useEffect, useState } from 'react';
 
-const NavbarComponent = (props) => {
-    const { admin } = props
+const NavbarComponent = () => {
+    const [authorized,setAuthorized] = useState(false)
+    const cekAuth = async () => {
+        try {
+            const { data } = await auth()
+            if (data) {
+                setAuthorized(true)
+            }
+        } catch (error) {
+            if (error.response && error.response.status === 500) {
+                setError("Internal Server Error")
+            }
+            console.error(error)
+        }
+    }
+
     const handleLogout = () => {
         localStorage.removeItem("session")
         localStorage.removeItem("expiration")
+        navigate('/')
     }
 
     const navigate = useNavigate()
@@ -18,6 +35,10 @@ const NavbarComponent = (props) => {
     const register = () => {
         navigate('/register')
     }
+
+    useEffect(()=>{
+        cekAuth()
+    },[])
     return (
         <>
             <Navbar key={'lg'} expand={'lg'} className="navbar-app mb-3">
@@ -35,17 +56,16 @@ const NavbarComponent = (props) => {
                         </Offcanvas.Title>
                     </Offcanvas.Header>
                     <Offcanvas.Body className='nav-mobile'>
-                        {admin ? 
-                            <Nav.Link href="#action2" className='text-light fs-5 text-center'>Profil</Nav.Link>  
-                        : 
-                        (
+                        {authorized ? (
                             <>
                                 <Nav className="justify-content-end flex-grow-1 pe-3">
                                 <Button variant="outline-light" onClick={()=>register()} className='fw-bolder'>Daftar</Button>
-                                <Nav.Link href="#action2" className='text-light text-center'>Masuk</Nav.Link>
+                                <Nav.Link href="/login" className='text-light text-center'>Masuk</Nav.Link>
                                 </Nav>
                             </>
-                        )}
+                        ):
+                        <Nav.Link style={{ "cursor":"pointer" }} onClick={()=>handleLogout()} className='text-light text-center'>Logout</Nav.Link>
+                        }
                     </Offcanvas.Body>
                     </Navbar.Offcanvas>
                 </Container>

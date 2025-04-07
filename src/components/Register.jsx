@@ -8,10 +8,13 @@ import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import axios from 'axios';
 import { server_url } from '../scripts/url';
 
-function Register() {
+function Register(props) {
+    const { loginPage } = props
     const navigate = useNavigate()
     const [error, setError] = useState(null)
     const [showPassword, setShowPassword] = useState(false)
+    const [login,setLogin] = useState(false)
+    const [register,setRegister] = useState(false)
     const [data, setData] = useState({
         name: "",
         email: "",
@@ -21,11 +24,43 @@ function Register() {
         setShowPassword(!showPassword)
     }
 
-    const register = async (e) => {
+    const Login = async(e) => {
+        try {
+            e.preventDefault()
+            const res = await axios.post(`${server_url}/api/login`, data)
+            const data_response = await res.data
+            if (res.status===404) {
+                setError("pengguna tidak ditemukan")
+                return
+            }
+
+            if (res.status===400) {
+                setError("password salah")
+                return
+            }
+            localStorage.setItem("session", data_response.data)
+            localStorage.setItem("expiration", expiration)
+            setError(null)
+            navigate('/')
+        } catch (e) {
+            if (error.response) {
+                if (error.response.status === 500) {
+                    setError("Internal Server Error")
+                }
+            }
+            console.error(error)
+        }
+    }
+
+    const Register = async (e) => {
         try {
             e.preventDefault()
             const res = await axios.post(`${server_url}/api/user`, data)
             const data_response = await res.data
+            if (res.status!==200) {
+                setError("email sudah ada, silahkan login")
+                return
+            }
             const expiration = new Date().getTime() + 1000* 60 * 10
             localStorage.setItem("session", data_response.data)
             localStorage.setItem("expiration", expiration)
@@ -35,8 +70,6 @@ function Register() {
             if (error.response) {
                 if (error.response.status === 500) {
                     setError("Internal Server Error")
-                } else {
-                    setError("email sudah ada, silahkan login")
                 }
             }
             console.error(error)
@@ -59,6 +92,9 @@ function Register() {
 
     useEffect(() => {
         cekAuth()
+        if (loginPage) {
+            setLogin(true)
+        }
     }, [])
     return(
         <main className='register'>
@@ -72,11 +108,13 @@ function Register() {
                                     <div className="d-flex justify-content-between align-items-center mt-3">
                                         <hr className='border-3 me-3 w-100'/>ATAU<hr className='border-3 ms-3 w-100'/>
                                     </div>
-                                    <Form onSubmit={register}>
-                                    <Form.Group className="mb-3" controlId="formBasicName">
-                                            <Form.Label>Nama</Form.Label>
-                                            <Form.Control required={true} type="search" onChange={(e)=>setData({...data,name:e.target.value})} placeholder="Nama" />
-                                        </Form.Group>
+                                    <Form onSubmit={Register}>
+                                        {!login&&(
+                                            <Form.Group className="mb-3" controlId="formBasicName">
+                                                <Form.Label>Nama</Form.Label>
+                                                <Form.Control required={true} type="search" onChange={(e)=>setData({...data,name:e.target.value})} placeholder="Nama" />
+                                            </Form.Group>
+                                        )}
                                         
                                         <Form.Group className="mb-3" controlId="formBasicEmail">
                                             <Form.Label>Email address</Form.Label>
@@ -96,7 +134,7 @@ function Register() {
                                             Daftar
                                         </Button>
                                     </Form>
-                                    <div className='text-center my-3'>Sudah punya akun? <a href='/login' className='text-success text-decoration-none'>Login di sini</a></div>
+                                    <div className='text-center my-3'>{register?"Sudah punya akun?":"Belum punya akun?"} <a onClick={()=>register?setLogin(true):setRegister(true)} style={{ "cursor":"pointer" }} className='text-success text-decoration-none'>{register?"Login di sini":"Daftar di sini"}</a></div>
                                 </aside>
                 </section>
             </article>
