@@ -23,14 +23,14 @@ const NavbarComponent = () => {
             console.error(error)
         }
     }
+    
+    const navigate = useNavigate()
 
     const handleLogout = () => {
         localStorage.removeItem("session")
         localStorage.removeItem("expiration")
         navigate('/')
     }
-
-    const navigate = useNavigate()
 
     const register = () => {
         navigate('/register')
@@ -56,17 +56,16 @@ const NavbarComponent = () => {
                         </Offcanvas.Title>
                     </Offcanvas.Header>
                     <Offcanvas.Body className='nav-mobile'>
-                        {authorized ? (
-                            
-                            <Nav.Link style={{ "cursor":"pointer" }} onClick={()=>handleLogout()} className='text-light text-center'>Logout</Nav.Link>
-                        ):(
-                            <>
-                                <Nav className="justify-content-end flex-grow-1 pe-3">
-                                <Button variant="outline-light" onClick={()=>register()} className='fw-bolder'>Daftar</Button>
-                                <Nav.Link href="/login" className='text-light text-center'>Masuk</Nav.Link>
-                                </Nav>
-                            </>
-                        )}
+                        <Nav className="justify-content-end flex-grow-1 pe-3">
+                            {authorized ? (
+                                <Nav.Link style={{ "cursor":"pointer" }} onClick={()=>handleLogout()} className='text-light text-center'>Logout</Nav.Link>
+                            ):(
+                                <>
+                                    <Button variant="outline-light" onClick={()=>register()} className='fw-bolder'>Daftar</Button>
+                                    <Nav.Link href="/login" className='text-light text-center'>Masuk</Nav.Link>
+                                </>
+                            )}
+                        </Nav>
                     </Offcanvas.Body>
                     </Navbar.Offcanvas>
                 </Container>

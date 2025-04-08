@@ -33,22 +33,20 @@ function Register(props) {
             setError(null)
             navigate('/')
         } catch (e) {
-            if (error.response) {
-                if (error.response.status === 500) {
+            if (e.response) {
+                if (e.response.status === 500) {
                     setError("Internal Server Error")
                 }
 
-                if (error.response.status===404) {
+                if (e.response.status===404) {
                     setError("pengguna tidak ditemukan")
-                    return 
                 }
     
-                if (error.response.status===400) {
+                if (e.response.status===400) {
                     setError("password salah")
-                    return
                 }
             }
-            console.error(error)
+            console.error(e)
         }
     }
 
@@ -57,10 +55,6 @@ function Register(props) {
             e.preventDefault()
             const res = await axios.post(`${server_url}/api/user`, data)
             const data_response = await res.data
-            if (res.status!==200) {
-                setError("email sudah ada, silahkan login")
-                return
-            }
             const expiration = new Date().getTime() + 1000* 60 * 10
             localStorage.setItem("session", data_response.data)
             localStorage.setItem("expiration", expiration)
@@ -70,6 +64,9 @@ function Register(props) {
             if (error.response) {
                 if (error.response.status === 500) {
                     setError("Internal Server Error")
+                }
+                if (error.response.status===400) {
+                    setError("email sudah ada, silahkan login")
                 }
             }
             console.error(error)
