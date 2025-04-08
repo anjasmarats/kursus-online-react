@@ -7,6 +7,7 @@ import "../styles/NavbarComponent.css";
 import { useNavigate } from 'react-router-dom';
 import auth from '../scripts/auth';
 import { useEffect, useState } from 'react';
+import logout from '../scripts/logout';
 
 const NavbarComponent = () => {
     const [authorized,setAuthorized] = useState(false)
@@ -25,12 +26,6 @@ const NavbarComponent = () => {
     }
     
     const navigate = useNavigate()
-
-    const handleLogout = () => {
-        localStorage.removeItem("session")
-        localStorage.removeItem("expiration")
-        navigate('/')
-    }
 
     const register = () => {
         navigate('/register')
@@ -58,7 +53,10 @@ const NavbarComponent = () => {
                     <Offcanvas.Body className='nav-mobile'>
                         <Nav className="justify-content-end flex-grow-1 pe-3">
                             {authorized ? (
-                                <Nav.Link style={{ "cursor":"pointer" }} onClick={()=>handleLogout()} className='text-light text-center'>Logout</Nav.Link>
+                                <>
+                                    <Button variant="outline-light" onClick={()=>register()} className='fw-bolder'>Edit Profil</Button>
+                                    <Nav.Link style={{ "cursor":"pointer" }} onClick={()=>logout()} className='text-light text-center'>Logout</Nav.Link>
+                                </>
                             ):(
                                 <>
                                     <Button variant="outline-light" onClick={()=>register()} className='fw-bolder'>Daftar</Button>

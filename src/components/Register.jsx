@@ -28,6 +28,7 @@ function Register(props) {
             e.preventDefault()
             const res = await axios.post(`${server_url}/api/login`, data)
             const data_response = await res.data
+            const expiration = new Date().getTime() + 1000* 60 * 10 
             localStorage.setItem("session", data_response.data)
             localStorage.setItem("expiration", expiration)
             setError(null)

@@ -4,6 +4,7 @@ import NavbarComponent from './NavbarComponent.jsx'
 import axios from 'axios'
 import auth from '../scripts/auth.js'
 import { server_url } from '../scripts/url.js'
+import { CgProfile } from 'react-icons/cg'
 
 function App() {
   const [data, setData] = useState([])
@@ -25,15 +26,21 @@ function App() {
       const res = await fetch(`${server_url}/api/user/photo`, {
         method: 'GET',
         headers: {
-          Authorization: `Bearer ${localStorage.getItem("session")}`
+          "Authorization": `Bearer ${localStorage.getItem("session")}`
         }
       })
-      const blob = await res.blob()
-      setPhoto(URL.createObjectURL(blob))
-    } catch (error) {
-      if (error.response && error.response.status === 500) {
+      
+      if (res.status === 500) {
         setError("Internal Server Error")
+        return
       }
+
+      if (res.status===200) {
+        const blob = await res.blob()
+        setPhoto(URL.createObjectURL(blob))
+      }
+    } catch (error) {
+      setError("Error")
       console.error(`error app ${error}`)
       setLoading(false)
     } finally {
@@ -47,7 +54,7 @@ function App() {
       if (data) {
         const res = await axios.get(`${server_url}/api/user`, {
           headers: {
-            Authorization: `Bearer ${data.session}`
+            Authorization: `Bearer ${localStorage.getItem("session")}`
           }
         })
         const result = await res.data
@@ -97,20 +104,23 @@ function App() {
         <NavbarComponent admin={admin}/>
         <section className="my-5 brand p-3 d-lg-flex flex-row-reverse justify-content-between align-items-center">
           <aside className='text-center col-12 col-lg-6 my-4'>
-            <img src={authorized?photo:`/dev-hiapps.jpg`} className='rounded-circle' alt=""/>
+            {authorized ?
+            photo ? <img src={photo} className='rounded-circle' alt=""/> : <CgProfile size={180}/>
+            :
+            <img src="/dev-hiapps.jpg" className='rounded-circle' alt=""/>}
           </aside>
-          <aside className={`col-12 col-lg-6 text-center ${!authorized&&'font-brand'} my-4`}>
+          <aside className={`col-12 col-lg-6 text-center ${!authorized&&'font-brand'}`}>
             {authorized ?
             (
             <>
               <div className="name">
-                <h3 className='text-center fw-bolder display-4'>{profileData.name}</h3>
+                <h3 className={`${authorized?'profiledata-name':'display-4'} text-center fw-bolder`}>{profileData.name}</h3>
               </div>
               <div className="email">
-                <h5 className='text-center fw-bolder display-5'>{profileData.email}</h5>
+                <h5 className={`${authorized?'profiledata-email text-wrap':'fw-bolder display-5'} text-center`}>{profileData.email}</h5>
               </div>
               <div className="periode">
-                {profileData.duration&&profileData.start_time&&<h5 className='text-center fw-bolder display-5'>Masa berlaku {profileData.duration} (sejak {profileData.start_time})</h5>}
+                {profileData.duration&&profileData.start_time&&<h5 className={`${!authorized&&'text-center'} fw-bolder display-5`}>Masa berlaku {profileData.duration} (sejak {profileData.start_time})</h5>}
               </div>
             </>
           ):(
