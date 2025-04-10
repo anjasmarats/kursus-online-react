@@ -101,38 +101,38 @@ function Register(props) {
                 {error&&(<Alert variant='danger' key={"danger"} className='col-lg-4 col-sm-8 col-10 mx-auto mt-5 mb-3'>{error}</Alert>)}
                 <section className='row'>
                 <aside className={`col-lg-4 col-sm-8 col-10 mx-auto ${error&&'my-5'} shadow-lg rounded-3 py-3 px-2`}>
-                                    <Button variant="outline-dark" className='w-100 rounded-3 p-2'>
-                                        <FcGoogle className='me-3' size={28}/>Lanjutkan dengan Google</Button>
-                                    <div className="d-flex justify-content-between align-items-center mt-3">
-                                        <hr className='border-3 me-3 w-100'/>ATAU<hr className='border-3 ms-3 w-100'/>
-                                    </div>
-                                    <Form onSubmit={register?Register:Login}>
-                                        {register&&(
-                                            <Form.Group className="mb-3" controlId="formBasicName">
-                                                <Form.Label>Nama</Form.Label>
-                                                <Form.Control required={true} type="search" onChange={(e)=>setData({...data,name:e.target.value})} placeholder="Nama" />
-                                            </Form.Group>
-                                        )}
-                                        
-                                        <Form.Group className="mb-3" controlId="formBasicEmail">
-                                            <Form.Label>Email address</Form.Label>
-                                            <Form.Control required={true} type="email" onChange={(e)=>setData({...data,email:e.target.value})} placeholder="email" />
-                                        </Form.Group>
+                    <Button variant="outline-dark" className='w-100 rounded-3 p-2'>
+                        <FcGoogle className='me-3' size={28}/>Lanjutkan dengan Google</Button>
+                    <div className="d-flex justify-content-between align-items-center mt-3">
+                        <hr className='border-3 me-3 w-100'/>ATAU<hr className='border-3 ms-3 w-100'/>
+                    </div>
+                    <Form onSubmit={register?Register:Login}>
+                        {register&&(
+                            <Form.Group className="mb-3" controlId="formBasicName">
+                                <Form.Label>Nama</Form.Label>
+                                <Form.Control required={true} type="search" onChange={(e)=>setData({...data,name:e.target.value})} placeholder="Nama" />
+                            </Form.Group>
+                        )}
+                        
+                        <Form.Group className="mb-3" controlId="formBasicEmail">
+                            <Form.Label>Email address</Form.Label>
+                            <Form.Control required={true} type="email" onChange={(e)=>setData({...data,email:e.target.value})} placeholder="email" />
+                        </Form.Group>
 
-                                        <Form.Group className="mb-3" controlId="formBasicPassword">
-                                            <Form.Label>Password</Form.Label>
-                                            <InputGroup className="mb-3 mt-2">
-                                                <Form.Control required={true} type={showPassword?'text':'password'} onChange={(e)=>setData({...data,password:e.target.value})} placeholder="Password" />
-                                                <Button variant="btn btn-secondary" onClick={handleShowPassword}>
-                                                    {showPassword ? <FaEyeSlash size={32}/> : <FaEye size={32}/>}
-                                                </Button>
-                                            </InputGroup>
-                                        </Form.Group>
-                                        <Button variant="primary" type="submit">
-                                            {register?"Daftar":"Login"}
-                                        </Button>
-                                    </Form>
-                                    <div className='text-center my-3'>{register?"Sudah punya akun?":"Belum punya akun?"} <a onClick={()=>setRegister(!register)} style={{ "cursor":"pointer" }} className='text-success text-decoration-none'>{register?"Login di sini":"Daftar di sini"}</a></div>
+                        <Form.Group className="mb-3" controlId="formBasicPassword">
+                            <Form.Label>Password</Form.Label>
+                            <InputGroup className="mb-3 mt-2">
+                                <Form.Control required={true} type={showPassword?'text':'password'} onChange={(e)=>setData({...data,password:e.target.value})} placeholder="Password" />
+                                <Button variant="btn btn-secondary" onClick={handleShowPassword}>
+                                    {showPassword ? <FaEyeSlash size={32}/> : <FaEye size={32}/>}
+                                </Button>
+                            </InputGroup>
+                        </Form.Group>
+                        <Button variant="primary" type="submit">
+                            {register?"Daftar":"Login"}
+                        </Button>
+                    </Form>
+                    <div className='text-center my-3'>{register?"Sudah punya akun?":"Belum punya akun?"} <a onClick={()=>setRegister(!register)} style={{ "cursor":"pointer" }} className='text-success text-decoration-none'>{register?"Login di sini":"Daftar di sini"}</a></div>
                                 </aside>
                 </section>
             </article>

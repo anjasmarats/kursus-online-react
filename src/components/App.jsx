@@ -11,13 +11,20 @@ function App() {
   const [loading, setLoading] = useState(true)
   const [authorized, setAuthorized] = useState(false)
   const [error, setError] = useState(null)
-  const [admin, setAdmin] = useState(false)
+  const [isAdmin, setIsAdmin] = useState(false)
   const [photo, setPhoto] = useState(null)
   const [profileData, setProfileData] = useState({
     name: "",
     email: "",
     start_time: "",
     duration: "",
+    photo: "",
+  })
+
+  const [editUser, setEditUser] = useState({
+    name: "",
+    email: "",
+    password: "",
     photo: "",
   })
 
@@ -50,8 +57,9 @@ function App() {
 
   const fetchData = async () => {
     try {
-      const {data,admin} = await auth()
-      if (data) {
+      setLoading(true)
+      const {result,adminuser} = await auth()
+      if (result) {
         const res = await axios.get(`${server_url}/api/user`, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("session")}`
@@ -69,19 +77,28 @@ function App() {
         }
         setProfileData({
           ...profileData,
-          name: name,
-          email: email,
-          photo: photo
+          name,
+          email,
+          photo
         })
+
+        setEditUser({
+          ...editUser,
+          name,
+          email,
+          photo
+        })
+
         await getPhoto()
-        if (admin) {
-          setAdmin(true)
+        if (adminuser) {
+          setIsAdmin(true)
         }
         setAuthorized(true)
       }
       const response = await axios.get(`${server_url}/api/courses`)
-      const result = await response.data
-      setData(result.courses)
+      const res = await response.data
+      setData(res.courses)
+      setLoading(false)
     } catch (error) {
       if (error.response && error.response.status === 500) {
         setError("Internal Server Error")
@@ -97,27 +114,29 @@ function App() {
     fetchData()
   }, [])
 
-  console.log("admin = ",admin)
+  // console.log("admin = ",profileData)
   return (
     <>
       <main className='app'>
-        <NavbarComponent admin={admin}/>
+        <NavbarComponent {...{editUser,loading,authorized,fetchData,setEditUser}}/>
         <section className="my-5 brand p-3 d-lg-flex flex-row-reverse justify-content-between align-items-center">
           <aside className='text-center col-12 col-lg-6 my-4'>
             {authorized ?
-            photo ? <img src={photo} className='rounded-circle' alt=""/> : <CgProfile size={180}/>
+            photo ? <img src={photo} className='img rounded-circle' alt=""/> : <CgProfile size={180}/>
             :
-            <img src="/dev-hiapps.jpg" className='rounded-circle' alt=""/>}
+            <img src="/dev-hiapps.jpg" className='img rounded-circle' alt=""/>}
           </aside>
-          <aside className={`col-12 col-lg-6 text-center ${!authorized&&'font-brand'}`}>
-            {authorized ?
+          <aside className={`col-12 col-lg-6 ${loading&&'mx-auto w-25 loading bg-secondary rounded-5'} text-center ${!authorized&&'font-brand'}`}>
+            {loading?<>&nbsp;</>:authorized ?
             (
             <>
-              <div className="name">
-                <h3 className={`${authorized?'profiledata-name':'display-4'} text-center fw-bolder`}>{profileData.name}</h3>
+              {/* <div className="name">
               </div>
               <div className="email">
-                <h5 className={`${authorized?'profiledata-email text-wrap':'fw-bolder display-5'} text-center`}>{profileData.email}</h5>
+              <h5 className={`${authorized?'profiledata-email text-wrap':'fw-bolder display-5'} text-center`}>{profileData.email}</h5>
+              </div> */}
+              <div className={`${authorized?'profiledata-name':'display-4'} text-center fw-bolder`}>
+                Halo, {profileData.name} <br />Selamat Belajar
               </div>
               <div className="periode">
                 {profileData.duration&&profileData.start_time&&<h5 className={`${!authorized&&'text-center'} fw-bolder display-5`}>Masa berlaku {profileData.duration} (sejak {profileData.start_time})</h5>}
@@ -133,7 +152,7 @@ function App() {
           <div className='container my-5'>
               <h1 className='text-center fw-bolder display-4'>Courses</h1>
               {loading ? 
-              <div className='row loading-main'>
+              <div className='row loading-main my-5'>
                 <div className="col-lg-4 col-sm-6 col-11">
                   <div className="w-100 bg-secondary m-4 rounded-3">&nbsp;</div>
                 </div>

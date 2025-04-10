@@ -1,26 +1,35 @@
 import axios from "axios"
+import { server_url } from "./url"
 
 const auth = async ()=>{
+    let result=false,adminuser = false
     try {
         const session = localStorage.getItem("session")
         const expiration = localStorage.getItem("expiration")
         const now = new Date().getTime()
-        if (!session) return false
+        if (!session) return {result,adminuser}
         if (expiration && now > expiration) {
             localStorage.removeItem("session")
             localStorage.removeItem("expiration")
-            return false
+            return {result,adminuser}
         }
-        const { data,admin } = await axios.get("/api/auth", {
+        const res = await axios.get(`${server_url}/api/auth`, {
             headers: {
                 Authorization: `Bearer ${session}`
             }
         })
 
-        return {data,admin}
+        const { data,admin } = await res.data
+
+        console.log(data)
+
+        return {
+            result:data,
+            adminuser:admin
+        }
     } catch (e) {
         console.error(`auth : ${e}`)
-        return false       
+        return {result,adminuser}
     }
 }
 

@@ -5,24 +5,61 @@ import Navbar from 'react-bootstrap/Navbar';
 import Offcanvas from 'react-bootstrap/Offcanvas';
 import "../styles/NavbarComponent.css";
 import { useNavigate } from 'react-router-dom';
-import auth from '../scripts/auth';
-import { useEffect, useState } from 'react';
-import logout from '../scripts/logout';
+import { useState } from 'react';
+import Modal from 'react-bootstrap/Modal'
+import { Alert, Form } from 'react-bootstrap';
+import { InputGroup } from 'react-bootstrap';
+import { FaEye,FaEyeSlash } from 'react-icons/fa';
+import axios from 'axios';
+import { server_url } from '../scripts/url';
 
-const NavbarComponent = () => {
-    const [authorized,setAuthorized] = useState(false)
-    const cekAuth = async () => {
+const NavbarComponent = (props) => {
+    const { editUser,loading,authorized,fetchData,setEditUser } = props
+
+    const { name,email,photo,password } = editUser||{}
+
+    // console.log(editUser)
+
+    const [show, setShow] = useState(false);
+    const [error,setError] = useState(null)
+
+    const handleClose = () => setShow(false);
+    const handleShow = () => setShow(true);
+
+    const [showPassword, setShowPassword] = useState(false)
+
+    const update = async(e) => {
+        e.preventDefault()
         try {
-            const { data } = await auth()
-            if (data) {
-                setAuthorized(true)
-            }
+            const formData = new FormData()
+            const { name,email,password,photo } = editUser
+            formData.append("name",name)
+            formData.append("email",email)
+            formData.append("password",password)
+            formData.append("photo",photo)
+            await axios.put(`${server_url}/api/user`,formData, {
+                headers: {
+                    "Content-Type":"multipart/form-data",
+                    Authorization: `Bearer ${localStorage.getItem("session")}`
+                }
+            })
+            // console.log(editUser)
+            
+            await fetchData()
+            handleClose()
         } catch (error) {
-            if (error.response && error.response.status === 500) {
-                setError("Internal Server Error")
+            if (error.response) {
+                if (error.response.status===500) {
+                    setError("Internal Server Error")
+                }
             }
+            setError("Error")
             console.error(error)
         }
+    }
+    
+    const handleShowPassword = () => {
+        setShowPassword(!showPassword)
     }
     
     const navigate = useNavigate()
@@ -31,13 +68,17 @@ const NavbarComponent = () => {
         navigate('/register')
     }
 
-    useEffect(()=>{
-        cekAuth()
-    },[])
+    const logout =()=>{
+        localStorage.removeItem("session")
+        localStorage.removeItem("expiration")
+        navigate('/logout')
+    }
+
     return (
         <>
             <Navbar key={'lg'} expand={'lg'} className="navbar-app mb-3">
                 <Container fluid>
+                    {!loading&&(<>
                     <Navbar.Brand href="/" className='text-light'>HiAppS</Navbar.Brand>
                     <Navbar.Toggle aria-controls={`offcanvasNavbar-expand-${'lg'}`} />
                     <Navbar.Offcanvas
@@ -54,7 +95,7 @@ const NavbarComponent = () => {
                         <Nav className="justify-content-end flex-grow-1 pe-3">
                             {authorized ? (
                                 <>
-                                    <Button variant="outline-light" onClick={()=>register()} className='fw-bolder'>Edit Profil</Button>
+                                    <Button variant="outline-light" onClick={handleShow} className='fw-bolder'>Edit Profil</Button>
                                     <Nav.Link style={{ "cursor":"pointer" }} onClick={()=>logout()} className='text-light text-center'>Logout</Nav.Link>
                                 </>
                             ):(
@@ -66,8 +107,44 @@ const NavbarComponent = () => {
                         </Nav>
                     </Offcanvas.Body>
                     </Navbar.Offcanvas>
+                    </>)}
                 </Container>
             </Navbar>
+
+            <Modal show={show} onHide={handleClose}>
+                <Form onSubmit={update}>
+                <Modal.Header closeButton>
+                <Modal.Title>Data Profil</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    {error&&(<Alert variant='danger' key={"danger"} className='w-100 mx-auto mt-5 mb-3'>{error}</Alert>)}
+                    <Form.Group className="mb-3" controlId="formBasicName">
+                        <Form.Label>Nama</Form.Label>
+                        <Form.Control required={true} value={name} type="search" onChange={(e)=>setEditUser({...editUser,name:e.target.value})} placeholder="Nama" />
+                    </Form.Group>
+                                        
+                    <Form.Group className="mb-3" controlId="formBasicEmail">
+                        <Form.Label>Email address</Form.Label>
+                        <Form.Control required={true} type="email" value={email} onChange={(e)=>setEditUser({...editUser,email:e.target.value})} placeholder="email" />
+                    </Form.Group>
+
+                    <Form.Group className="mb-3" controlId="formBasicPassword">
+                        <Form.Label>Password</Form.Label>
+                        <InputGroup className="mb-3 mt-2">
+                            <Form.Control type={showPassword?'text':'password'} onChange={(e)=>setEditUser({...editUser,password:e.target.value})} placeholder="Password" />
+                            <Button variant="btn btn-secondary" onClick={handleShowPassword}>
+                                {showPassword ? <FaEyeSlash size={32}/> : <FaEye size={32}/>}
+                            </Button>
+                        </InputGroup>
+                    </Form.Group>
+                </Modal.Body>
+                <Modal.Footer>
+                <Button variant="primary" type='submit'>
+                    Simpan
+                </Button>
+                </Modal.Footer>
+                </Form>
+            </Modal>
         </>
     )
 }

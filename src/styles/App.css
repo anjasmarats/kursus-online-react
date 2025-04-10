@@ -1,4 +1,4 @@
-main.app section aside img {
+main.app section aside .img {
     width: 28vw;
     height: auto;
     min-width: 180px;
@@ -7,7 +7,7 @@ main.app section aside img {
 }
 
 main.app section .font-brand,main.app .profiledata-name {
-    font-size: clamp(2.5rem, 2.5vw + 1rem, 4rem);
+    font-size: clamp(1rem, 1vw + 1rem, 2rem);
 }
 
 main.app .container .loading-main >div div {
@@ -20,9 +20,13 @@ main.app .courses {
     background-color: rgb(222, 219, 219);
 }
 
-main.app .profiledata-email {
+main.app .periode {
     font-size: clamp(.2rem, 1vw + 1rem, 1.7rem);
     font-weight: 100;
+}
+
+main.app .loading {
+    animation: loading 1.5s infinite;
 }
 /*
 @media only screen and (max-width: 992px) {
