@@ -1,4 +1,3 @@
-import { FcGoogle } from 'react-icons/fc'
 import NavbarComponent from './NavbarComponent';
 import { Form,Button, InputGroup, Alert } from 'react-bootstrap';
 import auth from '../scripts/auth';
@@ -7,6 +6,7 @@ import { useEffect, useState } from 'react';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import axios from 'axios';
 import { server_url } from '../scripts/url';
+import GoogleLoginButton from './GoogleLoginButton';
 
 function Register(props) {
     const { loginPage } = props
@@ -22,6 +22,8 @@ function Register(props) {
     const handleShowPassword = () => {
         setShowPassword(!showPassword)
     }
+
+    const formData = new FormData()
 
     const Login = async(e) => {
         try {
@@ -74,6 +76,30 @@ function Register(props) {
         }
     }
 
+    const authGoogle = async (e) => {
+        try {
+            e.preventDefault()
+            const res = await axios.post(`${server_url}/api/auth/google`, formData,{
+                headers:{
+                    "Content-Type":"multipart/form-data"
+                }
+            })
+            const data_response = await res.data
+            const expiration = new Date().getTime() + 1000* 60 * 10
+            localStorage.setItem("session", data_response.data)
+            localStorage.setItem("expiration", expiration)
+            setError(null)
+            navigate('/')
+        } catch (error) {
+            if (error.response) {
+                if (error.response.status === 500) {
+                    setError("Internal Server Error")
+                }
+            }
+            console.error(error)
+        }
+    }
+
     const cekAuth = async () => {
         try {
             const { data } = await auth()
@@ -101,8 +127,7 @@ function Register(props) {
                 {error&&(<Alert variant='danger' key={"danger"} className='col-lg-4 col-sm-8 col-10 mx-auto mt-5 mb-3'>{error}</Alert>)}
                 <section className='row'>
                 <aside className={`col-lg-4 col-sm-8 col-10 mx-auto ${error&&'my-5'} shadow-lg rounded-3 py-3 px-2`}>
-                    <Button variant="outline-dark" className='w-100 rounded-3 p-2'>
-                        <FcGoogle className='me-3' size={28}/>Lanjutkan dengan Google</Button>
+                    <GoogleLoginButton {...{authGoogle,formData}}/>
                     <div className="d-flex justify-content-between align-items-center mt-3">
                         <hr className='border-3 me-3 w-100'/>ATAU<hr className='border-3 ms-3 w-100'/>
                     </div>
