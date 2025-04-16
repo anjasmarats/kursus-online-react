@@ -6,7 +6,6 @@ import { useEffect, useState } from 'react';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import axios from 'axios';
 import { server_url } from '../scripts/url';
-import GoogleLoginButton from './GoogleLoginButton';
 
 function Register(props) {
     const { loginPage } = props
@@ -123,14 +122,10 @@ function Register(props) {
     return(
         <main className='register'>
             <NavbarComponent/>
-            <article>
+            <article className='mt-5 my-5'>
                 {error&&(<Alert variant='danger' key={"danger"} className='col-lg-4 col-sm-8 col-10 mx-auto mt-5 mb-3'>{error}</Alert>)}
                 <section className='row'>
                 <aside className={`col-lg-4 col-sm-8 col-10 mx-auto ${error&&'my-5'} shadow-lg rounded-3 py-3 px-2`}>
-                    <GoogleLoginButton {...{authGoogle,formData}}/>
-                    <div className="d-flex justify-content-between align-items-center mt-3">
-                        <hr className='border-3 me-3 w-100'/>ATAU<hr className='border-3 ms-3 w-100'/>
-                    </div>
                     <Form onSubmit={register?Register:Login}>
                         {register&&(
                             <Form.Group className="mb-3" controlId="formBasicName">
@@ -158,7 +153,7 @@ function Register(props) {
                         </Button>
                     </Form>
                     <div className='text-center my-3'>{register?"Sudah punya akun?":"Belum punya akun?"} <a onClick={()=>setRegister(!register)} style={{ "cursor":"pointer" }} className='text-success text-decoration-none'>{register?"Login di sini":"Daftar di sini"}</a></div>
-                                </aside>
+                </aside>
                 </section>
             </article>
         </main>
