@@ -118,15 +118,15 @@ function App() {
   return (
     <>
       <main className='app'>
-        <NavbarComponent {...{editUser,loading,authorized,fetchData,setEditUser}}/>
-        <section className="my-5 brand p-3 d-lg-flex flex-row-reverse justify-content-between align-items-center">
+        <NavbarComponent {...{editUser,loading,authorized,fetchData,setEditUser,isAdmin}}/>
+        <section className={`${isAdmin?'':'my-5 p-3'} brand ${loading?'container mx-auto w-100 loading bg-secondary rounded-5':isAdmin?`d-none`:`d-lg-flex flex-row-reverse justify-content-between align-items-center`}`}>
           <aside className='text-center col-12 col-lg-6 my-4'>
             {authorized ?
-            photo ? <img src={photo} className='img rounded-circle' alt=""/> : <CgProfile size={180}/>
+            photo ? <img src={photo} className={`img rounded-circle ${loading?'d-none':''}`} alt=""/> : <CgProfile size={180}/>
             :
-            <img src="/dev-hiapps.jpg" className='img rounded-circle' alt=""/>}
+            <img src="/dev-hiapps.jpg" className={`img rounded-circle ${loading?'d-none':''}`} alt=""/>}
           </aside>
-          <aside className={`col-12 col-lg-6 ${loading&&'mx-auto w-25 loading bg-secondary rounded-5'} text-center ${!authorized&&'font-brand'}`}>
+          <aside className={`col-12 col-lg-6 ${loading?'mx-auto w-25 loading bg-secondary rounded-5':''} text-center ${!authorized&&'font-brand'}`}>
             {loading?<>&nbsp;</>:authorized ?
             (
             <>
@@ -139,18 +139,29 @@ function App() {
                 Halo, {profileData.name} <br />Selamat Belajar
               </div>
               <div className="periode">
-                {profileData.duration&&profileData.start_time&&<h5 className={`${!authorized&&'text-center'} fw-bolder display-5`}>Masa berlaku {profileData.duration} (sejak {profileData.start_time})</h5>}
+                {profileData.duration&&profileData.start_time&&<h5 className={`${authorized?'':'text-center'} fw-bolder display-5`}>Masa berlaku {profileData.duration} (sejak {profileData.start_time})</h5>}
               </div>
             </>
           ):(
             <>
               Hi AppS<br/>Belajar Membuat Program Software<br/>dengan Mudah dan Nyaman
             </>
-          )}</aside>
+          )}
+          </aside>
         </section>
         <section className="courses container-fluid">
-          <div className='container my-5'>
-              <h1 className='text-center fw-bolder display-4'>Courses</h1>
+          <div className={`container ${isAdmin?'':'my-5'}`}>
+              {isAdmin ?
+              (
+                <div className={`d-flex justify-content-between align-items-center py-4 container`}>
+                  <span className='fw-bolder fs-3'>Courses</span>
+                  <a href="/post/course" className='btn btn-primary'>Kursus Baru</a>
+                </div>
+              )
+              :
+              (
+                <h1 className={`text-center fw-bolder display-4 ${loading&&'loading bg-secondary rounded-5'}`}>{!loading&&'Courses'}</h1>
+              )}
               {loading ? 
               <div className='row loading-main my-5'>
                 <div className="col-lg-4 col-sm-6 col-11">

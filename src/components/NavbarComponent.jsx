@@ -14,7 +14,7 @@ import axios from 'axios';
 import { server_url } from '../scripts/url';
 
 const NavbarComponent = (props) => {
-    const { editUser,loading,authorized,fetchData,setEditUser } = props
+    const { editUser,loading,authorized,fetchData,setEditUser,isAdmin } = props
 
     const { name,email,photo,password } = editUser||{}
 
@@ -76,7 +76,7 @@ const NavbarComponent = (props) => {
 
     return (
         <>
-            <Navbar key={'lg'} expand={'lg'} className="navbar-app mb-3">
+            <Navbar key={'lg'} expand={'lg'} className={`navbar-app ${isAdmin?'':'mb-3'}`}>
                 <Container fluid>
                     {!loading&&(<>
                     <Navbar.Brand href="/" className='text-light'>HiAppS</Navbar.Brand>
