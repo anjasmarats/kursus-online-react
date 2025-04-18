@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Form,FloatingLabel,Modal,Button } from 'react-bootstrap'
 import NavbarComponent from './NavbarComponent'
+import Swal from 'sweetalert2'
 
 const PostCourse = () => {
     const [course,setCourse] = useState({
@@ -34,13 +35,32 @@ const PostCourse = () => {
         setPreviewChapter({})
     }
 
+    const deleteChapter = async(title) => {
+        const confirm = await Swal.fire({
+            title:`Hapus chapter ${title}`,
+            showCancelButton:true,
+            cancelButtonColor:"blue",
+            showConfirmButton:true,
+            confirmButtonColor:"red",
+            confirmButtonText:"Delete"
+        }).then(res=>res.isConfirmed)
+        if (!confirm) {
+            return
+        }
+        setCourse({...course,chapters:course.chapters.filter((item)=>{return item.title!==title})})
+        closeViewChapter()
+    }
+
     const postcourse = async(e) => {
         try {
-            
+            e.preventDefault()
+            console.log(course)
         } catch (error) {
             
         }
     }
+
+    console.log(course)
     return(
         <>
             <Form>
@@ -56,6 +76,7 @@ const PostCourse = () => {
                         as="textarea"
                         onChange={(e)=>setCourse({...course,description:e.target.value})}
                         placeholder="Deskrisi kursus"
+                        rows={4}
                         style={{ height: '100px' }}
                         required={true}
                         />
@@ -71,13 +92,11 @@ const PostCourse = () => {
                     </Form.Group>
 
                     {course.chapters.length>0&&(
-                        <section className='bg-secondary opacity-3 p-3 rounded-5'>
+                        <section className='bg-info opacity-3 px-3 py-2 rounded-2'>
                             {course.chapters.map((v,k)=>(
-                                <aside key={k} onClick={()=>viewChapter(k,v.title,v.video)} className='d-flex justify-content-between align-items-center'>
-                                    <video controls={true}>
-                                        <source src={URL.createObjectURL(v.video)} type="video/mp4" />
-                                    </video>
-                                    <span className='fs-3 overflow-auto'>{v.title}</span>
+                                <aside key={k} style={{ cursor:"pointer" }} onClick={()=>viewChapter(k,v.title,v.video)} className=''>
+                                    <div className='fs-4 overflow-auto'>{v.title}</div>
+                                    <div className='overflow-auto'>{v.video.name}</div>
                                 </aside>
                             ))}
                         </section>
@@ -92,7 +111,7 @@ const PostCourse = () => {
                     <section className="chapter-course rounded-5 p-3">
                         <Form.Group className="mb-3" controlId="formBasicEmail">
                             <Form.Label>Nama Chapter</Form.Label>
-                            <Form.Control required={true} type="search" onChange={(e)=>setChapter({...chapter,title:e.target.value})} placeholder="Nama kursus" />
+                            <Form.Control required={true} type="search" onChange={(e)=>setChapter({...chapter,title:e.target.value})} placeholder="Nama materi" />
                         </Form.Group>
 
                         <Form.Group className="position-relative mb-3">
@@ -103,22 +122,24 @@ const PostCourse = () => {
                             onChange={(e)=>{setChapter({...chapter,video:e.target.files[0]})}}
                             />
                         </Form.Group>
-                        <button className='btn btn-info' disabled={!chapter.title||!chapter.video} onClick={()=>setCourse({...course,chapters:course.chapters.push(chapter)})}>hai</button>
+                        <div className="d-flex justify-content-end">
+                            <button className='btn btn-info mx-3' disabled={!chapter.title||!chapter.video} onClick={()=>setCourse({...course,chapters:[...course.chapters,{...chapter}]})} type='button'>hai</button>
+                            <button className="btn btn-primary px-4 py-2" type='submit' disabled={course.chapters.length===0}>Simpan</button>
+                        </div>
                     </section>
                 </article>
             </Form>
 
             <Modal show={show} onHide={closeViewChapter}>
                 <Modal.Header closeButton>
-                <Modal.Title>Modal heading</Modal.Title>
+                <Modal.Title>{previewChapter.title}</Modal.Title>
                 </Modal.Header>
-                <Modal.Body>Woohoo, you are reading this text in a modal!</Modal.Body>
+                <Modal.Body>
+                    {previewChapter.video}
+                </Modal.Body>
                 <Modal.Footer>
-                <Button variant="secondary" onClick={null}>
-                    Close
-                </Button>
-                <Button variant="primary" onClick={null}>
-                    Save Changes
+                <Button variant="secondary" onClick={()=>deleteChapter(previewChapter.title)}>
+                    Hapus
                 </Button>
                 </Modal.Footer>
             </Modal>
