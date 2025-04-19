@@ -1,7 +1,12 @@
 import { useState } from 'react'
-import { Form,FloatingLabel,Modal,Button } from 'react-bootstrap'
+import { Form,FloatingLabel,Modal,Button, Spinner } from 'react-bootstrap'
 import NavbarComponent from './NavbarComponent'
 import Swal from 'sweetalert2'
+import { MdOutlineEdit } from 'react-icons/md'
+import { IoClose } from 'react-icons/io5'
+import axios from 'axios'
+import { server_url } from '../scripts/url'
+import { useNavigate } from 'react-router-dom'
 
 const PostCourse = () => {
     const [course,setCourse] = useState({
@@ -12,58 +17,106 @@ const PostCourse = () => {
         chapters:[]
     })
 
+    const navigate = useNavigate()
+
+    const [loading,setLoading] = useState(false)
+
     const [show,setShow] = useState(false)
 
     const [chapter,setChapter] = useState({
         title:'',
-        video:'',
+        video:null,
+        description:''
     })
 
     const [previewChapter,setPreviewChapter] = useState({
         key:0,
         title:'',
-        video:'',
+        video:null,
     })
 
-    const viewChapter =(key,title,video)=>{
-        setPreviewChapter({...previewChapter,key,title,video})
-        setShow(true)
+    const viewChapter =(key,title,video,description)=>{
+        try {
+            if (!title||!video||!description) return
+            setPreviewChapter({...previewChapter,key,title,video,description})
+            setChapter({...chapter,title,video,description })
+            setShow(true)
+        } catch (error) {
+            console.error(`error vchptr ${error}`)
+        }
     }
 
     const closeViewChapter =()=>{
-        setShow(false)
-        setPreviewChapter({})
+        try {
+            setShow(false)
+            setPreviewChapter({title:'',video:null})
+            setChapter({title:'',video:''})
+        } catch (error) {
+            console.error(`error xviewchapter ${error}`)
+        }
     }
 
     const deleteChapter = async(title) => {
-        const confirm = await Swal.fire({
-            title:`Hapus chapter ${title}`,
-            showCancelButton:true,
-            cancelButtonColor:"blue",
-            showConfirmButton:true,
-            confirmButtonColor:"red",
-            confirmButtonText:"Delete"
-        }).then(res=>res.isConfirmed)
-        if (!confirm) {
-            return
+        try {
+            const confirm = await Swal.fire({
+                title:`Hapus chapter ${title}`,
+                showCancelButton:true,
+                cancelButtonColor:"blue",
+                showConfirmButton:true,
+                confirmButtonColor:"red",
+                confirmButtonText:"Delete"
+            }).then(res=>res.isConfirmed)
+            if (!confirm) {
+                return
+            }
+            setCourse({...course,chapters:course.chapters.filter((item)=>{return item.title!==title})})
+            closeViewChapter()
+        } catch (error) {
+            console.error(`error xchapter ${error}`)
         }
-        setCourse({...course,chapters:course.chapters.filter((item)=>{return item.title!==title})})
-        closeViewChapter()
+    }
+
+    const updateChapter = (key) => {
+        try {
+            if (!chapter.title||!chapter.video) return
+            course.chapters[key] = {...chapter}
+            closeViewChapter()
+        } catch (error) {
+            console.error(`error upchptr ${error}`)
+        }
     }
 
     const postcourse = async(e) => {
         try {
             e.preventDefault()
+            setLoading(true)
+            const formData = new FormData()
+            formData.append('title',course.title)
+            formData.append('description',course.description)
+            formData.append('price',course.price)
+            formData.append('thumbnail',course.thumbnail)
+            formData.append('chapters',course.chapters)
+            formData.append('chapterNote',chapter.description)
+            await axios.post(`${server_url}/api/course`,formData,{
+                headers:{
+                    Authorization: `Bearer ${localStorage.getItem("session")}`
+                }
+            })
+
+            navigate("/")
             console.log(course)
         } catch (error) {
             
         }
     }
 
+    console.log("chapter title",chapter.title)
+    console.log("chapter video",chapter.video)
+
     console.log(course)
     return(
         <>
-            <Form>
+            <Form onSubmit={postcourse} noValidate={true}>
                 <NavbarComponent/>
                 <article className="course col-lg-6 col-sm-8 col-10 mx-auto mt-5 mb-3 rounded-5 p-3 shadow-lg">
                     <Form.Group className="mb-3" controlId="formBasicEmail">
@@ -82,21 +135,33 @@ const PostCourse = () => {
                         />
                     </FloatingLabel>
 
+                    <Form.Group className="mb-3" controlId="formBasicHarga">
+                        <Form.Label>Harga</Form.Label>
+                        <Form.Control required={true} type="number" onChange={(e)=>setCourse({...chapter,price:e.target.value})} placeholder="Harga Kursus" />
+                    </Form.Group>
+
                     <Form.Group className="position-relative mb-3">
                         <Form.Label>File</Form.Label>
                         <Form.Control
                         type="file"
+                        accept='image/png'
                         required={true}
                         onChange={(e)=>setCourse({...course,thumbnail:e.target.files[0]})}
                         />
                     </Form.Group>
 
-                    {course.chapters.length>0&&(
-                        <section className='bg-info opacity-3 px-3 py-2 rounded-2'>
+                    {course.chapters&&course.chapters.length>0&&(
+                        <section className='bg-info opacity-3 px-3 py-2 rounded-3'>
                             {course.chapters.map((v,k)=>(
-                                <aside key={k} style={{ cursor:"pointer" }} onClick={()=>viewChapter(k,v.title,v.video)} className=''>
-                                    <div className='fs-4 overflow-auto'>{v.title}</div>
-                                    <div className='overflow-auto'>{v.video.name}</div>
+                                <aside key={k} className='bg-primary p-2 my-2 rounded-3 d-flex justify-content-between align-items-center'>
+                                    <div className='w-100 rounded-3'>
+                                        <div className='overflow-auto text-light fw-bolder'>{v.title}</div>
+                                        <div className='overflow-auto text-light'>{v.video.name}</div>
+                                    </div>
+                                    <div className="d-flex ms-5">
+                                        <MdOutlineEdit size={30} style={{ cursor:"pointer" }} className='mx-2 text-light' onClick={()=>viewChapter(k,v.title,v.video,v.description)}/>
+                                        <IoClose size={30} style={{ cursor:"pointer" }} className='mx-2 text-light' onClick={()=>deleteChapter(v.title)}/>
+                                    </div>
                                 </aside>
                             ))}
                         </section>
@@ -109,22 +174,41 @@ const PostCourse = () => {
                     </div>
 
                     <section className="chapter-course rounded-5 p-3">
-                        <Form.Group className="mb-3" controlId="formBasicEmail">
+                        <Form.Group className="mb-3" controlId="formBasicNamaChapter">
                             <Form.Label>Nama Chapter</Form.Label>
-                            <Form.Control required={true} type="search" onChange={(e)=>setChapter({...chapter,title:e.target.value})} placeholder="Nama materi" />
+                            <Form.Control required={true} type="search" value={chapter.title} onChange={(e)=>setChapter({...chapter,title:e.target.value})} placeholder="Nama materi" />
                         </Form.Group>
 
                         <Form.Group className="position-relative mb-3">
                             <Form.Label>File</Form.Label>
                             <Form.Control
                             type="file"
+                            accept='video/mp4'
                             required={true}
                             onChange={(e)=>{setChapter({...chapter,video:e.target.files[0]})}}
                             />
                         </Form.Group>
+
+                        <FloatingLabel controlId="floatingTextarea" label="Catatan/informasi materi tambahan" className='mb-3'>
+                            <Form.Control
+                            as="textarea"
+                            onChange={(e)=>setChapter({...chapter,description:e.target.value})}
+                            placeholder="Catatan/informasi materi tambahan"
+                            rows={4}
+                            style={{ height: '100px' }}
+                            />
+                        </FloatingLabel>
+
                         <div className="d-flex justify-content-end">
-                            <button className='btn btn-info mx-3' disabled={!chapter.title||!chapter.video} onClick={()=>setCourse({...course,chapters:[...course.chapters,{...chapter}]})} type='button'>hai</button>
-                            <button className="btn btn-primary px-4 py-2" type='submit' disabled={course.chapters.length===0}>Simpan</button>
+                            <button className='btn btn-info mx-3' disabled={!chapter.title||!chapter.video} onClick={()=>{
+                                setCourse({...course,chapters:course.chapters&&course.chapters.length>0 ?
+                                    [...course.chapters,{...chapter}]
+                                    :
+                                    [{...chapter}]
+                                })
+                                setChapter({title:'',video:null,description:''})
+                            }} type='button'>Tambah Materi</button>
+                            <button className="btn btn-primary px-4 py-2" type='submit' disabled={!course.chapters||course.chapters.length===0||!course.title||!course.thumbnail||!course.description||!course.price||loading}>{loading&&(<Spinner size='sm' className='me-2'/>)}Simpan</button>
                         </div>
                     </section>
                 </article>
@@ -135,11 +219,38 @@ const PostCourse = () => {
                 <Modal.Title>{previewChapter.title}</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    {previewChapter.video}
+                    <video controls={true} className='w-100'>
+                    <source src={previewChapter.video?URL.createObjectURL(previewChapter.video):null} type='video/mp4'/>
+                    </video>
+                    <Form.Group className="mb-3" controlId="formBasicEmail">
+                        <Form.Label>Nama Chapter</Form.Label>
+                        <Form.Control required={true} type="search" value={chapter.title} onChange={(e)=>setChapter({...chapter,title:e.target.value})} placeholder="Nama materi" />
+                    </Form.Group>
+
+                    <Form.Group className="position-relative mb-3">
+                        <Form.Label>File</Form.Label>
+                        <Form.Control
+                        type="file"
+                        accept='video/mp4'
+                        required={true}
+                        onChange={(e)=>{setChapter({...chapter,video:e.target.files[0]})}}
+                        />
+                    </Form.Group>
+
+                    <FloatingLabel controlId="floatingTextareanew" label="Deskripsi Materi" className='mb-3'>
+                        <Form.Control
+                        value={chapter.description}
+                        as="textarea"
+                        onChange={(e)=>setChapter({...chapter,description:e.target.value})}
+                        placeholder="Catatan/informasi singkat materi"
+                        rows={4}
+                        style={{ height: '100px' }}
+                        />
+                    </FloatingLabel>
                 </Modal.Body>
                 <Modal.Footer>
-                <Button variant="secondary" onClick={()=>deleteChapter(previewChapter.title)}>
-                    Hapus
+                <Button variant="secondary" onClick={()=>updateChapter(previewChapter.key)}>
+                    Simpan
                 </Button>
                 </Modal.Footer>
             </Modal>
