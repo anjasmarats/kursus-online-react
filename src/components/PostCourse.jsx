@@ -37,7 +37,8 @@ const PostCourse = () => {
 
     const viewChapter =(key,title,video,description)=>{
         try {
-            if (!title||!video||!description) return
+            console.info("key",key,"title",title,"video",video,"description",description)
+            if (!title||!video) return
             setPreviewChapter({...previewChapter,key,title,video,description})
             setChapter({...chapter,title,video,description })
             setShow(true)
@@ -94,12 +95,13 @@ const PostCourse = () => {
             formData.append('title',course.title)
             formData.append('description',course.description)
             formData.append('price',course.price)
-            formData.append('thumbnail',course.thumbnail)
+            formData.append('image',course.thumbnail)
             formData.append('chapters',course.chapters)
             formData.append('chapterNote',chapter.description)
             await axios.post(`${server_url}/api/course`,formData,{
                 headers:{
-                    Authorization: `Bearer ${localStorage.getItem("session")}`
+                    Authorization: `Bearer ${localStorage.getItem("session")}`,
+                    "Content-Type":"multipart/form-data"
                 }
             })
 
@@ -112,6 +114,8 @@ const PostCourse = () => {
 
     console.log("chapter title",chapter.title)
     console.log("chapter video",chapter.video)
+
+    console.log("!course.chapters||course.chapters.length===0",(!course.chapters||course.chapters.length===0),"!course.title",!course.title,"!course.thumbnail",!course.thumbnail,'!course.description',!course.description,"!course.price",!course.price,"loading",loading)
 
     console.log(course)
     return(
@@ -137,11 +141,11 @@ const PostCourse = () => {
 
                     <Form.Group className="mb-3" controlId="formBasicHarga">
                         <Form.Label>Harga</Form.Label>
-                        <Form.Control required={true} type="number" onChange={(e)=>setCourse({...chapter,price:e.target.value})} placeholder="Harga Kursus" />
+                        <Form.Control required={true} type="number" onChange={(e)=>setCourse({...course,price:e.target.value})} placeholder="Harga Kursus" />
                     </Form.Group>
 
                     <Form.Group className="position-relative mb-3">
-                        <Form.Label>File</Form.Label>
+                        <Form.Label>Poster kursus</Form.Label>
                         <Form.Control
                         type="file"
                         accept='image/png'
@@ -180,7 +184,7 @@ const PostCourse = () => {
                         </Form.Group>
 
                         <Form.Group className="position-relative mb-3">
-                            <Form.Label>File</Form.Label>
+                            <Form.Label>Video materi</Form.Label>
                             <Form.Control
                             type="file"
                             accept='video/mp4'
@@ -208,7 +212,7 @@ const PostCourse = () => {
                                 })
                                 setChapter({title:'',video:null,description:''})
                             }} type='button'>Tambah Materi</button>
-                            <button className="btn btn-primary px-4 py-2" type='submit' disabled={!course.chapters||course.chapters.length===0||!course.title||!course.thumbnail||!course.description||!course.price||loading}>{loading&&(<Spinner size='sm' className='me-2'/>)}Simpan</button>
+                            <button className="btn btn-primary px-4 py-2" type='submit' disabled={!course.chapters||course.chapters.length===0||!course.title||!course.thumbnail||!course.price||loading}>{loading&&(<Spinner size='sm' className='me-2'/>)}Simpan</button>
                         </div>
                     </section>
                 </article>
@@ -243,6 +247,8 @@ const PostCourse = () => {
                         as="textarea"
                         onChange={(e)=>setChapter({...chapter,description:e.target.value})}
                         placeholder="Catatan/informasi singkat materi"
+                        maxLength={255}
+                        max={255}
                         rows={4}
                         style={{ height: '100px' }}
                         />

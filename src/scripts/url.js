@@ -1,1 +1,1 @@
-export const server_url = 'https://course.hiapps.my.id';
+export const server_url = 'http://localhost:5000';
