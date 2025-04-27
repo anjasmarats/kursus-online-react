@@ -16,7 +16,7 @@ main.app .container .loading-main >div div {
 }
 
 main.app .courses {
-    height: 100vh;
+    min-height: 100vh;
     background-color: rgb(222, 219, 219);
 }
 

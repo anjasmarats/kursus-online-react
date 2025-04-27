@@ -5,6 +5,7 @@ import axios from 'axios'
 import auth from '../scripts/auth.js'
 import { server_url } from '../scripts/url.js'
 import { CgProfile } from 'react-icons/cg'
+import { Card,Button } from 'react-bootstrap'
 
 function App() {
   const [data, setData] = useState([])
@@ -177,18 +178,27 @@ function App() {
               :
               error ? 
               <div className='fw-bolder text-danger display-5 text-center mx-auto mt-5'>{error}</div>
-              : data.map((v,k) => (
-                <div key={k} className="col-12 col-md-6 col-lg-4 mb-4">
-                  <div class="card" style="width: 18rem;">
-                    <img src="..." class="card-img-top" alt="..." />
-                    <div class="card-body">
-                      <h5 class="card-title">{v.title}</h5>
-                      <p class="card-text">{v.description}</p>
-                      <a href="#" class="btn btn-primary">Daftar</a>
-                    </div>
-                  </div>
-                </div>
-              ))}
+              : (
+                <>
+                  <aside className='row overflow-auto'>
+                    {data&&data.length>0&&data.map((v,k) => (
+                      <div key={k} className='col-12 col-lg-4'>
+                        <Card className='mb-3'>
+                          <Card.Img variant="top" src="holder.js/100px180" />
+                          <Card.Body>
+                            <Card.Title>{v.title}</Card.Title>
+                            <Card.Text>
+                              {v.description}
+                            </Card.Text>
+                            <Button variant="primary">Go somewhere</Button>
+                          </Card.Body>
+                        </Card>
+                      </div>
+                    ))}
+                  </aside>
+                </>
+              )
+              }
           </div>
         </section>
       </main>

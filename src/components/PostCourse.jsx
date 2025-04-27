@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Form,FloatingLabel,Modal,Button, Spinner } from 'react-bootstrap'
+import { Form,FloatingLabel,Modal,Button, Spinner,Alert } from 'react-bootstrap'
 import NavbarComponent from './NavbarComponent'
 import Swal from 'sweetalert2'
 import { MdOutlineEdit } from 'react-icons/md'
@@ -34,6 +34,8 @@ const PostCourse = () => {
         title:'',
         video:null,
     })
+
+    const [error,setError] = useState(false)
 
     const viewChapter =(key,title,video,description)=>{
         try {
@@ -96,7 +98,10 @@ const PostCourse = () => {
             formData.append('description',course.description)
             formData.append('price',course.price)
             formData.append('image',course.thumbnail)
-            formData.append('chapters',course.chapters)
+            formData.append('chapters',JSON.stringify(course.chapters))
+            course.chapters.map((v,k)=>{
+                formData.append('chaptersVideo',v.video)
+            })
             formData.append('chapterNote',chapter.description)
             await axios.post(`${server_url}/api/course`,formData,{
                 headers:{
@@ -108,7 +113,16 @@ const PostCourse = () => {
             navigate("/")
             console.log(course)
         } catch (error) {
-            
+            if (error.response) {
+                if (error.response.status === 500) {
+                    setError("Error Server")
+                }
+                if(error.response.status === 403) {
+                    setError("Nama kursus sudah ada")
+                }
+            }
+            console.error("Error")
+            setLoading(false)
         }
     }
 
@@ -120,8 +134,9 @@ const PostCourse = () => {
     console.log(course)
     return(
         <>
+            <NavbarComponent/>
             <Form onSubmit={postcourse} noValidate={true}>
-                <NavbarComponent/>
+            {error&&(<Alert variant='danger' key={"danger"} className='col-lg-6 col-sm-8 col-10 mx-auto mt-5 mb-3'>{error}</Alert>)}
                 <article className="course col-lg-6 col-sm-8 col-10 mx-auto mt-5 mb-3 rounded-5 p-3 shadow-lg">
                     <Form.Group className="mb-3" controlId="formBasicEmail">
                         <Form.Label>Nama Kursus</Form.Label>
