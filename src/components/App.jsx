@@ -56,6 +56,33 @@ function App() {
     }
   }
 
+  const getThumbnail = async(data)=>{
+    try {
+      const res = await fetch(`${server_url}/api/course/photo`, {
+        method: 'GET',
+        headers: {
+          "Authorization": `Bearer ${data}`
+        }
+      })
+      
+      if (res.status === 500) {
+        setError("Internal Server Error")
+        return
+      }
+
+      if (res.status===200) {
+        const blob = await res.blob()
+        return URL.createObjectURL(blob)
+      }
+    } catch (error) {
+      setError("Error")
+      console.error(`error app ${error}`)
+      setLoading(false)
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const fetchData = async () => {
     try {
       setLoading(true)
@@ -98,6 +125,10 @@ function App() {
       }
       const response = await axios.get(`${server_url}/api/courses`)
       const res = await response.data
+      for (let i = 0; i < res.courses.length; i++) {
+        const thumbnailCourse = await getThumbnail(res.courses[i].image)
+        res.courses[i].image = thumbnailCourse
+      }
       setData(res.courses)
       setLoading(false)
     } catch (error) {
@@ -115,7 +146,7 @@ function App() {
     fetchData()
   }, [])
 
-  // console.log("admin = ",profileData)
+  console.log("data = ",data)
   return (
     <>
       <main className='app'>
@@ -184,7 +215,7 @@ function App() {
                     {data&&data.length>0&&data.map((v,k) => (
                       <div key={k} className='col-12 col-lg-4'>
                         <Card className='mb-3'>
-                          <Card.Img variant="top" src="holder.js/100px180" />
+                          <Card.Img variant="top" src={v.image} />
                           <Card.Body>
                             <Card.Title>{v.title}</Card.Title>
                             <Card.Text>
