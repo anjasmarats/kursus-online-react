@@ -146,6 +146,8 @@ function App() {
     fetchData()
   }, [])
 
+  const a = ''
+
   console.log("data = ",data)
   return (
     <>
@@ -217,11 +219,19 @@ function App() {
                         <Card className='mb-3'>
                           <Card.Img variant="top" src={v.image} />
                           <Card.Body>
-                            <Card.Title>{v.title}</Card.Title>
-                            <Card.Text>
-                              {v.description}
+                            <Card.Title className='fs-4'>{v.price}</Card.Title>
+                            <Card.Text className='d-flex flex-column justify-content-center'>
+                              <span className='text-wrap course-description'>{v.title}</span>
+                              <span className='my-2 text-wrap'>{v.description}</span>
                             </Card.Text>
-                            <Button variant="primary">Go somewhere</Button>
+                            {isAdmin?(
+                              <aside className='d-flex justify-content-between'>
+                                <Button variant="danger" className='w-100 mx-2'>Hapus</Button>
+                                <Button variant="primary" className='w-100 mx-2' href={`/edit/course/${v.courseId}`}>Edit</Button>
+                              </aside>
+                            ):(
+                              <Button variant="success w-100 fw-bolder fs-4">Beli</Button>
+                            )}
                           </Card.Body>
                         </Card>
                       </div>
