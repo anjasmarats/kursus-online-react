@@ -180,7 +180,7 @@ const EditCourse = () => {
         }
     }
 
-    const postcourse = async(e) => {
+    const editcourse = async(e) => {
         try {
             e.preventDefault()
             setLoading(true)
@@ -231,7 +231,7 @@ const EditCourse = () => {
     return(
         <>
             <NavbarComponent/>
-            <Form onSubmit={postcourse} noValidate={true}>
+            <Form onSubmit={editcourse} noValidate={true}>
             {error&&(<Alert variant='danger' key={"danger"} className='col-lg-6 col-sm-8 col-10 mx-auto mt-5 mb-3'>{error}</Alert>)}
                 <article className="course col-lg-6 col-sm-8 col-10 mx-auto mt-5 mb-3 rounded-5 p-3 shadow-lg">
                     <img src={course.thumbnail?URL.createObjectURL(course.thumbnail):courseThumbnail} alt="" className='w-100'/>
