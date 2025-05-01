@@ -8,6 +8,7 @@ import axios from 'axios'
 import { server_url } from '../scripts/url'
 import { useNavigate,useParams } from 'react-router-dom'
 import auth from '../scripts/auth'
+import "../styles/EditCourse.css"
 
 const EditCourse = () => {
     const { id } = useParams()
@@ -25,11 +26,14 @@ const EditCourse = () => {
 
     const [loading,setLoading] = useState(false)
 
+    const [loadingData,setLoadingData] = useState(false)
+
     const [show,setShow] = useState(false)
 
     const [chapter,setChapter] = useState({
         title:'',
-        video:null,
+        videodata:null,
+        videonew:null,
         description:''
     })
 
@@ -41,12 +45,15 @@ const EditCourse = () => {
 
     const [error,setError] = useState(false)
 
-    const viewChapter =(key,title,video,description)=>{
+    const viewChapter = async(key,title,video,description,chapterId)=>{
         try {
             console.info("key",key,"title",title,"video",video,"description",description)
-            if (!title||!video) return
+            if (!title||!video) console.error("title or video not found")
             setPreviewChapter({...previewChapter,key,title,video,description})
-            setChapter({...chapter,title,video,description })
+            const dataVideo = chapter.videonew?chapter.videonew:await getChapterVideo({courseId:idCourse,chapterId})
+            setChapter({...chapter,title,video:dataVideo,description })
+            console.log("chapter",chapter)
+            console.log("chapter.video",chapter.video)
             setShow(true)
         } catch (error) {
             console.error(`error vchptr ${error}`)
@@ -56,8 +63,8 @@ const EditCourse = () => {
     const closeViewChapter =()=>{
         try {
             setShow(false)
-            setPreviewChapter({title:'',video:null})
-            setChapter({title:'',video:''})
+            setPreviewChapter({title:'',videonew:null})
+            setChapter({title:'',videodata:'',videonew:''})
         } catch (error) {
             console.error(`error xviewchapter ${error}`)
         }
@@ -121,32 +128,35 @@ const EditCourse = () => {
 
     const fetchData = async () => {
         try {
-          setLoading(true)
+            let chapters=[]
+          setLoadingData(true)
           const {adminuser} = await auth()
           if (!adminuser) {
             navigate('/')
           }
           const response = await axios.get(`${server_url}/api/course/${id}`)
           const res = await response.data
-          console.log(res.course)
+        //   console.log("res.course",res.course.Chapters[2])
           const { courseId,title,description,image,price,Chapters } = res.course
-          for (let i = 0; i < Chapters.length; i++) {
-              const thumbnailCourse = await getChapterVideo({courseId,chapterId:Chapters[i].id})
-              Chapters[i].video = thumbnailCourse
-            }
           setIdCourse(courseId)
+          for (let i = 0; i < Chapters.length; i++) {
+            setChapter({...chapter,title:Chapters[i].title,videodata:Chapters[i].video,description:Chapters[i].description})
+            chapters.push(chapter)
+          }
+          chapters=[]
           const thumbnail = await getThumbnail(image)
           setCourseThumbnail(thumbnail)
-          setCourse({...course,title,description,price,chapters:[...Chapters] })
-          setLoading(false)
+          setCourse({...course,title,description,price,chapters:[...chapters] })
+          setChapter({})
+          setLoadingData(false)
         } catch (error) {
           if (error.response && error.response.status === 500) {
             setError("Internal Server Error")
           }
           console.error(`error app ${error}`)
-          setLoading(false)
+          setLoadingData(false)
         } finally {
-          setLoading(false)
+          setLoadingData(false)
         }
       }
 
@@ -172,8 +182,14 @@ const EditCourse = () => {
 
     const updateChapter = (key) => {
         try {
-            if (!chapter.title||!chapter.video) return
+            console.log("chapter",chapter)
+            if (!chapter.title||!chapter.videonew) return
+            console.log("chapter",chapter,"key",key)
             course.chapters[key] = {...chapter}
+            // console.log("chapter",chapter)
+            console.log(course.chapters.map((v,k)=>{
+                console.log("v",v,"k",k)
+            }))
             closeViewChapter()
         } catch (error) {
             console.error(`error upchptr ${error}`)
@@ -222,7 +238,7 @@ const EditCourse = () => {
 
     // console.log("!course.chapters||course.chapters.length===0",(!course.chapters||course.chapters.length===0),"!course.title",!course.title,"!course.thumbnail",!course.thumbnail,'!course.description',!course.description,"!course.price",!course.price,"loading",loading)
 
-    // console.log(course)
+    // console.log(course.chapters)
 
     useEffect(() => {
         fetchData()
@@ -233,41 +249,67 @@ const EditCourse = () => {
             <NavbarComponent/>
             <Form onSubmit={editcourse} noValidate={true}>
             {error&&(<Alert variant='danger' key={"danger"} className='col-lg-6 col-sm-8 col-10 mx-auto mt-5 mb-3'>{error}</Alert>)}
-                <article className="course col-lg-6 col-sm-8 col-10 mx-auto mt-5 mb-3 rounded-5 p-3 shadow-lg">
-                    <img src={course.thumbnail?URL.createObjectURL(course.thumbnail):courseThumbnail} alt="" className='w-100'/>
+                <article className="edit-course col-lg-6 col-sm-8 col-10 mx-auto mt-5 mb-3 rounded-5 p-3 shadow-lg">
+                    {loadingData?(
+                        <div className='w-100 bg-secondary rounded-3 py-3 my-3 loading'>&nbsp;</div>
+                    ):(<img src={course.thumbnail?URL.createObjectURL(course.thumbnail):courseThumbnail} alt="" className='w-100 my-3'/>)}
                     <Form.Group className="mb-3" controlId="formBasicEmail">
-                        <Form.Label>Nama Kursus</Form.Label>
-                        <Form.Control required={true} type="search" value={course.title} onChange={(e)=>setCourse({...course,title:e.target.value})} placeholder="Nama kursus" />
+                        {loadingData?(
+                            <div className='w-100 bg-secondary rounded-3 py-3 my-3 loading'>&nbsp;</div>
+                        ):(
+                            <>
+                                <Form.Label>Nama Kursus</Form.Label>
+                                <Form.Control required={true} type="search" value={course.title} onChange={(e)=>setCourse({...course,title:e.target.value})} placeholder="Nama kursus" />
+                            </>
+                        )}
                     </Form.Group>
 
-                    <FloatingLabel controlId="floatingTextarea2" label="Deskripsi kursus">
-                        <Form.Control
-                        as="textarea"
-                        value={course.description}
-                        onChange={(e)=>setCourse({...course,description:e.target.value})}
-                        placeholder="Deskrisi kursus"
-                        rows={4}
-                        style={{ height: '100px' }}
-                        required={true}
-                        />
-                    </FloatingLabel>
+                    {loadingData?(
+                        <div className='w-100 bg-secondary rounded-3 py-3 my-3 loading'>&nbsp;</div>
+                    ):(
+                        <FloatingLabel controlId="floatingTextarea2" label="Deskripsi kursus">
+                            <Form.Control
+                            as="textarea"
+                            value={course.description}
+                            onChange={(e)=>setCourse({...course,description:e.target.value})}
+                            placeholder="Deskrisi kursus"
+                            rows={4}
+                            style={{ height: '100px' }}
+                            required={true}
+                            />
+                        </FloatingLabel>
+                    )}
 
                     <Form.Group className="mb-3" controlId="formBasicHarga">
-                        <Form.Label>Harga</Form.Label>
-                        <Form.Control required={true} value={course.price} type="number" onChange={(e)=>setCourse({...course,price:e.target.value})} placeholder="Harga Kursus" />
+                        {loadingData?(
+                            <div className='w-100 bg-secondary rounded-3 py-3 my-3 loading'>&nbsp;</div>
+                        ):(
+                            <>
+                                <Form.Label>Harga</Form.Label>
+                                <Form.Control required={true} value={course.price} type="number" onChange={(e)=>setCourse({...course,price:e.target.value})} placeholder="Harga Kursus" />
+                            </>
+                        )}
                     </Form.Group>
 
                     <Form.Group className="position-relative mb-3">
-                        <Form.Label>Poster kursus</Form.Label>
-                        <Form.Control
-                        type="file"
-                        accept='image/png'
-                        required={true}
-                        onChange={(e)=>setCourse({...course,thumbnail:e.target.files[0]})}
-                        />
+                        {loadingData?(
+                            <div className='w-100 bg-secondary rounded-3 py-3 my-3 loading'>&nbsp;</div>
+                        ):(
+                            <>
+                                <Form.Label>Poster kursus</Form.Label>
+                                <Form.Control
+                                type="file"
+                                accept='image/png'
+                                required={true}
+                                onChange={(e)=>setCourse({...course,thumbnail:e.target.files[0]})}
+                                />
+                            </>
+                        )}
                     </Form.Group>
 
-                    {course.chapters&&course.chapters.length>0&&(
+                    {loadingData?(
+                        <div className='w-100 bg-secondary rounded-3 py-3 my-3 loading'>&nbsp;</div>
+                    ):course.chapters&&course.chapters.length>0&&(
                         <section className='bg-info opacity-3 px-3 py-2 rounded-3'>
                             {course.chapters.map((v,k)=>(
                                 <aside key={k} className='bg-primary p-2 my-2 rounded-3 d-flex justify-content-between align-items-center'>
@@ -276,7 +318,7 @@ const EditCourse = () => {
                                         <div className='overflow-auto text-light'>{v.video.name}</div>
                                     </div>
                                     <div className="d-flex ms-5">
-                                        <MdOutlineEdit size={30} style={{ cursor:"pointer" }} className='mx-2 text-light' onClick={()=>viewChapter(k,v.title,v.video,v.description)}/>
+                                        <MdOutlineEdit size={30} style={{ cursor:"pointer" }} className='mx-2 text-light' onClick={()=>viewChapter(k,v.title,v.video,v.description,v.id)}/>
                                         <IoClose size={30} style={{ cursor:"pointer" }} className='mx-2 text-light' onClick={()=>deleteChapter(v.title)}/>
                                     </div>
                                 </aside>
@@ -284,13 +326,21 @@ const EditCourse = () => {
                         </section>
                     )}
 
-                    <div className="d-flex my-2 justify-content-between align-items-center">
-                        <hr className='w-100 mx-3'/>
-                        <span className='fs-5'>CHAPTER</span>
-                        <hr className='w-100 mx-3'/>
+                    <div className={loadingData?'w-100 loading':`d-flex my-2 justify-content-between align-items-center`}>
+                        {!loadingData?(
+                            <>&nbsp;</>
+                        ):(
+                            <>
+                                <hr className='w-100 mx-3'/>
+                                <span className='fs-5'>CHAPTER</span>
+                                <hr className='w-100 mx-3'/>
+                            </>
+                        )}
                     </div>
 
-                    <section className="chapter-course rounded-5 p-3">
+                    {loadingData?(
+                        <div className='w-100 bg-secondary rounded-3 py-3 my-3 loading'>&nbsp;</div>
+                    ):(<section className="chapter-course rounded-5 p-3">
                         <Form.Group className="mb-3" controlId="formBasicNamaChapter">
                             <Form.Label>Nama Chapter</Form.Label>
                             <Form.Control required={true} type="search" value={chapter.title} onChange={(e)=>setChapter({...chapter,title:e.target.value})} placeholder="Nama materi" />
@@ -302,7 +352,7 @@ const EditCourse = () => {
                             type="file"
                             accept='video/mp4'
                             required={true}
-                            onChange={(e)=>{setChapter({...chapter,video:e.target.files[0]})}}
+                            onChange={(e)=>{setChapter({...chapter,videonew:e.target.files[0]})}}
                             />
                         </Form.Group>
 
@@ -317,7 +367,7 @@ const EditCourse = () => {
                         </FloatingLabel>
 
                         <div className="d-flex justify-content-end">
-                            <button className='btn btn-info mx-3' disabled={!chapter.title||!chapter.video} onClick={()=>{
+                            <button className='btn btn-info mx-3' disabled={!chapter.title||!chapter.videonew} onClick={()=>{
                                 setCourse({...course,chapters:course.chapters&&course.chapters.length>0 ?
                                     [...course.chapters,{...chapter}]
                                     :
@@ -327,17 +377,17 @@ const EditCourse = () => {
                             }} type='button'>Tambah Materi</button>
                             <button className="btn btn-primary px-4 py-2" type='submit' disabled={!course.chapters||course.chapters.length===0||!course.title||!course.thumbnail||!course.price||loading}>{loading&&(<Spinner size='sm' className='me-2'/>)}Simpan</button>
                         </div>
-                    </section>
+                    </section>)}
                 </article>
             </Form>
 
             <Modal show={show} onHide={closeViewChapter}>
                 <Modal.Header closeButton>
-                <Modal.Title>{previewChapter.title}</Modal.Title>
+                <Modal.Title>{chapter.title}</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     <video controls={true} className='w-100'>
-                    <source src={previewChapter.video?URL.createObjectURL(previewChapter.video):null} type='video/mp4'/>
+                    <source src={chapter.videonew} type='video/mp4'/>
                     </video>
                     <Form.Group className="mb-3" controlId="formBasicEmail">
                         <Form.Label>Nama Chapter</Form.Label>
@@ -350,7 +400,7 @@ const EditCourse = () => {
                         type="file"
                         accept='video/mp4'
                         required={true}
-                        onChange={(e)=>{setChapter({...chapter,video:e.target.files[0]})}}
+                        onChange={(e)=>{setChapter({...chapter,videonew:e.target.files[0]})}}
                         />
                     </Form.Group>
 

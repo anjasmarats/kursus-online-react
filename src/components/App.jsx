@@ -29,6 +29,17 @@ function App() {
     photo: "",
   })
 
+  const formatToIDR = (number) => {
+    // Pastikan input berupa angka
+    const num = typeof number === 'string' ? parseFloat(number) : number;
+    
+    // Memformat angka dengan memisahkan ribuan menggunakan titik dan desimal menggunakan koma
+    return num.toLocaleString('id-ID', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+  }
+
   const getPhoto = async()=>{
     try {
       const res = await fetch(`${server_url}/api/user/photo`, {
@@ -128,6 +139,8 @@ function App() {
       for (let i = 0; i < res.courses.length; i++) {
         const thumbnailCourse = await getThumbnail(res.courses[i].image)
         res.courses[i].image = thumbnailCourse
+        const price = res.courses[i].price
+        res.courses[i].price = formatToIDR(price)
       }
       setData(res.courses)
       setLoading(false)
@@ -217,7 +230,7 @@ function App() {
                     {data&&data.length>0&&data.map((v,k) => (
                       <div key={k} className='col-12 col-lg-4'>
                         <Card className='mb-3'>
-                          <Card.Img variant="top" src={v.image} />
+                          <Card.Img variant="top" src={v.image} className='rounded-top-3'/>
                           <Card.Body>
                             <Card.Title className='fs-4'>{v.price}</Card.Title>
                             <Card.Text className='d-flex flex-column justify-content-center'>
