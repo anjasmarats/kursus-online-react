@@ -31,29 +31,30 @@ const EditCourse = () => {
     const [show,setShow] = useState(false)
 
     const [chapter,setChapter] = useState({
+        key:0,
+        id:0,
         title:'',
-        videodata:null,
-        videonew:null,
+        video:null,
         description:''
     })
 
-    const [previewChapter,setPreviewChapter] = useState({
-        key:0,
-        title:'',
-        video:null,
-    })
+    const [newChapters,setNewChapters] = useState([])
 
     const [error,setError] = useState(false)
 
     const viewChapter = async(key,title,video,description,chapterId)=>{
         try {
             console.info("key",key,"title",title,"video",video,"description",description)
-            if (!title||!video) console.error("title or video not found")
-            setPreviewChapter({...previewChapter,key,title,video,description})
-            const dataVideo = chapter.videonew?chapter.videonew:await getChapterVideo({courseId:idCourse,chapterId})
-            setChapter({...chapter,title,video:dataVideo,description })
-            console.log("chapter",chapter)
-            console.log("chapter.video",chapter.video)
+            if (!title||!video||!chapterId) return
+            const dataVideo = newChapters[key]&&(newChapters[key].video === course.chapters[key].video) ? await getChapterVideo({courseId:idCourse,chapterId}) : URL.createObjectURL(newChapters[key].video)
+            console.log("dataVideo validate",newChapters[key]&&(newChapters[key].video === course.chapters[key].video))
+            console.log("dataVideo",await getChapterVideo({courseId:idCourse,chapterId}))
+            console.log("dataVideo",newChapters[key].video)
+            console.log("dataVideo",newChapters[key])
+            // const Video = dataVideo&&dataVideo.name===video?dataVideo:URL.createObjectURL(video)
+            setChapter({...chapter,title,video:dataVideo,description,key })
+            // console.log("chapter",chapter)
+            // console.log("chapter.video",chapter.video)
             setShow(true)
         } catch (error) {
             console.error(`error vchptr ${error}`)
@@ -63,8 +64,7 @@ const EditCourse = () => {
     const closeViewChapter =()=>{
         try {
             setShow(false)
-            setPreviewChapter({title:'',videonew:null})
-            setChapter({title:'',videodata:'',videonew:''})
+            setChapter({})
         } catch (error) {
             console.error(`error xviewchapter ${error}`)
         }
@@ -82,6 +82,7 @@ const EditCourse = () => {
           })
           
           if (res.status === 500) {
+            console.error(res.status,await res.json())
             setError("Internal Server Error")
             return
           }
@@ -128,7 +129,7 @@ const EditCourse = () => {
 
     const fetchData = async () => {
         try {
-            let chapters=[]
+            // let chapters=[]
           setLoadingData(true)
           const {adminuser} = await auth()
           if (!adminuser) {
@@ -138,15 +139,11 @@ const EditCourse = () => {
           const res = await response.data
         //   console.log("res.course",res.course.Chapters[2])
           const { courseId,title,description,image,price,Chapters } = res.course
-          setIdCourse(courseId)
-          for (let i = 0; i < Chapters.length; i++) {
-            setChapter({...chapter,title:Chapters[i].title,videodata:Chapters[i].video,description:Chapters[i].description})
-            chapters.push(chapter)
-          }
-          chapters=[]
           const thumbnail = await getThumbnail(image)
           setCourseThumbnail(thumbnail)
-          setCourse({...course,title,description,price,chapters:[...chapters] })
+          setIdCourse(courseId)
+          setCourse({...course,title,description,price,chapters:[...Chapters] })
+          setNewChapters([...Chapters])
           setChapter({})
           setLoadingData(false)
         } catch (error) {
@@ -183,11 +180,22 @@ const EditCourse = () => {
     const updateChapter = (key) => {
         try {
             console.log("chapter",chapter)
-            if (!chapter.title||!chapter.videonew) return
+            if (!chapter.title||!chapter.video) return
             console.log("chapter",chapter,"key",key)
-            course.chapters[key] = {...chapter}
+            console.log("newChapters[key]===chapter.video",newChapters[key].video!==chapter.video)
+            console.log("newchapter[key].video",newChapters[key].video)
+            console.log("chapter.video",chapter.video)
+            if (newChapters[key].video!==chapter.video) {
+                console.log("tidak sama")
+                setChapter({...chapter,video:newChapters[key].video})
+            } else {
+                console.log("sama")
+                setChapter({...chapter,video:chapter.video})
+            }
+            console.log("chapter",chapter)
+            newChapters[key] = {...chapter}
             // console.log("chapter",chapter)
-            console.log(course.chapters.map((v,k)=>{
+            console.log(newChapters.map((v,k)=>{
                 console.log("v",v,"k",k)
             }))
             closeViewChapter()
@@ -205,7 +213,7 @@ const EditCourse = () => {
             formData.append('description',course.description)
             formData.append('price',course.price)
             formData.append('image',course.thumbnail)
-            formData.append('chapters',JSON.stringify(course.chapters))
+            formData.append('chapters',JSON.stringify(newChapters))
             course.chapters.map((v,k)=>{
                 formData.append('chaptersVideo',v.video)
             })
@@ -314,12 +322,23 @@ const EditCourse = () => {
                             {course.chapters.map((v,k)=>(
                                 <aside key={k} className='bg-primary p-2 my-2 rounded-3 d-flex justify-content-between align-items-center'>
                                     <div className='w-100 rounded-3'>
-                                        <div className='overflow-auto text-light fw-bolder'>{v.title}</div>
-                                        <div className='overflow-auto text-light'>{v.video.name}</div>
+                                        <div className='overflow-auto text-light fw-bolder'>
+                                            {newChapters[k].title===v.title?v.title:newChapters[k].title}
+                                        </div>
+                                        <div className='overflow-auto text-light'>
+                                            {newChapters[k].video.name===v.video.name?v.video.name:newChapters[k].video.name}
+                                        </div>
                                     </div>
                                     <div className="d-flex ms-5">
-                                        <MdOutlineEdit size={30} style={{ cursor:"pointer" }} className='mx-2 text-light' onClick={()=>viewChapter(k,v.title,v.video,v.description,v.id)}/>
-                                        <IoClose size={30} style={{ cursor:"pointer" }} className='mx-2 text-light' onClick={()=>deleteChapter(v.title)}/>
+                                        <MdOutlineEdit size={30} style={{ cursor:"pointer" }} className='mx-2 text-light' onClick={()=>viewChapter(
+                                            k,
+                                            newChapters[k].title===v.title?v.title:newChapters[k].title,
+                                            newChapters[k].video===v.video?v.video:newChapters[k].video,
+                                            newChapters[k].description===v.description?v.description:newChapters[k].description,
+                                            v.id)}/>
+                                        <IoClose size={30} style={{ cursor:"pointer" }} className='mx-2 text-light' onClick={()=>{
+                                            deleteChapter(newChapters[k].title===v.title?v.title:newChapters[k].title)
+                                        }}/>
                                     </div>
                                 </aside>
                             ))}
@@ -352,7 +371,7 @@ const EditCourse = () => {
                             type="file"
                             accept='video/mp4'
                             required={true}
-                            onChange={(e)=>{setChapter({...chapter,videonew:e.target.files[0]})}}
+                            onChange={(e)=>{setChapter({...chapter,video:e.target.files[0]})}}
                             />
                         </Form.Group>
 
@@ -367,7 +386,7 @@ const EditCourse = () => {
                         </FloatingLabel>
 
                         <div className="d-flex justify-content-end">
-                            <button className='btn btn-info mx-3' disabled={!chapter.title||!chapter.videonew} onClick={()=>{
+                            <button className='btn btn-info mx-3' disabled={!chapter.title||!chapter.video} onClick={()=>{
                                 setCourse({...course,chapters:course.chapters&&course.chapters.length>0 ?
                                     [...course.chapters,{...chapter}]
                                     :
@@ -387,7 +406,7 @@ const EditCourse = () => {
                 </Modal.Header>
                 <Modal.Body>
                     <video controls={true} className='w-100'>
-                    <source src={chapter.videonew} type='video/mp4'/>
+                    <source src={chapter.video} type='video/mp4'/>
                     </video>
                     <Form.Group className="mb-3" controlId="formBasicEmail">
                         <Form.Label>Nama Chapter</Form.Label>
@@ -400,7 +419,7 @@ const EditCourse = () => {
                         type="file"
                         accept='video/mp4'
                         required={true}
-                        onChange={(e)=>{setChapter({...chapter,videonew:e.target.files[0]})}}
+                        onChange={(e)=>{setChapter({...chapter,video:e.target.files[0]})}}
                         />
                     </Form.Group>
 
@@ -418,7 +437,7 @@ const EditCourse = () => {
                     </FloatingLabel>
                 </Modal.Body>
                 <Modal.Footer>
-                <Button variant="secondary" onClick={()=>updateChapter(previewChapter.key)}>
+                <Button variant="secondary" onClick={()=>updateChapter(chapter.key)}>
                     Simpan
                 </Button>
                 </Modal.Footer>
