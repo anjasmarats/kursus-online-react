@@ -22,6 +22,8 @@ const EditCourse = () => {
         chapters:[]
     })
 
+    const [thumbnailPreview,setThumbnailPreview] = useState()
+
     const navigate = useNavigate()
 
     const [loading,setLoading] = useState(false)
@@ -33,26 +35,25 @@ const EditCourse = () => {
     const [chapter,setChapter] = useState({
         key:0,
         id:0,
+        courseId:0,
         title:'',
         video:null,
-        description:''
+        chapterNote:''
     })
 
     const [newChapters,setNewChapters] = useState([])
 
     const [error,setError] = useState(false)
 
-    const viewChapter = async(key,title,video,description,chapterId)=>{
+    const viewChapter = async(key,title,video,chapterNote,chapterId)=>{
         try {
-            console.info("key",key,"title",title,"video",video,"description",description)
+            console.info("key",key,"title",title,"video",video,"chapterNote",chapterNote)
             if (!title||!video||!chapterId) return
             const dataVideo = newChapters[key]&&(newChapters[key].video === course.chapters[key].video) ? await getChapterVideo({courseId:idCourse,chapterId}) : URL.createObjectURL(newChapters[key].video)
-            console.log("dataVideo validate",newChapters[key]&&(newChapters[key].video === course.chapters[key].video))
-            console.log("dataVideo",await getChapterVideo({courseId:idCourse,chapterId}))
-            console.log("dataVideo",newChapters[key].video)
-            console.log("dataVideo",newChapters[key])
+            setThumbnailPreview(dataVideo)
+            // console.log("dataVideo",newChapters[key])
             // const Video = dataVideo&&dataVideo.name===video?dataVideo:URL.createObjectURL(video)
-            setChapter({...chapter,title,video:dataVideo,description,key })
+            setChapter({...chapter,id:chapterId,courseId:idCourse,title,video,chapterNote,key })
             // console.log("chapter",chapter)
             // console.log("chapter.video",chapter.video)
             setShow(true)
@@ -179,25 +180,35 @@ const EditCourse = () => {
 
     const updateChapter = (key) => {
         try {
-            console.log("chapter",chapter)
-            if (!chapter.title||!chapter.video) return
-            console.log("chapter",chapter,"key",key)
-            console.log("newChapters[key]===chapter.video",newChapters[key].video!==chapter.video)
-            console.log("newchapter[key].video",newChapters[key].video)
-            console.log("chapter.video",chapter.video)
-            if (newChapters[key].video!==chapter.video) {
-                console.log("tidak sama")
-                setChapter({...chapter,video:newChapters[key].video})
-            } else {
-                console.log("sama")
-                setChapter({...chapter,video:chapter.video})
-            }
-            console.log("chapter",chapter)
-            newChapters[key] = {...chapter}
+            console.log("chapter pertama",chapter)
+            if (!key) return
+            // console.log("chapter",chapter,"key",key)
+            // console.log("newChapters[key]===chapter.video",newChapters[key].video!==chapter.video)
+            // console.log("newchapter[key].video",newChapters[key].video)
+            // console.log("chapter.video",chapter.video)
+            // if (newChapters[key].video!==chapter.video) {
+            //     console.log("tidak sama")
+            //     setChapter({...chapter,video:newChapters[key].video})
+            // } else {
+            //     console.log("sama")
+            //     setChapter({...chapter,video:chapter.video})
+            // }
+            console.log("newchapters[key].video",newChapters[key].video)
+            const video = chapter.video!==null&&(newChapters[key].video!==chapter.video)?newChapters[key].video:chapter.video
+            console.log("chapter a",chapter)
+            setChapter({...chapter,video})
+            console.log("chapter b",chapter)
+            newChapters[key] = chapter
+            console.log("newchapters[",key,"]",newChapters[key])
+            console.log("newchapters",newChapters)
+            // const newchapter = {
+            //     title:chapter.title,
+            //     description:chapter.description,
+            //     video:newChapters[key].video!==chapter.video?newChapters[key].video:chapter.video,
+            //     key:chapter.key,
+            // }
+            // newChapters[key] = newchapter
             // console.log("chapter",chapter)
-            console.log(newChapters.map((v,k)=>{
-                console.log("v",v,"k",k)
-            }))
             closeViewChapter()
         } catch (error) {
             console.error(`error upchptr ${error}`)
@@ -217,7 +228,7 @@ const EditCourse = () => {
             course.chapters.map((v,k)=>{
                 formData.append('chaptersVideo',v.video)
             })
-            formData.append('chapterNote',chapter.description)
+            formData.append('chapterNote',chapter.chapterNote)
             await axios.post(`${server_url}/api/course`,formData,{
                 headers:{
                     Authorization: `Bearer ${localStorage.getItem("session")}`,
@@ -334,7 +345,7 @@ const EditCourse = () => {
                                             k,
                                             newChapters[k].title===v.title?v.title:newChapters[k].title,
                                             newChapters[k].video===v.video?v.video:newChapters[k].video,
-                                            newChapters[k].description===v.description?v.description:newChapters[k].description,
+                                            newChapters[k].chapterNote===v.chapterNote?v.chapterNote:newChapters[k].chapterNote,
                                             v.id)}/>
                                         <IoClose size={30} style={{ cursor:"pointer" }} className='mx-2 text-light' onClick={()=>{
                                             deleteChapter(newChapters[k].title===v.title?v.title:newChapters[k].title)
@@ -378,7 +389,7 @@ const EditCourse = () => {
                         <FloatingLabel controlId="floatingTextarea" label="Catatan/informasi materi tambahan" className='mb-3'>
                             <Form.Control
                             as="textarea"
-                            onChange={(e)=>setChapter({...chapter,description:e.target.value})}
+                            onChange={(e)=>setChapter({...chapter,chapterNote:e.target.value})}
                             placeholder="Catatan/informasi materi tambahan"
                             rows={4}
                             style={{ height: '100px' }}
@@ -392,7 +403,7 @@ const EditCourse = () => {
                                     :
                                     [{...chapter}]
                                 })
-                                setChapter({title:'',video:null,description:''})
+                                setChapter({title:'',video:null,chapterNote:''})
                             }} type='button'>Tambah Materi</button>
                             <button className="btn btn-primary px-4 py-2" type='submit' disabled={!course.chapters||course.chapters.length===0||!course.title||!course.thumbnail||!course.price||loading}>{loading&&(<Spinner size='sm' className='me-2'/>)}Simpan</button>
                         </div>
@@ -406,7 +417,7 @@ const EditCourse = () => {
                 </Modal.Header>
                 <Modal.Body>
                     <video controls={true} className='w-100'>
-                    <source src={chapter.video} type='video/mp4'/>
+                    <source src={thumbnailPreview} type='video/mp4'/>
                     </video>
                     <Form.Group className="mb-3" controlId="formBasicEmail">
                         <Form.Label>Nama Chapter</Form.Label>
@@ -425,9 +436,9 @@ const EditCourse = () => {
 
                     <FloatingLabel controlId="floatingTextareanew" label="Deskripsi Materi" className='mb-3'>
                         <Form.Control
-                        value={chapter.description}
+                        value={chapter.chapterNote}
                         as="textarea"
-                        onChange={(e)=>setChapter({...chapter,description:e.target.value})}
+                        onChange={(e)=>setChapter({...chapter,chapterNote:e.target.value})}
                         placeholder="Catatan/informasi singkat materi"
                         maxLength={255}
                         max={255}
