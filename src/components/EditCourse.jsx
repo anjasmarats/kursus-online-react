@@ -49,7 +49,7 @@ const EditCourse = () => {
         try {
             console.info("key",key,"title",title,"video",video,"chapterNote",chapterNote)
             if (!title||!video||!chapterId) return
-            const dataVideo = newChapters[key]&&(newChapters[key].video === course.chapters[key].video) ? await getChapterVideo({courseId:idCourse,chapterId}) : URL.createObjectURL(newChapters[key].video)
+            const dataVideo = course.chapters[key]!==null&&(newChapters[key]&&(newChapters[key].video === course.chapters[key].video)) ? await getChapterVideo({courseId:idCourse,chapterId}) : URL.createObjectURL(newChapters[key].video)
             setThumbnailPreview(dataVideo)
             // console.log("dataVideo",newChapters[key])
             // const Video = dataVideo&&dataVideo.name===video?dataVideo:URL.createObjectURL(video)
@@ -345,7 +345,11 @@ const EditCourse = () => {
                                             k,
                                             newChapters[k].title===v.title?v.title:newChapters[k].title,
                                             newChapters[k].video===v.video?v.video:newChapters[k].video,
-                                            newChapters[k].chapterNote===v.chapterNote?v.chapterNote:newChapters[k].chapterNote,
+                                            newChapters[k].chapterNote===v.chapterNote?
+                                            v.chapterNote
+                                            :
+                                            newChapters[k].chapterNote
+                                            ,
                                             v.id)}/>
                                         <IoClose size={30} style={{ cursor:"pointer" }} className='mx-2 text-light' onClick={()=>{
                                             deleteChapter(newChapters[k].title===v.title?v.title:newChapters[k].title)

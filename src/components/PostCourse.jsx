@@ -26,7 +26,7 @@ const PostCourse = () => {
     const [chapter,setChapter] = useState({
         title:'',
         video:null,
-        description:''
+        chapterNote:''
     })
 
     const [previewChapter,setPreviewChapter] = useState({
@@ -37,12 +37,12 @@ const PostCourse = () => {
 
     const [error,setError] = useState(false)
 
-    const viewChapter =(key,title,video,description)=>{
+    const viewChapter =(key,title,video,chapterNote)=>{
         try {
-            console.info("key",key,"title",title,"video",video,"description",description)
+            console.info("key",key,"title",title,"video",video,"chapterNote",chapterNote)
             if (!title||!video) return
-            setPreviewChapter({...previewChapter,key,title,video,description})
-            setChapter({...chapter,title,video,description })
+            setPreviewChapter({...previewChapter,key,title,video,chapterNote})
+            setChapter({...chapter,title,video,chapterNote })
             setShow(true)
         } catch (error) {
             console.error(`error vchptr ${error}`)
@@ -102,7 +102,6 @@ const PostCourse = () => {
             course.chapters.map((v,k)=>{
                 formData.append('chaptersVideo',v.video)
             })
-            formData.append('chapterNote',chapter.description)
             await axios.post(`${server_url}/api/course`,formData,{
                 headers:{
                     Authorization: `Bearer ${localStorage.getItem("session")}`,
@@ -178,7 +177,7 @@ const PostCourse = () => {
                                         <div className='overflow-auto text-light'>{v.video.name}</div>
                                     </div>
                                     <div className="d-flex ms-5">
-                                        <MdOutlineEdit size={30} style={{ cursor:"pointer" }} className='mx-2 text-light' onClick={()=>viewChapter(k,v.title,v.video,v.description)}/>
+                                        <MdOutlineEdit size={30} style={{ cursor:"pointer" }} className='mx-2 text-light' onClick={()=>viewChapter(k,v.title,v.video,v.chapterNote)}/>
                                         <IoClose size={30} style={{ cursor:"pointer" }} className='mx-2 text-light' onClick={()=>deleteChapter(v.title)}/>
                                     </div>
                                 </aside>
@@ -211,7 +210,7 @@ const PostCourse = () => {
                         <FloatingLabel controlId="floatingTextarea" label="Catatan/informasi materi tambahan" className='mb-3'>
                             <Form.Control
                             as="textarea"
-                            onChange={(e)=>setChapter({...chapter,description:e.target.value})}
+                            onChange={(e)=>setChapter({...chapter,chapterNote:e.target.value})}
                             placeholder="Catatan/informasi materi tambahan"
                             rows={4}
                             style={{ height: '100px' }}
@@ -225,7 +224,7 @@ const PostCourse = () => {
                                     :
                                     [{...chapter}]
                                 })
-                                setChapter({title:'',video:null,description:''})
+                                setChapter({title:'',video:null,chapterNote:''})
                             }} type='button'>Tambah Materi</button>
                             <button className="btn btn-primary px-4 py-2" type='submit' disabled={!course.chapters||course.chapters.length===0||!course.title||!course.thumbnail||!course.price||loading}>{loading&&(<Spinner size='sm' className='me-2'/>)}Simpan</button>
                         </div>
@@ -256,11 +255,11 @@ const PostCourse = () => {
                         />
                     </Form.Group>
 
-                    <FloatingLabel controlId="floatingTextareanew" label="Deskripsi Materi" className='mb-3'>
+                    <FloatingLabel controlId="floatingTextareanew" label="Catatan/informasi singkat materi" className='mb-3'>
                         <Form.Control
-                        value={chapter.description}
+                        value={chapter.chapterNote}
                         as="textarea"
-                        onChange={(e)=>setChapter({...chapter,description:e.target.value})}
+                        onChange={(e)=>setChapter({...chapter,chapterNote:e.target.value})}
                         placeholder="Catatan/informasi singkat materi"
                         maxLength={255}
                         max={255}
