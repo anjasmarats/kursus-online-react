@@ -228,8 +228,8 @@ const EditCourse = () => {
             course.chapters.map((v,k)=>{
                 formData.append('chaptersVideo',v.video)
             })
-            formData.append('chapterNote',chapter.chapterNote)
-            await axios.post(`${server_url}/api/course`,formData,{
+            // formData.append('chapterNote',chapter.chapterNote)
+            await axios.post(`${server_url}/api/course/${idCourse}`,formData,{
                 headers:{
                     Authorization: `Bearer ${localStorage.getItem("session")}`,
                     "Content-Type":"multipart/form-data"
