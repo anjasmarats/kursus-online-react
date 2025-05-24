@@ -47,15 +47,20 @@ const EditCourse = () => {
 
     const viewChapter = async(key,title,video,chapterNote,chapterId)=>{
         try {
-            console.info("key",key,"title",title,"video",video,"chapterNote",chapterNote)
-            if (!title||!video||!chapterId) return
-            const dataVideo = course.chapters[key]!==null&&(newChapters[key]&&(newChapters[key].video === course.chapters[key].video)) ? await getChapterVideo({courseId:idCourse,chapterId}) : URL.createObjectURL(newChapters[key].video)
-            setThumbnailPreview(dataVideo)
-            // console.log("dataVideo",newChapters[key])
-            // const Video = dataVideo&&dataVideo.name===video?dataVideo:URL.createObjectURL(video)
-            setChapter({...chapter,id:chapterId,courseId:idCourse,title,video,chapterNote,key })
-            // console.log("chapter",chapter)
-            // console.log("chapter.video",chapter.video)
+            console.info("key",key,"title",title,"video",video,"chapterNote",chapterNote,"chapterid",chapterId)
+            if (!title||!video||!key) return
+            if (chapterId) {
+                const dataVideo = newChapters[key]&&(newChapters[key].video === course.chapters[key].video) ? await getChapterVideo({courseId:idCourse,chapterId}) : URL.createObjectURL(newChapters[key].video)
+                setThumbnailPreview(dataVideo)
+                // console.log("dataVideo",newChapters[key])
+                // const Video = dataVideo&&dataVideo.name===video?dataVideo:URL.createObjectURL(video)
+                setChapter({...chapter,id:chapterId,courseId:idCourse,title,video,chapterNote,key })
+                // console.log("chapter",chapter)
+                // console.log("chapter.video",chapter.video)
+            } else {
+                setThumbnailPreview(URL.createObjectURL(video))
+                setChapter({...chapter,id:chapterId,courseId:idCourse,title,video,chapterNote,key })
+            }
             setShow(true)
         } catch (error) {
             console.error(`error vchptr ${error}`)
@@ -171,6 +176,8 @@ const EditCourse = () => {
             if (!confirm) {
                 return
             }
+            const newchapters = newChapters.filter((item)=>{return item.title!==title})
+            setNewChapters([...newchapters])
             setCourse({...course,chapters:course.chapters.filter((item)=>{return item.title!==title})})
             closeViewChapter()
         } catch (error) {
@@ -334,10 +341,11 @@ const EditCourse = () => {
                                 <aside key={k} className='bg-primary p-2 my-2 rounded-3 d-flex justify-content-between align-items-center'>
                                     <div className='w-100 rounded-3'>
                                         <div className='overflow-auto text-light fw-bolder'>
-                                            {newChapters[k].title===v.title?v.title:newChapters[k].title}
+                                            v = {JSON.stringify(v)} newchapter = {JSON.stringify(newChapters[k])}
+                                            {/* {newChapters[k].title===v.title?v.title:newChapters[k].title} */}
                                         </div>
                                         <div className='overflow-auto text-light'>
-                                            {newChapters[k].video.name===v.video.name?v.video.name:newChapters[k].video.name}
+                                            {/* {newChapters[k].video.name===v.video.name?v.video.name:newChapters[k].video.name} */}
                                         </div>
                                     </div>
                                     <div className="d-flex ms-5">
@@ -407,6 +415,7 @@ const EditCourse = () => {
                                     :
                                     [{...chapter}]
                                 })
+                                setNewChapters([...newChapters,{...chapter}])
                                 setChapter({title:'',video:null,chapterNote:''})
                             }} type='button'>Tambah Materi</button>
                             <button className="btn btn-primary px-4 py-2" type='submit' disabled={!course.chapters||course.chapters.length===0||!course.title||!course.thumbnail||!course.price||loading}>{loading&&(<Spinner size='sm' className='me-2'/>)}Simpan</button>
