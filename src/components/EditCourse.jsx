@@ -1,473 +1,424 @@
-import { useState,useEffect } from 'react'
-import { Form,FloatingLabel,Modal,Button, Spinner,Alert } from 'react-bootstrap'
-import NavbarComponent from './NavbarComponent'
-import Swal from 'sweetalert2'
-import { MdOutlineEdit } from 'react-icons/md'
-import { IoClose } from 'react-icons/io5'
-import axios from 'axios'
-import { server_url } from '../scripts/url'
-import { useNavigate,useParams } from 'react-router-dom'
-import auth from '../scripts/auth'
-import "../styles/EditCourse.css"
+import React, { useState } from "react";
+import 'bootstrap/dist/css/bootstrap.min.css';
+import {
 
+// EditCourse.jsx
+// UI/UX Online Course Video Player - Unique, Modern, and User-Friendly
+// Uses React, React-Bootstrap, Bootstrap, and React-Icons
+// This design features a visually distinct, comfortable, and easy-to-use interface
+// for displaying a list of course videos and the currently playing video.
+
+// Import React and necessary libraries
+    Container,
+    Row,
+    Col,
+    ListGroup,
+    Card,
+    ProgressBar,
+    Button,
+    Badge,
+    OverlayTrigger,
+    Tooltip,
+} from "react-bootstrap";
+import {
+    FaPlayCircle,
+    FaPauseCircle,
+    FaCheckCircle,
+    FaRegClock,
+    FaChevronRight,
+    FaChevronLeft,
+    FaRegHeart,
+    FaHeart,
+} from "react-icons/fa";
+
+// Sample video data (replace with your API or props)
+const videoList = [
+    {
+        id: 1,
+        title: "Introduction to React",
+        duration: "5:32",
+        watched: true,
+        url: "https://www.w3schools.com/html/mov_bbb.mp4",
+        description: "Get started with the basics of React and component structure.",
+    },
+    {
+        id: 2,
+        title: "JSX & Rendering",
+        duration: "8:21",
+        watched: false,
+        url: "https://www.w3schools.com/html/movie.mp4",
+        description: "Learn how JSX works and how to render elements dynamically.",
+    },
+    {
+        id: 3,
+        title: "State & Props",
+        duration: "10:05",
+        watched: false,
+        url: "https://www.w3schools.com/html/mov_bbb.mp4",
+        description: "Understand state management and passing data via props.",
+    },
+    {
+        id: 4,
+        title: "Hooks Deep Dive",
+        duration: "12:47",
+        watched: false,
+        url: "https://www.w3schools.com/html/movie.mp4",
+        description: "Explore React hooks for powerful functional components.",
+    },
+];
+
+// Main component
 const EditCourse = () => {
-    const { id } = useParams()
-    const [idCourse,setIdCourse] = useState(0)
-    const [courseThumbnail,setCourseThumbnail] = useState(0)
-    const [course,setCourse] = useState({
-        title:'',
-        description:'',
-        price:0,
-        thumbnail:'',
-        chapters:[]
-    })
+    // State for currently playing video and favorite status
+    const [currentVideo, setCurrentVideo] = useState(videoList[0]);
+    const [isPlaying, setIsPlaying] = useState(true);
+    const [favorites, setFavorites] = useState([]);
+    const [hovered, setHovered] = useState(null);
 
-    const [thumbnailPreview,setThumbnailPreview] = useState()
+    // Handler to play selected video
+    const handleSelectVideo = (video) => {
+        setCurrentVideo(video);
+        setIsPlaying(true);
+    };
 
-    const navigate = useNavigate()
+    // Handler to toggle play/pause
+    const handlePlayPause = () => {
+        setIsPlaying((prev) => !prev);
+    };
 
-    const [loading,setLoading] = useState(false)
+    // Handler to toggle favorite
+    const handleFavorite = (id) => {
+        setFavorites((prev) =>
+            prev.includes(id) ? prev.filter((fid) => fid !== id) : [...prev, id]
+        );
+    };
 
-    const [loadingData,setLoadingData] = useState(false)
+    // Handler for next/previous video
+    const handleNextPrev = (direction) => {
+        const idx = videoList.findIndex((v) => v.id === currentVideo.id);
+        let newIdx = direction === "next" ? idx + 1 : idx - 1;
+        if (newIdx < 0) newIdx = videoList.length - 1;
+        if (newIdx >= videoList.length) newIdx = 0;
+        setCurrentVideo(videoList[newIdx]);
+        setIsPlaying(true);
+    };
 
-    const [show,setShow] = useState(false)
+    // Calculate progress (watched videos)
+    const progress =
+        (videoList.filter((v) => v.watched || v.id === currentVideo.id).length /
+            videoList.length) *
+        100;
 
-    const [chapter,setChapter] = useState({
-        key:0,
-        id:0,
-        courseId:0,
-        title:'',
-        video:null,
-        chapterNote:''
-    })
+    return (
+        <Container
+            fluid
+            className="py-4"
+            style={{
+                minHeight: "100vh",
+                background:
+                    "linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%)",
+            }}
+        >
+            {/* Header */}
+            <Row className="mb-4">
+                <Col>
+                    <h2
+                        className="fw-bold"
+                        style={{
+                            letterSpacing: "1px",
+                            color: "#3b3b5c",
+                            textShadow: "0 2px 8px #e0e7ff",
+                        }}
+                    >
+                        <FaPlayCircle className="mb-1 me-2" color="#6366f1" size={32} />
+                        Online Course Player
+                    </h2>
+                    <ProgressBar
+                        now={progress}
+                        label={`${Math.round(progress)}% Completed`}
+                        variant="info"
+                        style={{ height: "10px", borderRadius: "8px" }}
+                        className="mt-2"
+                    />
+                </Col>
+            </Row>
 
-    const [newChapters,setNewChapters] = useState([])
-
-    const [error,setError] = useState(false)
-
-    const viewChapter = async(key,title,video,chapterNote,chapterId)=>{
-        try {
-            console.info("key",key,"title",title,"video",video,"chapterNote",chapterNote,"chapterid",chapterId)
-            if (!title||!video||!key) return
-            if (chapterId) {
-                const dataVideo = newChapters[key]&&(newChapters[key].video === course.chapters[key].video) ? await getChapterVideo({courseId:idCourse,chapterId}) : URL.createObjectURL(newChapters[key].video)
-                setThumbnailPreview(dataVideo)
-                // console.log("dataVideo",newChapters[key])
-                // const Video = dataVideo&&dataVideo.name===video?dataVideo:URL.createObjectURL(video)
-                setChapter({...chapter,id:chapterId,courseId:idCourse,title,video,chapterNote,key })
-                // console.log("chapter",chapter)
-                // console.log("chapter.video",chapter.video)
-            } else {
-                setThumbnailPreview(URL.createObjectURL(video))
-                setChapter({...chapter,id:chapterId,courseId:idCourse,title,video,chapterNote,key })
-            }
-            setShow(true)
-        } catch (error) {
-            console.error(`error vchptr ${error}`)
-        }
-    }
-
-    const closeViewChapter =()=>{
-        try {
-            setShow(false)
-            setChapter({})
-        } catch (error) {
-            console.error(`error xviewchapter ${error}`)
-        }
-    }
-
-    const getChapterVideo = async(data)=>{
-        try {
-            console.log("idCourse",idCourse)
-            const { courseId,chapterId } = data
-          const res = await fetch(`${server_url}/api/course/${courseId}/chapter/${chapterId}/video`, {
-            method: 'GET',
-            headers: {
-              "Authorization": `Bearer ${localStorage.getItem("session")}`
-            }
-          })
-          
-          if (res.status === 500) {
-            console.error(res.status,await res.json())
-            setError("Internal Server Error")
-            return
-          }
-    
-          if (res.status===200) {
-            const blob = await res.blob()
-            return URL.createObjectURL(blob)
-          }
-        } catch (error) {
-          setError("Error")
-          console.error(`error app ${error}`)
-          setLoading(false)
-        } finally {
-          setLoading(false)
-        }
-      }
-
-      const getThumbnail = async(data)=>{
-        try {
-          const res = await fetch(`${server_url}/api/course/photo`, {
-            method: 'GET',
-            headers: {
-              "Authorization": `Bearer ${data}`
-            }
-          })
-          
-          if (res.status === 500) {
-            setError("Internal Server Error")
-            return
-          }
-    
-          if (res.status===200) {
-            const blob = await res.blob()
-            return URL.createObjectURL(blob)
-          }
-        } catch (error) {
-          setError("Error")
-          console.error(`error app ${error}`)
-          setLoading(false)
-        } finally {
-          setLoading(false)
-        }
-      }
-
-    const fetchData = async () => {
-        try {
-            // let chapters=[]
-          setLoadingData(true)
-          const {adminuser} = await auth()
-          if (!adminuser) {
-            navigate('/')
-          }
-          const response = await axios.get(`${server_url}/api/course/${id}`)
-          const res = await response.data
-        //   console.log("res.course",res.course.Chapters[2])
-          const { courseId,title,description,image,price,Chapters } = res.course
-          const thumbnail = await getThumbnail(image)
-          setCourseThumbnail(thumbnail)
-          setIdCourse(courseId)
-          setCourse({...course,title,description,price,chapters:[...Chapters] })
-          setNewChapters([...Chapters])
-          setChapter({})
-          setLoadingData(false)
-        } catch (error) {
-          if (error.response && error.response.status === 500) {
-            setError("Internal Server Error")
-          }
-          console.error(`error app ${error}`)
-          setLoadingData(false)
-        } finally {
-          setLoadingData(false)
-        }
-      }
-
-    const deleteChapter = async(title) => {
-        try {
-            const confirm = await Swal.fire({
-                title:`Hapus chapter ${title}`,
-                showCancelButton:true,
-                cancelButtonColor:"blue",
-                showConfirmButton:true,
-                confirmButtonColor:"red",
-                confirmButtonText:"Delete"
-            }).then(res=>res.isConfirmed)
-            if (!confirm) {
-                return
-            }
-            const newchapters = newChapters.filter((item)=>{return item.title!==title})
-            setNewChapters([...newchapters])
-            setCourse({...course,chapters:course.chapters.filter((item)=>{return item.title!==title})})
-            closeViewChapter()
-        } catch (error) {
-            console.error(`error xchapter ${error}`)
-        }
-    }
-
-    const updateChapter = (key) => {
-        try {
-            console.log("chapter pertama",chapter)
-            if (!key) return
-            // console.log("chapter",chapter,"key",key)
-            // console.log("newChapters[key]===chapter.video",newChapters[key].video!==chapter.video)
-            // console.log("newchapter[key].video",newChapters[key].video)
-            // console.log("chapter.video",chapter.video)
-            // if (newChapters[key].video!==chapter.video) {
-            //     console.log("tidak sama")
-            //     setChapter({...chapter,video:newChapters[key].video})
-            // } else {
-            //     console.log("sama")
-            //     setChapter({...chapter,video:chapter.video})
-            // }
-            console.log("newchapters[key].video",newChapters[key].video)
-            const video = chapter.video!==null&&(newChapters[key].video!==chapter.video)?newChapters[key].video:chapter.video
-            console.log("chapter a",chapter)
-            setChapter({...chapter,video})
-            console.log("chapter b",chapter)
-            newChapters[key] = chapter
-            console.log("newchapters[",key,"]",newChapters[key])
-            console.log("newchapters",newChapters)
-            // const newchapter = {
-            //     title:chapter.title,
-            //     description:chapter.description,
-            //     video:newChapters[key].video!==chapter.video?newChapters[key].video:chapter.video,
-            //     key:chapter.key,
-            // }
-            // newChapters[key] = newchapter
-            // console.log("chapter",chapter)
-            closeViewChapter()
-        } catch (error) {
-            console.error(`error upchptr ${error}`)
-        }
-    }
-
-    const editcourse = async(e) => {
-        try {
-            e.preventDefault()
-            setLoading(true)
-            const formData = new FormData()
-            formData.append('title',course.title)
-            formData.append('description',course.description)
-            formData.append('price',course.price)
-            formData.append('image',course.thumbnail)
-            formData.append('chapters',JSON.stringify(newChapters))
-            course.chapters.map((v,k)=>{
-                formData.append('chaptersVideo',v.video)
-            })
-            // formData.append('chapterNote',chapter.chapterNote)
-            await axios.post(`${server_url}/api/course/${idCourse}`,formData,{
-                headers:{
-                    Authorization: `Bearer ${localStorage.getItem("session")}`,
-                    "Content-Type":"multipart/form-data"
-                }
-            })
-
-            navigate("/")
-            console.log(course)
-        } catch (error) {
-            if (error.response) {
-                if (error.response.status === 500) {
-                    setError("Error Server")
-                }
-                if(error.response.status === 403) {
-                    setError("Nama kursus sudah ada")
-                }
-            }
-            console.error("Error")
-            setLoading(false)
-        }
-    }
-
-    // console.log("chapter title",chapter.title)
-    // console.log("chapter video",chapter.video)
-
-    // console.log("!course.chapters||course.chapters.length===0",(!course.chapters||course.chapters.length===0),"!course.title",!course.title,"!course.thumbnail",!course.thumbnail,'!course.description',!course.description,"!course.price",!course.price,"loading",loading)
-
-    // console.log(course.chapters)
-
-    useEffect(() => {
-        fetchData()
-    }, [])
-
-    return(
-        <>
-            <NavbarComponent/>
-            <Form onSubmit={editcourse} noValidate={true}>
-            {error&&(<Alert variant='danger' key={"danger"} className='col-lg-6 col-sm-8 col-10 mx-auto mt-5 mb-3'>{error}</Alert>)}
-                <article className="edit-course col-lg-6 col-sm-8 col-10 mx-auto mt-5 mb-3 rounded-5 p-3 shadow-lg">
-                    {loadingData?(
-                        <div className='w-100 bg-secondary rounded-3 py-3 my-3 loading'>&nbsp;</div>
-                    ):(<img src={course.thumbnail?URL.createObjectURL(course.thumbnail):courseThumbnail} alt="" className='w-100 my-3'/>)}
-                    <Form.Group className="mb-3" controlId="formBasicEmail">
-                        {loadingData?(
-                            <div className='w-100 bg-secondary rounded-3 py-3 my-3 loading'>&nbsp;</div>
-                        ):(
-                            <>
-                                <Form.Label>Nama Kursus</Form.Label>
-                                <Form.Control required={true} type="search" value={course.title} onChange={(e)=>setCourse({...course,title:e.target.value})} placeholder="Nama kursus" />
-                            </>
-                        )}
-                    </Form.Group>
-
-                    {loadingData?(
-                        <div className='w-100 bg-secondary rounded-3 py-3 my-3 loading'>&nbsp;</div>
-                    ):(
-                        <FloatingLabel controlId="floatingTextarea2" label="Deskripsi kursus">
-                            <Form.Control
-                            as="textarea"
-                            value={course.description}
-                            onChange={(e)=>setCourse({...course,description:e.target.value})}
-                            placeholder="Deskrisi kursus"
-                            rows={4}
-                            style={{ height: '100px' }}
-                            required={true}
-                            />
-                        </FloatingLabel>
-                    )}
-
-                    <Form.Group className="mb-3" controlId="formBasicHarga">
-                        {loadingData?(
-                            <div className='w-100 bg-secondary rounded-3 py-3 my-3 loading'>&nbsp;</div>
-                        ):(
-                            <>
-                                <Form.Label>Harga</Form.Label>
-                                <Form.Control required={true} value={course.price} type="number" onChange={(e)=>setCourse({...course,price:e.target.value})} placeholder="Harga Kursus" />
-                            </>
-                        )}
-                    </Form.Group>
-
-                    <Form.Group className="position-relative mb-3">
-                        {loadingData?(
-                            <div className='w-100 bg-secondary rounded-3 py-3 my-3 loading'>&nbsp;</div>
-                        ):(
-                            <>
-                                <Form.Label>Poster kursus</Form.Label>
-                                <Form.Control
-                                type="file"
-                                accept='image/png'
-                                required={true}
-                                onChange={(e)=>setCourse({...course,thumbnail:e.target.files[0]})}
-                                />
-                            </>
-                        )}
-                    </Form.Group>
-
-                    {loadingData?(
-                        <div className='w-100 bg-secondary rounded-3 py-3 my-3 loading'>&nbsp;</div>
-                    ):course.chapters&&course.chapters.length>0&&(
-                        <section className='bg-info opacity-3 px-3 py-2 rounded-3'>
-                            {course.chapters.map((v,k)=>(
-                                <aside key={k} className='bg-primary p-2 my-2 rounded-3 d-flex justify-content-between align-items-center'>
-                                    <div className='w-100 rounded-3'>
-                                        <div className='overflow-auto text-light fw-bolder'>
-                                            v = {JSON.stringify(v)} newchapter = {JSON.stringify(newChapters[k])}
-                                            {/* {newChapters[k].title===v.title?v.title:newChapters[k].title} */}
+            {/* Main Content: Video Player & Playlist */}
+            <Row>
+                {/* Playlist Sidebar */}
+                <Col
+                    md={4}
+                    className="mb-4"
+                    style={{
+                        borderRight: "2px solid #e0e7ff",
+                        minHeight: "70vh",
+                        background: "rgba(255,255,255,0.7)",
+                        borderRadius: "18px 0 0 18px",
+                        boxShadow: "2px 0 16px #e0e7ff",
+                    }}
+                >
+                    <h5 className="fw-semibold mb-3" style={{ color: "#6366f1" }}>
+                        <FaRegClock className="me-2" />
+                        Playlist
+                    </h5>
+                    <ListGroup variant="flush">
+                        {videoList.map((video, idx) => (
+                            <ListGroup.Item
+                                key={video.id}
+                                active={currentVideo.id === video.id}
+                                onClick={() => handleSelectVideo(video)}
+                                style={{
+                                    cursor: "pointer",
+                                    background:
+                                        currentVideo.id === video.id
+                                            ? "linear-gradient(90deg, #6366f1 0%, #a5b4fc 100%)"
+                                            : hovered === video.id
+                                            ? "#f1f5f9"
+                                            : "transparent",
+                                    color: currentVideo.id === video.id ? "#fff" : "#3b3b5c",
+                                    border: "none",
+                                    borderRadius: "12px",
+                                    marginBottom: "8px",
+                                    transition: "background 0.2s",
+                                    boxShadow:
+                                        currentVideo.id === video.id
+                                            ? "0 2px 12px #a5b4fc"
+                                            : "none",
+                                }}
+                                onMouseEnter={() => setHovered(video.id)}
+                                onMouseLeave={() => setHovered(null)}
+                            >
+                                <Row className="align-items-center">
+                                    <Col xs={2} className="text-center">
+                                        {video.watched || currentVideo.id === video.id ? (
+                                            <FaCheckCircle color="#22c55e" size={22} />
+                                        ) : (
+                                            <FaPlayCircle color="#6366f1" size={22} />
+                                        )}
+                                    </Col>
+                                    <Col xs={7}>
+                                        <div className="fw-semibold">{video.title}</div>
+                                        <div
+                                            className="small"
+                                            style={{
+                                                color:
+                                                    currentVideo.id === video.id
+                                                        ? "#e0e7ff"
+                                                        : "#64748b",
+                                            }}
+                                        >
+                                            {video.duration}
                                         </div>
-                                        <div className='overflow-auto text-light'>
-                                            {/* {newChapters[k].video.name===v.video.name?v.video.name:newChapters[k].video.name} */}
-                                        </div>
-                                    </div>
-                                    <div className="d-flex ms-5">
-                                        <MdOutlineEdit size={30} style={{ cursor:"pointer" }} className='mx-2 text-light' onClick={()=>viewChapter(
-                                            k,
-                                            newChapters[k].title===v.title?v.title:newChapters[k].title,
-                                            newChapters[k].video===v.video?v.video:newChapters[k].video,
-                                            newChapters[k].chapterNote===v.chapterNote?
-                                            v.chapterNote
-                                            :
-                                            newChapters[k].chapterNote
-                                            ,
-                                            v.id)}/>
-                                        <IoClose size={30} style={{ cursor:"pointer" }} className='mx-2 text-light' onClick={()=>{
-                                            deleteChapter(newChapters[k].title===v.title?v.title:newChapters[k].title)
-                                        }}/>
-                                    </div>
-                                </aside>
-                            ))}
-                        </section>
-                    )}
+                                    </Col>
+                                    <Col xs={3} className="text-end">
+                                        <OverlayTrigger
+                                            placement="top"
+                                            overlay={
+                                                <Tooltip>
+                                                    {favorites.includes(video.id)
+                                                        ? "Remove from Favorites"
+                                                        : "Add to Favorites"}
+                                                </Tooltip>
+                                            }
+                                        >
+                                            <span
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleFavorite(video.id);
+                                                }}
+                                                style={{ cursor: "pointer" }}
+                                            >
+                                                {favorites.includes(video.id) ? (
+                                                    <FaHeart color="#f43f5e" size={18} />
+                                                ) : (
+                                                    <FaRegHeart color="#64748b" size={18} />
+                                                )}
+                                            </span>
+                                        </OverlayTrigger>
+                                    </Col>
+                                </Row>
+                            </ListGroup.Item>
+                        ))}
+                    </ListGroup>
+                </Col>
 
-                    <div className={loadingData?'w-100 loading':`d-flex my-2 justify-content-between align-items-center`}>
-                        {!loadingData?(
-                            <>&nbsp;</>
-                        ):(
-                            <>
-                                <hr className='w-100 mx-3'/>
-                                <span className='fs-5'>CHAPTER</span>
-                                <hr className='w-100 mx-3'/>
-                            </>
-                        )}
-                    </div>
-
-                    {loadingData?(
-                        <div className='w-100 bg-secondary rounded-3 py-3 my-3 loading'>&nbsp;</div>
-                    ):(<section className="chapter-course rounded-5 p-3">
-                        <Form.Group className="mb-3" controlId="formBasicNamaChapter">
-                            <Form.Label>Nama Chapter</Form.Label>
-                            <Form.Control required={true} type="search" value={chapter.title} onChange={(e)=>setChapter({...chapter,title:e.target.value})} placeholder="Nama materi" />
-                        </Form.Group>
-
-                        <Form.Group className="position-relative mb-3">
-                            <Form.Label>Video materi</Form.Label>
-                            <Form.Control
-                            type="file"
-                            accept='video/mp4'
-                            required={true}
-                            onChange={(e)=>{setChapter({...chapter,video:e.target.files[0]})}}
+                {/* Video Player Section */}
+                <Col
+                    md={8}
+                    className="d-flex flex-column align-items-center justify-content-center"
+                >
+                    <Card
+                        className="shadow-lg"
+                        style={{
+                            width: "100%",
+                            maxWidth: "720px",
+                            borderRadius: "24px",
+                            background:
+                                "linear-gradient(120deg, #6366f1 0%, #a5b4fc 100%)",
+                            color: "#fff",
+                            border: "none",
+                        }}
+                    >
+                        {/* Video Player */}
+                        <div
+                            style={{
+                                borderRadius: "24px 24px 0 0",
+                                overflow: "hidden",
+                                background: "#000",
+                                position: "relative",
+                            }}
+                        >
+                            <video
+                                key={currentVideo.id}
+                                src={currentVideo.url}
+                                controls
+                                autoPlay={isPlaying}
+                                style={{
+                                    width: "100%",
+                                    height: "360px",
+                                    objectFit: "cover",
+                                    background: "#000",
+                                }}
+                                poster="https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=800&q=80"
                             />
-                        </Form.Group>
-
-                        <FloatingLabel controlId="floatingTextarea" label="Catatan/informasi materi tambahan" className='mb-3'>
-                            <Form.Control
-                            as="textarea"
-                            onChange={(e)=>setChapter({...chapter,chapterNote:e.target.value})}
-                            placeholder="Catatan/informasi materi tambahan"
-                            rows={4}
-                            style={{ height: '100px' }}
-                            />
-                        </FloatingLabel>
-
-                        <div className="d-flex justify-content-end">
-                            <button className='btn btn-info mx-3' disabled={!chapter.title||!chapter.video} onClick={()=>{
-                                setCourse({...course,chapters:course.chapters&&course.chapters.length>0 ?
-                                    [...course.chapters,{...chapter}]
-                                    :
-                                    [{...chapter}]
-                                })
-                                setNewChapters([...newChapters,{...chapter}])
-                                setChapter({title:'',video:null,chapterNote:''})
-                            }} type='button'>Tambah Materi</button>
-                            <button className="btn btn-primary px-4 py-2" type='submit' disabled={!course.chapters||course.chapters.length===0||!course.title||!course.thumbnail||!course.price||loading}>{loading&&(<Spinner size='sm' className='me-2'/>)}Simpan</button>
+                            {/* Custom Play/Pause Overlay Button */}
+                            <Button
+                                variant="light"
+                                size="lg"
+                                onClick={handlePlayPause}
+                                style={{
+                                    position: "absolute",
+                                    top: "50%",
+                                    left: "50%",
+                                    transform: "translate(-50%, -50%)",
+                                    opacity: 0.85,
+                                    borderRadius: "50%",
+                                    boxShadow: "0 2px 16px #6366f1",
+                                    zIndex: 2,
+                                }}
+                            >
+                                {isPlaying ? (
+                                    <FaPauseCircle color="#6366f1" size={48} />
+                                ) : (
+                                    <FaPlayCircle color="#6366f1" size={48} />
+                                )}
+                            </Button>
                         </div>
-                    </section>)}
-                </article>
-            </Form>
+                        {/* Video Info & Controls */}
+                        <Card.Body>
+                            <Row className="align-items-center">
+                                <Col xs={2} className="text-center">
+                                    <Button
+                                        variant="outline-light"
+                                        onClick={() => handleNextPrev("prev")}
+                                        style={{
+                                            borderRadius: "50%",
+                                            border: "none",
+                                            boxShadow: "0 2px 8px #a5b4fc",
+                                        }}
+                                    >
+                                        <FaChevronLeft size={24} />
+                                    </Button>
+                                </Col>
+                                <Col xs={8} className="text-center">
+                                    <Card.Title className="fw-bold mb-1">
+                                        {currentVideo.title}
+                                    </Card.Title>
+                                    <Badge
+                                        bg="info"
+                                        className="mb-2"
+                                        style={{
+                                            fontSize: "0.9rem",
+                                            color: "#3b3b5c",
+                                            background: "#e0e7ff",
+                                        }}
+                                    >
+                                        {currentVideo.duration}
+                                    </Badge>
+                                    <Card.Text
+                                        className="mt-2"
+                                        style={{
+                                            fontSize: "1rem",
+                                            color: "#e0e7ff",
+                                            minHeight: "48px",
+                                        }}
+                                    >
+                                        {currentVideo.description}
+                                    </Card.Text>
+                                </Col>
+                                <Col xs={2} className="text-center">
+                                    <Button
+                                        variant="outline-light"
+                                        onClick={() => handleNextPrev("next")}
+                                        style={{
+                                            borderRadius: "50%",
+                                            border: "none",
+                                            boxShadow: "0 2px 8px #a5b4fc",
+                                        }}
+                                    >
+                                        <FaChevronRight size={24} />
+                                    </Button>
+                                </Col>
+                            </Row>
+                        </Card.Body>
+                    </Card>
+                </Col>
+            </Row>
+        </Container>
+    );
+};
 
-            <Modal show={show} onHide={closeViewChapter}>
-                <Modal.Header closeButton>
-                <Modal.Title>{chapter.title}</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <video controls={true} className='w-100'>
-                    <source src={thumbnailPreview} type='video/mp4'/>
-                    </video>
-                    <Form.Group className="mb-3" controlId="formBasicEmail">
-                        <Form.Label>Nama Chapter</Form.Label>
-                        <Form.Control required={true} type="search" value={chapter.title} onChange={(e)=>setChapter({...chapter,title:e.target.value})} placeholder="Nama materi" />
-                    </Form.Group>
+export default EditCourse;
 
-                    <Form.Group className="position-relative mb-3">
-                        <Form.Label>File</Form.Label>
-                        <Form.Control
-                        type="file"
-                        accept='video/mp4'
-                        required={true}
-                        onChange={(e)=>{setChapter({...chapter,video:e.target.files[0]})}}
-                        />
-                    </Form.Group>
+/*
+================================================================================
+EXPLANATION (Highly Detailed):
 
-                    <FloatingLabel controlId="floatingTextareanew" label="Deskripsi Materi" className='mb-3'>
-                        <Form.Control
-                        value={chapter.chapterNote}
-                        as="textarea"
-                        onChange={(e)=>setChapter({...chapter,chapterNote:e.target.value})}
-                        placeholder="Catatan/informasi singkat materi"
-                        maxLength={255}
-                        max={255}
-                        rows={4}
-                        style={{ height: '100px' }}
-                        />
-                    </FloatingLabel>
-                </Modal.Body>
-                <Modal.Footer>
-                <Button variant="secondary" onClick={()=>updateChapter(chapter.key)}>
-                    Simpan
-                </Button>
-                </Modal.Footer>
-            </Modal>
-        </>
-    )
-}
+1. Layout:
+     - Uses React-Bootstrap's Container, Row, and Col for responsive layout.
+     - Left sidebar (Playlist) and right main area (Video Player).
+     - Modern, soft color gradients and rounded corners for a unique, comfortable look.
 
-export default EditCourse
+2. Playlist Sidebar:
+     - ListGroup displays all course videos.
+     - Each item shows:
+         - Play/Check icon (watched or not).
+         - Title and duration.
+         - Favorite icon (toggleable, with tooltip).
+     - Active video is highlighted with a gradient and shadow.
+     - Hover effect for better interactivity.
+     - Clicking an item plays that video.
+
+3. Video Player Section:
+     - Card with gradient background and rounded corners.
+     - Video element with custom play/pause overlay button.
+     - Next/Previous buttons for easy navigation.
+     - Video title, duration badge, and description shown below the player.
+
+4. Progress Bar:
+     - Shows course completion based on watched videos.
+
+5. Icons:
+     - Uses react-icons for modern, visually appealing icons.
+
+6. Accessibility & Usability:
+     - Large clickable areas, clear contrasts, tooltips for icons.
+     - Responsive design for desktop and tablet.
+
+7. Customization:
+     - Replace `videoList` with your own data or API.
+     - Easily extendable for more features (e.g., notes, comments).
+
+8. Uniqueness:
+     - The combination of gradients, rounded corners, shadow, and icon usage
+         creates a fresh, modern look not commonly found in other course platforms.
+
+================================================================================
+INSTRUCTIONS:
+- Install dependencies:
+        npm install react-bootstrap bootstrap react-icons
+- Import Bootstrap CSS in your main.jsx or App.jsx:
+- Place this component in your route/page as needed.
+
+================================================================================
+*/
