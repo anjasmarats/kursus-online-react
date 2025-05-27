@@ -11,40 +11,11 @@ import auth from '../scripts/auth'
 import "../styles/EditCourse.css"
 
 const EditCourse = () => {
-    const { id } = useParams()
-    const [idCourse,setIdCourse] = useState(0)
     const [courseThumbnail,setCourseThumbnail] = useState(0)
-    const [course,setCourse] = useState({
-        title:'',
-        description:'',
-        price:0,
-        thumbnail:'',
-        chapters:[]
-    })
-
     const [thumbnailPreview,setThumbnailPreview] = useState()
-
-    const navigate = useNavigate()
-
     const [loading,setLoading] = useState(false)
-
-    const [loadingData,setLoadingData] = useState(false)
-
-    const [show,setShow] = useState(false)
-
-    const [chapter,setChapter] = useState({
-        key:0,
-        id:0,
-        courseId:0,
-        title:'',
-        video:null,
-        chapterNote:''
-    })
-
     const [newChapters,setNewChapters] = useState([])
-
-    const [error,setError] = useState(false)
-
+    const [loadingData,setLoadingData] = useState(false)
     const viewChapter = async(key,title,video,chapterNote,chapterId)=>{
         try {
             console.info("key",key,"title",title,"video",video,"chapterNote",chapterNote,"chapterid",chapterId)
@@ -66,74 +37,7 @@ const EditCourse = () => {
             console.error(`error vchptr ${error}`)
         }
     }
-
-    const closeViewChapter =()=>{
-        try {
-            setShow(false)
-            setChapter({})
-        } catch (error) {
-            console.error(`error xviewchapter ${error}`)
-        }
-    }
-
-    const getChapterVideo = async(data)=>{
-        try {
-            console.log("idCourse",idCourse)
-            const { courseId,chapterId } = data
-          const res = await fetch(`${server_url}/api/course/${courseId}/chapter/${chapterId}/video`, {
-            method: 'GET',
-            headers: {
-              "Authorization": `Bearer ${localStorage.getItem("session")}`
-            }
-          })
-          
-          if (res.status === 500) {
-            console.error(res.status,await res.json())
-            setError("Internal Server Error")
-            return
-          }
-    
-          if (res.status===200) {
-            const blob = await res.blob()
-            return URL.createObjectURL(blob)
-          }
-        } catch (error) {
-          setError("Error")
-          console.error(`error app ${error}`)
-          setLoading(false)
-        } finally {
-          setLoading(false)
-        }
-      }
-
-      const getThumbnail = async(data)=>{
-        try {
-          const res = await fetch(`${server_url}/api/course/photo`, {
-            method: 'GET',
-            headers: {
-              "Authorization": `Bearer ${data}`
-            }
-          })
-          
-          if (res.status === 500) {
-            setError("Internal Server Error")
-            return
-          }
-    
-          if (res.status===200) {
-            const blob = await res.blob()
-            return URL.createObjectURL(blob)
-          }
-        } catch (error) {
-          setError("Error")
-          console.error(`error app ${error}`)
-          setLoading(false)
-        } finally {
-          setLoading(false)
-        }
-      }
-
-    const fetchData = async () => {
+        const fetchData = async () => {
         try {
             // let chapters=[]
           setLoadingData(true)
@@ -162,8 +66,7 @@ const EditCourse = () => {
           setLoadingData(false)
         }
       }
-
-    const deleteChapter = async(title) => {
+          const deleteChapter = async(title) => {
         try {
             const confirm = await Swal.fire({
                 title:`Hapus chapter ${title}`,
@@ -185,7 +88,7 @@ const EditCourse = () => {
         }
     }
 
-    const updateChapter = (key) => {
+        const updateChapter = (key) => {
         try {
             console.log("chapter pertama",chapter)
             if (!key) return
@@ -222,7 +125,7 @@ const EditCourse = () => {
         }
     }
 
-    const editcourse = async(e) => {
+        const editcourse = async(e) => {
         try {
             e.preventDefault()
             setLoading(true)
@@ -265,10 +168,6 @@ const EditCourse = () => {
     // console.log("!course.chapters||course.chapters.length===0",(!course.chapters||course.chapters.length===0),"!course.title",!course.title,"!course.thumbnail",!course.thumbnail,'!course.description',!course.description,"!course.price",!course.price,"loading",loading)
 
     // console.log(course.chapters)
-
-    useEffect(() => {
-        fetchData()
-    }, [])
 
     return(
         <>

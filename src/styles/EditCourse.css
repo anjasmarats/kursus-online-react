@@ -1,3 +1,29 @@
 .edit-course .loading {
     animation: loading 1.5s infinite;
 }
+
+.container-detail-course {
+  background-color: rgba(255,255,255,0.7);
+  min-height: 100vh;
+}
+
+.container-detail-course  .title-course {
+    letter-spacing: 1px;
+    color: #3b3b5c;
+    text-shadow: 0 2px 8px #e0e7ff;
+}
+
+.container-detail-course .playlist-sidebar {
+    border-right: 2px solid #e0e7ff;
+    min-height: 70vh;
+    background: rgba(255,255,255,0.7);
+    border-radius: 18px 0 0 18px;
+    box-shadow: 2px 0 16px #e0e7ff;
+}
+
+.container-detail-course .video-player {
+    overflow: "hidden";
+    background: "#000";
+    position: "relative";
+    border-radius: 24px 24px 0 0;
+}

@@ -1,7 +1,5 @@
-import React, { useState } from "react";
-import 'bootstrap/dist/css/bootstrap.min.css';
-import {
-
+import React, { useEffect, useState } from "react";
+// import 'bootstrap/dist/css/bootstrap.min.css';
 // EditCourse.jsx
 // UI/UX Online Course Video Player - Unique, Modern, and User-Friendly
 // Uses React, React-Bootstrap, Bootstrap, and React-Icons
@@ -9,27 +7,17 @@ import {
 // for displaying a list of course videos and the currently playing video.
 
 // Import React and necessary libraries
-    Container,
-    Row,
-    Col,
-    ListGroup,
-    Card,
-    ProgressBar,
-    Button,
-    Badge,
-    OverlayTrigger,
-    Tooltip,
+import {
+    Container,Row,Col,ListGroup,Card,Button,Badge,
 } from "react-bootstrap";
 import {
-    FaPlayCircle,
-    FaPauseCircle,
-    FaCheckCircle,
-    FaRegClock,
-    FaChevronRight,
-    FaChevronLeft,
-    FaRegHeart,
-    FaHeart,
+    FaChevronRight,FaChevronLeft,
 } from "react-icons/fa";
+import "../styles/EditCourse.css"
+import { useNavigate, useParams } from "react-router-dom";
+import { server_url } from "../scripts/url";
+import axios from "axios";
+import auth from "../scripts/auth";
 
 // Sample video data (replace with your API or props)
 const videoList = [
@@ -70,28 +58,183 @@ const videoList = [
 // Main component
 const EditCourse = () => {
     // State for currently playing video and favorite status
-    const [currentVideo, setCurrentVideo] = useState(videoList[0]);
+    const [loading,setLoading] = useState(false)
+    const [currentVideo, setCurrentVideo] = useState({});
     const [isPlaying, setIsPlaying] = useState(true);
-    const [favorites, setFavorites] = useState([]);
     const [hovered, setHovered] = useState(null);
+    const { id } = useParams()
+    const [idCourse,setIdCourse] = useState(0)
+    const [course,setCourse] = useState({
+        title:'',
+        description:'',
+        price:0,
+        thumbnail:'',
+        chapters:[]
+    })
+
+
+    const navigate = useNavigate()
+
+    const [show,setShow] = useState(false)
+
+    const [chapter,setChapter] = useState({
+        key:0,
+        id:0,
+        courseId:0,
+        title:'',
+        video:null,
+        chapterNote:''
+    })
+
+    const [error,setError] = useState(false)
+
+    const viewChapter = async(key,title,video,chapterNote,chapterId)=>{
+        try {
+            console.info("key",key,"title",title,"video",video,"chapterNote",chapterNote,"chapterid",chapterId)
+            if (!title||!video||!key) return
+            setChapter({...chapter,id:chapterId,courseId:idCourse,title,video,chapterNote,key })
+            setShow(true)
+        } catch (error) {
+            console.error(`error vchptr ${error}`)
+        }
+    }
+
+    const closeViewChapter =()=>{
+        try {
+            setShow(false)
+            setChapter({})
+        } catch (error) {
+            console.error(`error xviewchapter ${error}`)
+        }
+    }
+
+    const getChapterVideo = async(data)=>{
+        try {
+            console.log("idCourse",idCourse)
+            const { courseId,chapterId } = data
+            const res = await fetch(`${server_url}/api/course/${courseId}/chapter/${chapterId}/video`, {
+                method: 'GET',
+                headers: {
+                "Authorization": `Bearer ${localStorage.getItem("session")}`
+                }
+            })
+            
+            if (res.status === 500) {
+                console.error(res.status,await res.json())
+                setError("Internal Server Error")
+                return
+            }
+        
+            if (res.status===200) {
+                const blob = await res.blob()
+                return URL.createObjectURL(blob)
+            }
+        } catch (error) {
+          setError("Error")
+          console.error(`error app ${error}`)
+          setLoading(false)
+        } finally {
+          setLoading(false)
+        }
+      }
+
+      const getThumbnail = async(data)=>{
+        try {
+          const res = await fetch(`${server_url}/api/course/photo`, {
+            method: 'GET',
+            headers: {
+              "Authorization": `Bearer ${data}`
+            }
+          })
+          
+          if (res.status === 500) {
+            setError("Internal Server Error")
+            return
+          }
+    
+          if (res.status===200) {
+            const blob = await res.blob()
+            return URL.createObjectURL(blob)
+          }
+        } catch (error) {
+          setError("Error")
+          console.error(`error app ${error}`)
+          setLoading(false)
+        } finally {
+          setLoading(false)
+        }
+      }
+
+    const fetchData = async () => {
+        try {
+            // let chapters=[]
+          setLoading(true)
+          const {adminuser} = await auth()
+          if (!adminuser) {
+            navigate('/')
+          }
+          const response = await axios.get(`${server_url}/api/course/${id}`)
+          const res = await response.data
+        //   console.log("res.course",res.course.Chapters[2])
+          const { courseId,title,description,image,price,Chapters } = res.course
+          const thumbnail = await getThumbnail(image)
+          setIdCourse(courseId)
+          setCourse({...course,title,description,price,chapters:[...Chapters],thumbnail})
+          console.log(res.course)
+          setChapter({})
+          setLoading(false)
+        } catch (error) {
+          if (error.response && error.response.status === 500) {
+            setError("Internal Server Error")
+          }
+          console.error(`error app ${error}`)
+        } finally {
+            setLoading(false)
+        }
+      }
+
+    const deleteChapter = async(title) => {
+        try {
+            const confirm = await Swal.fire({
+                title:`Hapus chapter ${title}`,
+                showCancelButton:true,
+                cancelButtonColor:"blue",
+                showConfirmButton:true,
+                confirmButtonColor:"red",
+                confirmButtonText:"Delete"
+            }).then(res=>res.isConfirmed)
+            if (!confirm) {
+                return
+            }
+        } catch (error) {
+            console.error(`error xchapter ${error}`)
+        }
+    }
+
+    const updateChapter = (key) => {
+        try {
+            console.log("chapter pertama",chapter)
+            if (!key) return
+            closeViewChapter()
+        } catch (error) {
+            console.error(`error upchptr ${error}`)
+        }
+    }
+
+    useEffect(() => {
+        fetchData()
+    }, [])
 
     // Handler to play selected video
-    const handleSelectVideo = (video) => {
-        setCurrentVideo(video);
-        setIsPlaying(true);
+    const handleSelectVideo = async (video) => {
+        // setCurrentVideo(video);
+        // setIsPlaying(true);
+        const Video = await getChapterVideo({courseId:idCourse,chapterId:video.id})
+        video.video = Video
+        console.log("video",video)
+        console.log("Video",Video)
     };
 
-    // Handler to toggle play/pause
-    const handlePlayPause = () => {
-        setIsPlaying((prev) => !prev);
-    };
-
-    // Handler to toggle favorite
-    const handleFavorite = (id) => {
-        setFavorites((prev) =>
-            prev.includes(id) ? prev.filter((fid) => fid !== id) : [...prev, id]
-        );
-    };
 
     // Handler for next/previous video
     const handleNextPrev = (direction) => {
@@ -103,43 +246,19 @@ const EditCourse = () => {
         setIsPlaying(true);
     };
 
-    // Calculate progress (watched videos)
-    const progress =
-        (videoList.filter((v) => v.watched || v.id === currentVideo.id).length /
-            videoList.length) *
-        100;
-
     return (
         <Container
             fluid
-            className="py-4"
-            style={{
-                minHeight: "100vh",
-                background:
-                    "linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%)",
-            }}
+            className="py-4 container-detail-course"
         >
             {/* Header */}
             <Row className="mb-4">
                 <Col>
                     <h2
-                        className="fw-bold"
-                        style={{
-                            letterSpacing: "1px",
-                            color: "#3b3b5c",
-                            textShadow: "0 2px 8px #e0e7ff",
-                        }}
+                        className="fw-bold my-3 title-course"
                     >
-                        <FaPlayCircle className="mb-1 me-2" color="#6366f1" size={32} />
-                        Online Course Player
+                        Title Online Course
                     </h2>
-                    <ProgressBar
-                        now={progress}
-                        label={`${Math.round(progress)}% Completed`}
-                        variant="info"
-                        style={{ height: "10px", borderRadius: "8px" }}
-                        className="mt-2"
-                    />
                 </Col>
             </Row>
 
@@ -148,57 +267,46 @@ const EditCourse = () => {
                 {/* Playlist Sidebar */}
                 <Col
                     md={4}
-                    className="mb-4"
-                    style={{
-                        borderRight: "2px solid #e0e7ff",
-                        minHeight: "70vh",
-                        background: "rgba(255,255,255,0.7)",
-                        borderRadius: "18px 0 0 18px",
-                        boxShadow: "2px 0 16px #e0e7ff",
-                    }}
+                    className="mb-4 playlist-sidebar"
                 >
-                    <h5 className="fw-semibold mb-3" style={{ color: "#6366f1" }}>
-                        <FaRegClock className="me-2" />
-                        Playlist
-                    </h5>
                     <ListGroup variant="flush">
-                        {videoList.map((video, idx) => (
+                        {course.chapters.map((video, idx) => (
                             <ListGroup.Item
-                                key={video.id}
-                                active={currentVideo.id === video.id}
+                                key={idx}
+                                active={currentVideo.title === video.title}
                                 onClick={() => handleSelectVideo(video)}
                                 style={{
                                     cursor: "pointer",
                                     background:
-                                        currentVideo.id === video.id
-                                            ? "linear-gradient(90deg, #6366f1 0%, #a5b4fc 100%)"
-                                            : hovered === video.id
+                                        currentVideo.title === video.title
+                                            ? "#cc00cc"
+                                            : hovered === video.title
                                             ? "#f1f5f9"
                                             : "transparent",
-                                    color: currentVideo.id === video.id ? "#fff" : "#3b3b5c",
+                                    color: currentVideo.title === video.title ? "#fff" : "#3b3b5c",
                                     border: "none",
                                     borderRadius: "12px",
                                     marginBottom: "8px",
                                     transition: "background 0.2s",
                                     boxShadow:
-                                        currentVideo.id === video.id
+                                        currentVideo.title === video.title
                                             ? "0 2px 12px #a5b4fc"
                                             : "none",
                                 }}
-                                onMouseEnter={() => setHovered(video.id)}
+                                onMouseEnter={() => setHovered(video.title)}
                                 onMouseLeave={() => setHovered(null)}
                             >
                                 <Row className="align-items-center">
-                                    <Col xs={2} className="text-center">
+                                    {/* <Col xs={2} className="text-center">
                                         {video.watched || currentVideo.id === video.id ? (
                                             <FaCheckCircle color="#22c55e" size={22} />
                                         ) : (
                                             <FaPlayCircle color="#6366f1" size={22} />
                                         )}
-                                    </Col>
-                                    <Col xs={7}>
-                                        <div className="fw-semibold">{video.title}</div>
-                                        <div
+                                    </Col> */}
+                                    <Col>
+                                        <div className="fw-semibold fs-5 py-2">{video.title}</div>
+                                        {/* <div
                                             className="small"
                                             style={{
                                                 color:
@@ -208,9 +316,9 @@ const EditCourse = () => {
                                             }}
                                         >
                                             {video.duration}
-                                        </div>
+                                        </div> */}
                                     </Col>
-                                    <Col xs={3} className="text-end">
+                                    {/* <Col xs={3} className="text-end">
                                         <OverlayTrigger
                                             placement="top"
                                             overlay={
@@ -235,7 +343,7 @@ const EditCourse = () => {
                                                 )}
                                             </span>
                                         </OverlayTrigger>
-                                    </Col>
+                                    </Col> */}
                                 </Row>
                             </ListGroup.Item>
                         ))}
@@ -254,23 +362,15 @@ const EditCourse = () => {
                             maxWidth: "720px",
                             borderRadius: "24px",
                             background:
-                                "linear-gradient(120deg, #6366f1 0%, #a5b4fc 100%)",
+                                "#cc00cc",
                             color: "#fff",
                             border: "none",
                         }}
                     >
                         {/* Video Player */}
-                        <div
-                            style={{
-                                borderRadius: "24px 24px 0 0",
-                                overflow: "hidden",
-                                background: "#000",
-                                position: "relative",
-                            }}
-                        >
+                        <div className="video-player">
                             <video
-                                key={currentVideo.id}
-                                src={currentVideo.url}
+                                src={currentVideo.video}
                                 controls
                                 autoPlay={isPlaying}
                                 style={{
@@ -279,30 +379,7 @@ const EditCourse = () => {
                                     objectFit: "cover",
                                     background: "#000",
                                 }}
-                                poster="https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=800&q=80"
                             />
-                            {/* Custom Play/Pause Overlay Button */}
-                            <Button
-                                variant="light"
-                                size="lg"
-                                onClick={handlePlayPause}
-                                style={{
-                                    position: "absolute",
-                                    top: "50%",
-                                    left: "50%",
-                                    transform: "translate(-50%, -50%)",
-                                    opacity: 0.85,
-                                    borderRadius: "50%",
-                                    boxShadow: "0 2px 16px #6366f1",
-                                    zIndex: 2,
-                                }}
-                            >
-                                {isPlaying ? (
-                                    <FaPauseCircle color="#6366f1" size={48} />
-                                ) : (
-                                    <FaPlayCircle color="#6366f1" size={48} />
-                                )}
-                            </Button>
                         </div>
                         {/* Video Info & Controls */}
                         <Card.Body>
@@ -324,17 +401,6 @@ const EditCourse = () => {
                                     <Card.Title className="fw-bold mb-1">
                                         {currentVideo.title}
                                     </Card.Title>
-                                    <Badge
-                                        bg="info"
-                                        className="mb-2"
-                                        style={{
-                                            fontSize: "0.9rem",
-                                            color: "#3b3b5c",
-                                            background: "#e0e7ff",
-                                        }}
-                                    >
-                                        {currentVideo.duration}
-                                    </Badge>
                                     <Card.Text
                                         className="mt-2"
                                         style={{
@@ -343,7 +409,7 @@ const EditCourse = () => {
                                             minHeight: "48px",
                                         }}
                                     >
-                                        {currentVideo.description}
+                                        {currentVideo.chapterNote}
                                     </Card.Text>
                                 </Col>
                                 <Col xs={2} className="text-center">
@@ -369,56 +435,3 @@ const EditCourse = () => {
 };
 
 export default EditCourse;
-
-/*
-================================================================================
-EXPLANATION (Highly Detailed):
-
-1. Layout:
-     - Uses React-Bootstrap's Container, Row, and Col for responsive layout.
-     - Left sidebar (Playlist) and right main area (Video Player).
-     - Modern, soft color gradients and rounded corners for a unique, comfortable look.
-
-2. Playlist Sidebar:
-     - ListGroup displays all course videos.
-     - Each item shows:
-         - Play/Check icon (watched or not).
-         - Title and duration.
-         - Favorite icon (toggleable, with tooltip).
-     - Active video is highlighted with a gradient and shadow.
-     - Hover effect for better interactivity.
-     - Clicking an item plays that video.
-
-3. Video Player Section:
-     - Card with gradient background and rounded corners.
-     - Video element with custom play/pause overlay button.
-     - Next/Previous buttons for easy navigation.
-     - Video title, duration badge, and description shown below the player.
-
-4. Progress Bar:
-     - Shows course completion based on watched videos.
-
-5. Icons:
-     - Uses react-icons for modern, visually appealing icons.
-
-6. Accessibility & Usability:
-     - Large clickable areas, clear contrasts, tooltips for icons.
-     - Responsive design for desktop and tablet.
-
-7. Customization:
-     - Replace `videoList` with your own data or API.
-     - Easily extendable for more features (e.g., notes, comments).
-
-8. Uniqueness:
-     - The combination of gradients, rounded corners, shadow, and icon usage
-         creates a fresh, modern look not commonly found in other course platforms.
-
-================================================================================
-INSTRUCTIONS:
-- Install dependencies:
-        npm install react-bootstrap bootstrap react-icons
-- Import Bootstrap CSS in your main.jsx or App.jsx:
-- Place this component in your route/page as needed.
-
-================================================================================
-*/
