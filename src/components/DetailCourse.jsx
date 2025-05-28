@@ -103,7 +103,8 @@ const DetailCourse = () => {
         try {
             console.info("title",title,"video",video,"chapterNote",chapterNote,"chapterid",chapterId)
             if (!title||!video) return
-            setChapter({...chapter,id:chapterId,courseId:idCourse,title,video,chapterNote })
+            const videoPreview = await getChapterVideo({chapterId,courseId:idCourse})
+            setChapter({...chapter,id:chapterId,courseId:idCourse,title,video:videoPreview,chapterNote })
             setShow(true)
         } catch (error) {
             console.error(`error vchptr ${error}`)
@@ -113,7 +114,7 @@ const DetailCourse = () => {
     const closeViewChapter =()=>{
         try {
             setShow(false)
-            setChapter({})
+            setChapter({title:"",video:null,chapterNote:"",key:0,id:0,courseId:0})
         } catch (error) {
             console.error(`error xviewchapter ${error}`)
         }
@@ -583,7 +584,7 @@ const DetailCourse = () => {
                                 className="form-control"
                                 id="chapterTitle"
                                 placeholder="Enter chapter name"
-                                value={chapter.title || ""}
+                                value={chapter.title}
                                 onChange={e =>
                                     setChapter({ ...chapter, title: e.target.value })
                                 }
@@ -611,7 +612,7 @@ const DetailCourse = () => {
                                 id="chapterNote"
                                 rows={3}
                                 placeholder="Write notes or description for this chapter"
-                                value={chapter.chapterNote || ""}
+                                value={chapter.chapterNote}
                                 onChange={e =>
                                     setChapter({ ...chapter, chapterNote: e.target.value })
                                 }
