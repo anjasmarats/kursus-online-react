@@ -350,12 +350,14 @@ const DetailCourse = () => {
                 setHovered,
                 viewChapter,
                 deleteChapter,
-                updateChapter,
                 handleSelectVideo,
                 handleNextPrev,
+                setChapter,
                 loading,
                 chapters:course.chapters,
-                currentVideo
+                currentVideo,
+                chapter,
+                setShow,
             }}/>
 
             {/* Edit Chapter Modal (already implemented below, but here's a standalone, improved version for clarity) */}

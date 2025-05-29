@@ -3,6 +3,7 @@ import { ListGroup,Card,OverlayTrigger,Tooltip, Row,Col,Button } from "react-boo
 import { FaPlayCircle,FaChevronRight,FaChevronLeft } from "react-icons/fa";
 import { MdModeEditOutline } from "react-icons/md";
 import { RiDeleteBin5Fill } from "react-icons/ri";
+import { server_url } from "../../scripts/url";
 
 const ListChapters=React.memo(({
         isPlaying,
@@ -10,12 +11,14 @@ const ListChapters=React.memo(({
         setHovered,
         viewChapter,
         deleteChapter,
-        updateChapter,
         handleSelectVideo,
         handleNextPrev,
+        setChapter,
         loading,
         chapters,
-        currentVideo
+        currentVideo,
+        chapter,
+        setShow,
     })=>{
 
     return (

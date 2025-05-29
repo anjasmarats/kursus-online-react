@@ -1,4 +1,5 @@
 import { Modal,Button } from "react-bootstrap"
+import { server_url } from "../../scripts/url"
 
 const ModalDetailVideo = ({
         show,
@@ -54,7 +55,7 @@ const ModalDetailVideo = ({
                 <div className="mb-4 text-center">
                     {showFormEditCourse ? (
                         <img
-                        src={thumbnail}
+                        src={thumbnail||""}
                         controls
                         style={{
                             width: "100%",
@@ -67,11 +68,7 @@ const ModalDetailVideo = ({
                         />
                     ) : chapter.video ? (
                         <video
-                        src={
-                            typeof chapter.video === "string"
-                                ? chapter.video
-                                : URL.createObjectURL(chapter.video)
-                        }
+                        src={`${server_url}/courses/videos/${chapter.video}`}
                         controls
                         style={{
                             width: "100%",
@@ -115,7 +112,7 @@ const ModalDetailVideo = ({
                         className="form-control"
                         id="chapterTitle"
                         placeholder={showFormEditCourse?"Enter course title":"Enter chapter name"}
-                        value={showFormEditCourse?course.title:chapter.title}
+                        value={showFormEditCourse?(course.title||""):(chapter.title||"")}
                         onChange={e =>{
                                 if (showFormEditCourse) {
                                 setCourse({...course, title: e.target.value})
@@ -148,7 +145,7 @@ const ModalDetailVideo = ({
                         className="form-control"
                         id="coursePrice"
                         placeholder={"Enter course price"}
-                        value={course.price}
+                        value={course.price||""}
                         onChange={e =>
                             setCourse({...course, price: e.target.value})
                         }
@@ -177,7 +174,7 @@ const ModalDetailVideo = ({
                         id="chapterNote"
                         rows={3}
                         placeholder={showFormEditCourse?"Write notes or description for this course":"Write notes or description for this chapter"}
-                        value={showFormEditCourse?course.description:chapter.chapterNote}
+                        value={showFormEditCourse?(course.description||""):(chapter.chapterNote||"")}
                         onChange={e =>{
                                 if (showFormEditCourse) {
                                 setCourse({...course, description: e.target.value})
@@ -240,10 +237,10 @@ const ModalDetailVideo = ({
                             accept="video/mp4"
                             onChange={e => {
                                 if (e.target.files && e.target.files[0]) {
-                                setChapter({
-                                    ...chapter,
-                                    video: e.target.files[0],
-                                });
+                                    setChapter({
+                                        ...chapter,
+                                        video: e.target.files[0],
+                                    });
                                 }
                             }}
                             style={{
