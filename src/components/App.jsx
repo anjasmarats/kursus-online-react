@@ -40,59 +40,59 @@ function App() {
     });
   }
 
-  const getPhoto = async()=>{
-    try {
-      const res = await fetch(`${server_url}/api/user/photo`, {
-        method: 'GET',
-        headers: {
-          "Authorization": `Bearer ${localStorage.getItem("session")}`
-        }
-      })
+  // const getPhoto = async()=>{
+  //   try {
+  //     const res = await fetch(`${server_url}/api/user/photo`, {
+  //       method: 'GET',
+  //       headers: {
+  //         "Authorization": `Bearer ${localStorage.getItem("session")}`
+  //       }
+  //     })
       
-      if (res.status === 500) {
-        setError("Internal Server Error")
-        return
-      }
+  //     if (res.status === 500) {
+  //       setError("Internal Server Error")
+  //       return
+  //     }
 
-      if (res.status===200) {
-        const blob = await res.blob()
-        setPhoto(URL.createObjectURL(blob))
-      }
-    } catch (error) {
-      setError("Error")
-      console.error(`error app ${error}`)
-      setLoading(false)
-    } finally {
-      setLoading(false)
-    }
-  }
+  //     if (res.status===200) {
+  //       const blob = await res.blob()
+  //       setPhoto(URL.createObjectURL(blob))
+  //     }
+  //   } catch (error) {
+  //     setError("Error")
+  //     console.error(`error app ${error}`)
+  //     setLoading(false)
+  //   } finally {
+  //     setLoading(false)
+  //   }
+  // }
 
-  const getThumbnail = async(data)=>{
-    try {
-      const res = await fetch(`${server_url}/api/course/photo`, {
-        method: 'GET',
-        headers: {
-          "Authorization": `Bearer ${data}`
-        }
-      })
+  // const getThumbnail = async(data)=>{
+  //   try {
+  //     const res = await fetch(`${server_url}/api/course/photo`, {
+  //       method: 'GET',
+  //       headers: {
+  //         "Authorization": `Bearer ${data}`
+  //       }
+  //     })
       
-      if (res.status === 500) {
-        setError("Internal Server Error")
-        return
-      }
+  //     if (res.status === 500) {
+  //       setError("Internal Server Error")
+  //       return
+  //     }
 
-      if (res.status===200) {
-        const blob = await res.blob()
-        return URL.createObjectURL(blob)
-      }
-    } catch (error) {
-      setError("Error")
-      console.error(`error app ${error}`)
-      setLoading(false)
-    } finally {
-      setLoading(false)
-    }
-  }
+  //     if (res.status===200) {
+  //       const blob = await res.blob()
+  //       return URL.createObjectURL(blob)
+  //     }
+  //   } catch (error) {
+  //     setError("Error")
+  //     console.error(`error app ${error}`)
+  //     setLoading(false)
+  //   } finally {
+  //     setLoading(false)
+  //   }
+  // }
 
   const fetchData = async () => {
     try {
@@ -128,7 +128,7 @@ function App() {
           photo
         })
 
-        await getPhoto()
+        // await getPhoto()
         if (adminuser) {
           setIsAdmin(true)
         }
@@ -137,8 +137,6 @@ function App() {
       const response = await axios.get(`${server_url}/api/courses`)
       const res = await response.data
       for (let i = 0; i < res.courses.length; i++) {
-        const thumbnailCourse = await getThumbnail(res.courses[i].image)
-        res.courses[i].image = thumbnailCourse
         const price = res.courses[i].price
         res.courses[i].price = formatToIDR(price)
       }
@@ -168,10 +166,7 @@ function App() {
         <NavbarComponent {...{editUser,loading,authorized,fetchData,setEditUser,isAdmin}}/>
         <section className={`${isAdmin?'':'my-5 p-3'} brand ${loading?'container mx-auto w-100 loading bg-secondary rounded-5':isAdmin?`d-none`:`d-lg-flex flex-row-reverse justify-content-between align-items-center`}`}>
           <aside className='text-center col-12 col-lg-6 my-4'>
-            {authorized ?
-            photo ? <img src={photo} className={`img rounded-circle ${loading?'d-none':''}`} alt=""/> : <CgProfile size={180}/>
-            :
-            <img src="/dev-hiapps.jpg" className={`img rounded-circle ${loading?'d-none':''}`} alt=""/>}
+            <img src="/dev-hiapps.jpg" className={`img rounded-circle ${loading?'d-none':''}`} alt=""/>
           </aside>
           <aside className={`col-12 col-lg-6 ${loading?'mx-auto w-25 loading bg-secondary rounded-5':''} text-center ${!authorized&&'font-brand'}`}>
             {loading?<>&nbsp;</>:authorized ?
@@ -230,7 +225,7 @@ function App() {
                     {data&&data.length>0&&data.map((v,k) => (
                       <div key={k} className='col-12 col-lg-4'>
                         <Card className='mb-3'>
-                          <Card.Img variant="top" src={v.image} className='rounded-top-3'/>
+                          <Card.Img variant="top" src={`${server_url}/courses/thumbnails/${v.image}`} className='rounded-top-3'/>
                           <Card.Body>
                             <Card.Title className='fs-4'>{v.price}</Card.Title>
                             <Card.Text className='d-flex flex-column justify-content-center'>
