@@ -19,7 +19,10 @@ const ListChapters=React.memo(({
         currentVideo,
         chapter,
         setShow,
+        thumbnail
     })=>{
+
+        console.log("currentvideo",currentVideo)
 
     return (
         <Row>
@@ -163,9 +166,9 @@ const ListChapters=React.memo(({
                                     position: "relative",
                                 }}
                             >
-                                <video
+                                {currentVideo.video!=null?(<video
                                     key={currentVideo.id}
-                                    src={`{currentVideo.url}`}
+                                    src={`${server_url}/courses/videos/${currentVideo.video}`}
                                     controls
                                     autoPlay={isPlaying}
                                     style={{
@@ -175,7 +178,14 @@ const ListChapters=React.memo(({
                                         background: "#000",
                                     }}
                                     poster="https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=800&q=80"
-                                />
+                                />)
+                                :
+                                (<img src={`${server_url}/courses/thumbnails/${thumbnail}`} style={{
+                                        width: "100%",
+                                        height: "360px",
+                                        objectFit: "cover",
+                                        background: "#000",
+                                    }} alt="" />)}
                             </div>
                             {/* Video Info & Controls */}
                             <Card.Body>

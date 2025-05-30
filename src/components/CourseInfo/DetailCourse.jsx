@@ -367,6 +367,7 @@ const DetailCourse = () => {
                 currentVideo,
                 chapter,
                 setShow,
+                thumbnail:course.thumbnail
             }}/>
 
             {/* Edit Chapter Modal (already implemented below, but here's a standalone, improved version for clarity) */}
