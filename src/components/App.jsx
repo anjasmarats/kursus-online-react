@@ -6,6 +6,7 @@ import auth from '../scripts/auth.js'
 import { server_url } from '../scripts/url.js'
 import { CgProfile } from 'react-icons/cg'
 import { Card,Button } from 'react-bootstrap'
+import Swal from 'sweetalert2'
 
 function App() {
   const [data, setData] = useState([])
@@ -93,6 +94,32 @@ function App() {
   //     setLoading(false)
   //   }
   // }
+
+      const deleteCourse = async(id,title) => {
+          try {
+              const confirm = await Swal.fire({
+                  title:`Hapus course ${title}`,
+                  showCancelButton:true,
+                  cancelButtonColor:"blue",
+                  showConfirmButton:true,
+                  confirmButtonColor:"red",
+                  confirmButtonText:"Hapus",
+                  cancelButtonText:"Batal"
+              }).then(res=>res.isConfirmed)
+              if (!confirm) {
+                  return
+              }
+              const session = localStorage.getItem("session")
+              await axios.delete(`${server_url}/api/course/${id}`,{
+                  headers:{
+                      Authorization:"Bearer "+session
+                  }
+              })
+              await fetchData()
+          } catch (error) {
+              console.error(`error xchapter ${error}`)
+          }
+      }
 
   const fetchData = async () => {
     try {
@@ -234,7 +261,7 @@ function App() {
                             </Card.Text>
                             {isAdmin?(
                               <aside className='d-flex justify-content-between'>
-                                <Button variant="danger" className='w-100 mx-2'>Hapus</Button>
+                                <Button variant="danger" className='w-100 mx-2' onClick={()=>deleteCourse(v.courseId,v.title)}>Hapus</Button>
                                 <Button variant="primary" className='w-100 mx-2' href={`/edit/course/${v.courseId}`}>Edit</Button>
                               </aside>
                             ):(

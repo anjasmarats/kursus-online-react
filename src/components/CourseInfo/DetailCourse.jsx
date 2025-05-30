@@ -12,6 +12,8 @@ import {
     Container,
     Row,
     Col,
+    Card,
+    Button,
 } from "react-bootstrap";
 import {
     FaEdit,
@@ -31,6 +33,7 @@ const DetailCourse = () => {
     const [thumbnail,setThumbnail] = useState()
     const [isPlaying, setIsPlaying] = useState(true);
     const [hovered, setHovered] = useState(null);
+    const [showFullDescription, setShowFullDescription] = useState(false);
     const { id } = useParams()
     const [idCourse,setIdCourse] = useState(0)
     const [course,setCourse] = useState({
@@ -120,6 +123,8 @@ const DetailCourse = () => {
             formData.append("video",chapter.video)
             formData.append("chapterNote",chapter.chapterNote)
             formData.append("courseTitle",course.title)
+
+            console.log("chapter edit",chapter)
 
             const res = await axios.put(`${server_url}/api/course/${idCourse}/chapter/${chapter.id}`,formData,{
                 headers:{
@@ -249,7 +254,8 @@ const DetailCourse = () => {
                 cancelButtonColor:"blue",
                 showConfirmButton:true,
                 confirmButtonColor:"red",
-                confirmButtonText:"Delete"
+                confirmButtonText:"Hapus",
+                cancelButtonText:"Batal"
             }).then(res=>res.isConfirmed)
             if (!confirm) {
                 return
@@ -266,23 +272,20 @@ const DetailCourse = () => {
         }
     },[idCourse,fetchData])
 
-    const updateChapter = (key) => {
-        try {
-            console.log("chapter pertama",chapter)
-            if (!key) return
-            closeViewChapter()
-        } catch (error) {
-            console.error(`error upchptr ${error}`)
-        }
-    }
-
     const courseEdit = ()=>{
         setThumbnail(`${server_url}/courses/thumbnails/${course.thumbnail}`)
         setShowFormEditCourse(true)
         setShow(true)
     }
-
-    console.log("showformeditcourse",showFormEditCourse)
+  
+    // 3. Tentukan apakah deskripsi perlu dipotong atau tidak
+    // Ini akan menjadi 'true' jika panjang deskripsi melebihi batas yang ditentukan
+    
+    // 5. Fungsi untuk menangani klik tombol "Baca Selengkapnya" atau "Baca Lebih Sedikit"
+    const handleToggleDescription = () => {
+        // Membalik nilai 'showFullDescription' setiap kali tombol diklik
+        setShowFullDescription(!showFullDescription);
+    };
 
     useEffect(() => {
         fetchData()
@@ -335,21 +338,66 @@ const DetailCourse = () => {
                     "linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%)",
             }}
         >
+            <Card className="course-card shadow-sm border-0 rounded-lg">
+            {/* 7. Card.Body sebagai isi dari Card */}
+            <Card.Body>
+                {/* 8. Judul Kursus */}
+                <Card.Title className="course-title mb-3">
+                    <Row>
+                        <Col>
+                            <h2
+                                className="fw-bold"
+                                style={{
+                                    letterSpacing: "1px",
+                                    color: "#3b3b5c",
+                                    textShadow: "0 2px 8px #e0e7ff",
+                                }}
+                            >
+                                {!loading&&course.title}
+                            </h2>
+                        </Col>
+                        <Col className="text-end">
+                            <FaEdit size={36} onClick={()=>courseEdit()} style={{cursor:"pointer"}}/>
+                        </Col>
+                    </Row>
+                </Card.Title>
+
+                {/* 9. Teks Deskripsi Kursus */}
+                {/* Tambahkan class 'course-description' untuk styling kustom */}
+                <Card.Text className="course-description mb-3">
+                {showFullDescription || course.description.length<=160
+                ? course.description
+                : `${course.description.substring(0, 160)}...`}
+                </Card.Text>
+
+                {/* 10. Tombol "Baca Selengkapnya" / "Baca Lebih Sedikit" */}
+                {/* Hanya tampilkan tombol jika deskripsi memang perlu dipotong */}
+                {course.description.length>160 && (
+                <Button
+                    variant="outline-none text-primary" // Gaya tombol dari Bootstrap
+                    onClick={handleToggleDescription} // Panggil fungsi saat tombol diklik
+                    className="toggle-description-btn" // Class untuk styling kustom
+                    size="sm" // Ukuran tombol kecil
+                >
+                    {/* Teks tombol berubah berdasarkan state 'showFullDescription' */}
+                    {showFullDescription ? (
+                    <>
+                        {/* Anda bisa menambahkan ikon di sini, contoh: <BsChevronUp className="me-1" /> */}
+                        Baca Lebih Sedikit
+                    </>
+                    ) : (
+                    <>
+                        {/* Anda bisa menambahkan ikon di sini, contoh: <BsChevronDown className="me-1" /> */}
+                        Baca Selengkapnya
+                    </>
+                    )}
+                </Button>
+                )}
+            </Card.Body>
+            </Card>
             {/* Header */}
             <Row className="mb-4 align-items-center">
-                <Col>
-                    <h2
-                        className="fw-bold"
-                        style={{
-                            letterSpacing: "1px",
-                            color: "#3b3b5c",
-                            textShadow: "0 2px 8px #e0e7ff",
-                        }}
-                    >
-                        {!loading&&course.title}
-                    </h2>
-                </Col>
-                <Col className="text-end"><FaEdit size={36} onClick={()=>courseEdit()}/></Col>
+                
             </Row>
 
             {/* Main Content: Video Player & Playlist */}

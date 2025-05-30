@@ -173,6 +173,7 @@ const ModalDetailVideo = ({
                         required={showFormEditCourse}
                         className="form-control"
                         id="chapterNote"
+                        maxLength={250}
                         rows={3}
                         placeholder={showFormEditCourse?"Write notes or description for this course":"Write notes or description for this chapter"}
                         value={showFormEditCourse?(course.description||""):(chapter.chapterNote||"")}

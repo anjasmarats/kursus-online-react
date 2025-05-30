@@ -1,0 +1,50 @@
+/* src/components/CourseDescriptionCard.css */
+
+/* Styling untuk Card utama */
+.course-card {
+  margin: 2rem auto; /* Atur margin agar kartu berada di tengah dan ada jarak */
+  padding: 1.5rem; /* Padding di dalam kartu */
+  border-radius: 15px !important; /* Sudut membulat yang lebih estetis */
+  transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out; /* Animasi hover */
+  overflow: hidden; /* Pastikan tidak ada konten yang keluar */
+}
+
+/* Efek hover pada Card */
+.course-card:hover {
+  transform: translateY(-5px); /* Sedikit naik saat di-hover */
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15); /* Bayangan yang lebih menonjol */
+}
+
+/* Styling untuk Judul Kursus */
+.course-title {
+  font-size: 1.8rem; /* Ukuran font lebih besar */
+  font-weight: 700; /* Tebal */
+  color: #343a40; /* Warna teks gelap */
+  margin-bottom: 1rem; /* Jarak bawah */
+  line-height: 1.3; /* Tinggi baris */
+}
+
+/* Styling untuk Deskripsi Kursus */
+.course-description {
+  font-size: 1rem; /* Ukuran font standar */
+  color: #495057; /* Warna teks abu-abu tua */
+  line-height: 1.6; /* Jarak antar baris agar mudah dibaca */
+  text-align: justify; /* Ratakan teks agar rapi */
+  margin-bottom: 1.5rem; /* Jarak bawah */
+}
+
+/* Styling untuk Tombol "Baca Selengkapnya" / "Baca Lebih Sedikit" */
+.toggle-description-btn {
+  font-size: 0.9rem; /* Ukuran font sedikit lebih kecil */
+  font-weight: 600; /* Sedikit tebal */
+  transition: all 0.3s ease; /* Transisi halus untuk semua properti */
+  display: flex; /* Gunakan flexbox untuk menata ikon dan teks */
+  align-items: center; /* Pusatkan item secara vertikal */
+  gap: 5px; /* Jarak antara ikon dan teks jika ada */
+}
+
+/* Efek hover pada tombol */
+.toggle-description-btn:hover {
+  transform: translateY(-2px); /* Sedikit naik saat di-hover */
+  box-shadow: 0 4px 8px rgba(0, 123, 255, 0.2); /* Bayangan biru */
+}

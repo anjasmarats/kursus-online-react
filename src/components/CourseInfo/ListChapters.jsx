@@ -4,6 +4,7 @@ import { FaPlayCircle,FaChevronRight,FaChevronLeft } from "react-icons/fa";
 import { MdModeEditOutline } from "react-icons/md";
 import { RiDeleteBin5Fill } from "react-icons/ri";
 import { server_url } from "../../scripts/url";
+import "../../styles/ListChapters.css"
 
 const ListChapters=React.memo(({
         isPlaying,
@@ -21,8 +22,6 @@ const ListChapters=React.memo(({
         setShow,
         thumbnail
     })=>{
-
-        console.log("currentvideo",currentVideo)
 
     return (
         <Row>
@@ -146,6 +145,13 @@ const ListChapters=React.memo(({
                         md={8}
                         className="d-flex flex-column align-items-center justify-content-center"
                     >
+                        {currentVideo.video==null ? (
+                            <img src={`${server_url}/courses/thumbnails/${thumbnail}`} style={{
+                                width: "100%",
+                                objectFit: "cover",
+                                background: "#000",
+                            }} alt="" />
+                        ) : (
                         <Card
                             className="shadow-lg"
                             style={{
@@ -166,7 +172,7 @@ const ListChapters=React.memo(({
                                     position: "relative",
                                 }}
                             >
-                                {currentVideo.video!=null?(<video
+                                <video
                                     key={currentVideo.id}
                                     src={`${server_url}/courses/videos/${currentVideo.video}`}
                                     controls
@@ -178,14 +184,7 @@ const ListChapters=React.memo(({
                                         background: "#000",
                                     }}
                                     poster="https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=800&q=80"
-                                />)
-                                :
-                                (<img src={`${server_url}/courses/thumbnails/${thumbnail}`} style={{
-                                        width: "100%",
-                                        height: "360px",
-                                        objectFit: "cover",
-                                        background: "#000",
-                                    }} alt="" />)}
+                                />
                             </div>
                             {/* Video Info & Controls */}
                             <Card.Body>
@@ -208,14 +207,16 @@ const ListChapters=React.memo(({
                                             {currentVideo.title}
                                         </Card.Title>
                                         <Card.Text
-                                            className="mt-2"
+                                            className="mt-2 listchapter-chapterNote"
                                             style={{
                                                 fontSize: "1rem",
                                                 color: "#e0e7ff",
-                                                minHeight: "48px",
+                                                minHeight: "60px",
+                                                maxHeight: "60px",
+                                                overflow:"auto",
                                             }}
                                         >
-                                            {currentVideo.description}
+                                            {currentVideo.chapterNote}
                                         </Card.Text>
                                     </Col>
                                     <Col xs={2} className="text-center">
@@ -233,7 +234,7 @@ const ListChapters=React.memo(({
                                     </Col>
                                 </Row>
                             </Card.Body>
-                        </Card>
+                        </Card>)}
                     </Col>
                 )}
             </Row>
