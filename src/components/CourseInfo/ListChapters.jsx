@@ -93,7 +93,7 @@ const ListChapters=React.memo(({
                                             placement="top"
                                             overlay={
                                                 <Tooltip>
-                                                    hai
+                                                    Edit chapter
                                                 </Tooltip>
                                             }
                                         >
@@ -114,14 +114,14 @@ const ListChapters=React.memo(({
                                             placement="top"
                                             overlay={
                                                 <Tooltip>
-                                                    hai
+                                                    Hapus chapter
                                                 </Tooltip>
                                             }
                                         >
                                             <span
                                                 onClick={(e) => {
                                                     e.stopPropagation();
-                                                    handleFavorite(video.id);
+                                                    deleteChapter(video.title,video.id)
                                                 }}
                                                 style={{ cursor: "pointer" }}
                                             >

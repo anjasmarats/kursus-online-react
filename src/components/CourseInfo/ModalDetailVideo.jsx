@@ -1,4 +1,4 @@
-import { Modal,Button } from "react-bootstrap"
+import { Modal,Button, Spinner } from "react-bootstrap"
 import { server_url } from "../../scripts/url"
 
 const ModalDetailVideo = ({
@@ -12,7 +12,8 @@ const ModalDetailVideo = ({
         setChapter,
         course,
         changeThumbnail,
-        closeViewChapter
+        closeViewChapter,
+        loading
     }) =>{
     return (
         <Modal
@@ -290,8 +291,10 @@ const ModalDetailVideo = ({
                         letterSpacing: 1,
                         boxShadow: "0 2px 8px #cc00cc44",
                     }}
-                    disabled={showFormEditCourse?(!course.title||!course.description||!course.price):!chapter.title}
+                    disabled={loading||(showFormEditCourse?(!course.title||!course.description||!course.price):!chapter.title)}
                 >
+                    {loading&&(<Spinner size="sm" color="white"/>)}
+                    &nbsp;
                     Save Changes
                 </Button>
                 </Modal.Footer>

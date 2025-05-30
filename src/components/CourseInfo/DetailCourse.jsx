@@ -108,6 +108,7 @@ const DetailCourse = () => {
     const editChapter = useCallback(async(e) => {
         try {
             e.preventDefault()
+            setLoading(true)
             if (!chapter.title) {
                 return
             }
@@ -118,8 +119,9 @@ const DetailCourse = () => {
             formData.append("title",chapter.title)
             formData.append("video",chapter.video)
             formData.append("chapterNote",chapter.chapterNote)
+            formData.append("courseTitle",course.title)
 
-            const res = await axios.put(`${server_url}/api/chapter/${chapter.id}`,formData,{
+            const res = await axios.put(`${server_url}/api/course/${idCourse}/chapter/${chapter.id}`,formData,{
                 headers:{
                     Authorization:"Bearer "+session
                 }
@@ -212,7 +214,7 @@ const DetailCourse = () => {
     //     }
     //   }
 
-    const fetchData = async () => {
+    const fetchData = useCallback(async () => {
         try {
             // let chapters=[]
           setLoading(true)
@@ -237,9 +239,9 @@ const DetailCourse = () => {
         } finally {
             setLoading(false)
         }
-      }
+      },[course])
 
-    const deleteChapter = async(title) => {
+    const deleteChapter = useCallback(async(title,id) => {
         try {
             const confirm = await Swal.fire({
                 title:`Hapus chapter ${title}`,
@@ -252,10 +254,17 @@ const DetailCourse = () => {
             if (!confirm) {
                 return
             }
+            const session = localStorage.getItem("session")
+            await axios.delete(`${server_url}/api/course/${idCourse}/chapter/${id}`,{
+                headers:{
+                    Authorization:"Bearer "+session
+                }
+            })
+            await fetchData()
         } catch (error) {
             console.error(`error xchapter ${error}`)
         }
-    }
+    },[idCourse,fetchData])
 
     const updateChapter = (key) => {
         try {
@@ -373,6 +382,7 @@ const DetailCourse = () => {
                 setChapter,
                 course,
                 changeThumbnail,
+                loading
             }}/>
         </Container>
     );
