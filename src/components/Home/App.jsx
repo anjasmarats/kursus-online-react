@@ -1,12 +1,10 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Container,
   Row,
   Col,
   Button,
   Card,
-  Modal,
-  Image
 } from "react-bootstrap";
 import { FaEdit, FaTrash, FaInfoCircle, FaPlusCircle, FaCrown, FaStar, FaRocket, FaBookOpen, FaShoppingCart, FaCheckCircle, FaLightbulb } from "react-icons/fa";
 import BrandHeader from "./BrandHeader";
@@ -31,7 +29,7 @@ function formatDate(dateStr) {
 }
 
 export default function App() {
-    const [data, setData] = useState([])
+  const [data, setData] = useState([])
   const [loading, setLoading] = useState(true)
   const [authorized, setAuthorized] = useState(false)
   const [error, setError] = useState(null)
@@ -141,7 +139,7 @@ export default function App() {
         res.courses[i].price = formatToIDR(price)
       }
       setData(res.courses)
-      setLoading(false)
+      // setLoading(false)
     } catch (error) {
       if (error.response && error.response.status === 500) {
         setError("Internal Server Error")
@@ -149,7 +147,7 @@ export default function App() {
       console.error(`error app ${error}`)
       setLoading(false)
     } finally {
-      setLoading(false)
+      // setLoading(false)
     }
   }
 
@@ -169,113 +167,130 @@ export default function App() {
       <Container style={{ maxWidth: 1200, marginTop: 30 }}>
         {loading ? (
           <>
-            <div className="bg-secondary loading-main p-5">&nbsp;</div>
-            <div className="bg-secondary loading-main p-5">&nbsp;</div>
-            <div className="bg-secondary loading-main p-5">&nbsp;</div>
+            <div className="bg-secondary loading m-3 rounded-3 p-3">&nbsp;</div>
+            <div className="bg-secondary loading m-3 rounded-3 p-3">&nbsp;</div>
+            <div className="bg-secondary loading m-3 rounded-3 p-3">&nbsp;</div>
           </>
         ) : (
           <BrandHeader {...{isAdmin,authorized,profileData}} />
         )}
         <InfoSection {...{loading}}/>
-        <SubscriptionOffer />
+        <SubscriptionOffer {...{loading}}/>
         <hr style={{ borderColor: mainPurple, margin: "40px 0" }} />
         <div className="d-flex justify-content-between align-items-center mb-4">
-          <h3 className="mb-0" style={{ color: mainPurple }}>
-            Daftar Kursus
-          </h3>
-          {/* {user.role === "admin" && (
-            <Button
-              style={{
-                background: mainPurple,
-                border: "none",
-                fontWeight: "bold",
-                borderRadius: 24,
-                boxShadow: "0 2px 8px rgba(204,0,204,0.10)",
-                display: "flex",
-                alignItems: "center",
-                gap: 8,
-                fontSize: 18,
-                padding: "8px 20px",
-              }}
-              href="/post/course"
-            >
-              <FaPlusCircle className="me-2" /> Tambah Kursus Baru
-            </Button>
-          )} */}
+          {loading ? (
+            <div className="bg-secondary loading rounded-5 px-5 py-2">&nbsp;</div>
+          ) : (
+            <h3 className="mb-0" style={{ color: mainPurple }}>
+              Daftar Kursus
+            </h3>
+          )}
+          <Button
+            variant={loading?"secondary":""}
+            style={{
+              background: loading?"":mainPurple,
+              border: "none",
+              fontWeight: "bold",
+              borderRadius: 24,
+              boxShadow: "0 2px 8px rgba(204,0,204,0.10)",
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              fontSize: 18,
+              padding: "8px 20px",
+            }}
+            href="/post/course"
+            disabled={loading}
+            className={loading?"loading":""}
+          >
+            {loading ? (
+              <div className="bg-secondary loading px-5">&nbsp;</div>
+            ) : (
+              <>
+                <FaPlusCircle className="me-2" /> Tambah Kursus Baru
+              </>
+            )}
+          </Button>
         </div>
         <Row className="g-4">
           {data&&data.length>0&&data.map((course,key) => (
             <Col md={4} key={key}>
               <Card
                 style={{
-                  borderColor: mainPurple,
-                  background: "#e0b3ff",
+                  borderColor: loading?"":mainPurple,
+                  background: loading?"":"#e0b3ff",
                   boxShadow: "0 2px 12px rgba(204,0,204,0.07)",
-                  transition: "transform 0.15s",
+                  transition: loading?"":"transform 0.15s",
                 }}
-                className="h-100 shadow-sm course-card"
+                className={loading?"h-100 shadow-sm course-card bg-secondary loading":"h-100 shadow-sm course-card"}
               >
-                <Card.Img
-                  variant="top"
-                  src={`${server_url}/courses/thumbnails/${course.image}`}
-                  alt={course.title}
-                  style={{ height: 180, objectFit: "cover" }}
-                />
-                <Card.Body>
-                  <Card.Title style={{ color: mainPurple }}>{course.title}</Card.Title>
-                  <Card.Text>{course.description.substring(0,100)}....</Card.Text>
-                  <div className="d-flex justify-content-between align-items-center mt-3">
-                    <Button
-                      variant="outline-primary"
-                      style={{
-                        borderColor: mainPurple,
-                        color: mainPurple,
-                        fontWeight: "bold",
-                        borderRadius: 20,
-                        transition: "background 0.2s, color 0.2s",
-                      }}
-                      onClick={() => handleShowModal(course)}
-                    >
-                      <FaInfoCircle className="me-1" /> Info Selengkapnya
-                    </Button>
-                    {isAdmin && (
-                      <div className="d-flex gap-2 m-2">
+                {loading ? (
+                  <div className="bg-secondary loading m-3 rounded-3 p-5">&nbsp;</div>
+                ) : (
+                  <>
+                    <Card.Img
+                      variant="top"
+                      src={`${server_url}/courses/thumbnails/${course.image}`}
+                      alt={course.title}
+                      style={{ height: 180, objectFit: "cover" }}
+                    />
+                    <Card.Body>
+                      <Card.Title style={{ color: mainPurple }}>{course.title}</Card.Title>
+                      <Card.Text>{course.description.substring(0,100)}....</Card.Text>
+                      <div className="d-flex justify-content-between align-items-center mt-3">
                         <Button
-                          variant="outline-success"
-                          size="sm"
+                          variant="outline-primary"
                           style={{
-                            borderRadius: 20,
+                            borderColor: mainPurple,
+                            color: mainPurple,
                             fontWeight: "bold",
-                            borderWidth: 2,
-                            borderColor: "#28a745",
-                            color: "#28a745",
-                            background: "#eaffea",
+                            borderRadius: 20,
                             transition: "background 0.2s, color 0.2s",
                           }}
-                          href={`edit/course/${course.id}`}
+                          onClick={() => handleShowModal(course)}
                         >
-                          <FaEdit className="me-1" /> Edit
+                          <FaInfoCircle className="me-1" /> Info Selengkapnya
                         </Button>
-                        <Button
-                          variant="outline-danger"
-                          size="sm"
-                          style={{
-                            borderRadius: 20,
-                            fontWeight: "bold",
-                            borderWidth: 2,
-                            borderColor: "#dc3545",
-                            color: "#dc3545",
-                            background: "#fff0f3",
-                            transition: "background 0.2s, color 0.2s",
-                          }}
-                          onClick={() => deleteCourse(course.id)}
-                        >
-                          <FaTrash className="me-1" /> Hapus
-                        </Button>
+                        {isAdmin && (
+                          <div className="d-flex gap-2 m-2">
+                            <Button
+                              variant="outline-success"
+                              size="sm"
+                              style={{
+                                borderRadius: 20,
+                                fontWeight: "bold",
+                                borderWidth: 2,
+                                borderColor: "#28a745",
+                                color: "#28a745",
+                                background: "#eaffea",
+                                transition: "background 0.2s, color 0.2s",
+                              }}
+                              href={`edit/course/${course.id}`}
+                            >
+                              <FaEdit className="me-1" /> Edit
+                            </Button>
+                            <Button
+                              variant="outline-danger"
+                              size="sm"
+                              style={{
+                                borderRadius: 20,
+                                fontWeight: "bold",
+                                borderWidth: 2,
+                                borderColor: "#dc3545",
+                                color: "#dc3545",
+                                background: "#fff0f3",
+                                transition: "background 0.2s, color 0.2s",
+                              }}
+                              onClick={() => deleteCourse(course.id)}
+                            >
+                              <FaTrash className="me-1" /> Hapus
+                            </Button>
+                          </div>
+                        )}
                       </div>
-                    )}
-                  </div>
-                </Card.Body>
+                    </Card.Body>
+                  </>
+                )}
               </Card>
             </Col>
           ))}
