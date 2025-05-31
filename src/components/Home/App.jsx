@@ -272,7 +272,7 @@ export default function App() {
             </Col>
           ))}
         </Row>
-        <ConfirmSubscription {...{showModal,setShowModal,course:selectedCourse,formatToIDR}}/>
+        <ConfirmSubscription {...{showModal,setShowModal,course:selectedCourse,formatToIDR,courses:data}}/>
       </Container>
       <footer
         className="text-center py-4 mt-5"
