@@ -94,90 +94,7 @@ function App() {
   //   }
   // }
 
-      const deleteCourse = async(id,title) => {
-          try {
-              const confirm = await Swal.fire({
-                  title:`Hapus course ${title}`,
-                  showCancelButton:true,
-                  cancelButtonColor:"blue",
-                  showConfirmButton:true,
-                  confirmButtonColor:"red",
-                  confirmButtonText:"Hapus",
-                  cancelButtonText:"Batal"
-              }).then(res=>res.isConfirmed)
-              if (!confirm) {
-                  return
-              }
-              const session = localStorage.getItem("session")
-              await axios.delete(`${server_url}/api/course/${id}`,{
-                  headers:{
-                      Authorization:"Bearer "+session
-                  }
-              })
-              await fetchData()
-          } catch (error) {
-              console.error(`error xchapter ${error}`)
-          }
-      }
 
-  const fetchData = async () => {
-    try {
-      setLoading(true)
-      const {result,adminuser} = await auth()
-      if (result) {
-        const res = await axios.get(`${server_url}/api/user`, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("session")}`
-          }
-        })
-        const result = await res.data
-        const { name,email,activation_time,photo } = result.user
-        if (activation_time) {
-          const { time,date } = JSON.parse(activation_time)
-          setProfileData({
-            ...profileData,
-            start_time: date,
-            duration: time?JSON.parse(time).month:"",
-          })
-        }
-        setProfileData({
-          ...profileData,
-          name,
-          email,
-          photo
-        })
-
-        setEditUser({
-          ...editUser,
-          name,
-          email,
-          photo
-        })
-
-        // await getPhoto()
-        if (adminuser) {
-          setIsAdmin(true)
-        }
-        setAuthorized(true)
-      }
-      const response = await axios.get(`${server_url}/api/courses`)
-      const res = await response.data
-      for (let i = 0; i < res.courses.length; i++) {
-        const price = res.courses[i].price
-        res.courses[i].price = formatToIDR(price)
-      }
-      setData(res.courses)
-      setLoading(false)
-    } catch (error) {
-      if (error.response && error.response.status === 500) {
-        setError("Internal Server Error")
-      }
-      console.error(`error app ${error}`)
-      setLoading(false)
-    } finally {
-      setLoading(false)
-    }
-  }
 
   useEffect(() => {
     fetchData()
@@ -189,7 +106,7 @@ function App() {
   return (
     <>
       <main className='app'>
-        <NavbarComponent {...{editUser,loading,authorized,fetchData,setEditUser,isAdmin}}/>
+        <NavbarComponent />
         <section className={`${isAdmin?'':'my-5 p-3'} brand ${loading?'container mx-auto w-100 loading bg-secondary rounded-5':isAdmin?`d-none`:`d-lg-flex flex-row-reverse justify-content-between align-items-center`}`}>
           <aside className='text-center col-12 col-lg-6 my-4'>
             <img src="/dev-hiapps.jpg" className={`img rounded-circle ${loading?'d-none':''}`} alt=""/>

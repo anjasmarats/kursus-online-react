@@ -2,7 +2,6 @@ import Button from 'react-bootstrap/Button';
 import Container from 'react-bootstrap/Container';
 import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
-import Offcanvas from 'react-bootstrap/Offcanvas';
 import "../styles/NavbarComponent.css";
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
@@ -74,40 +73,46 @@ const NavbarComponent = (props) => {
         navigate('/logout')
     }
 
+    console.log("loading",loading)
+
     return (
         <>
-            <Navbar key={'lg'} expand={'lg'} className={`navbar-app ${isAdmin?'':'mb-3'}`}>
-                <Container fluid>
-                    {!loading&&(<>
-                    <Navbar.Brand href="/" className='text-light'>HiAppS</Navbar.Brand>
-                    <Navbar.Toggle aria-controls={`offcanvasNavbar-expand-${'lg'}`} />
-                    <Navbar.Offcanvas
-                    id={`offcanvasNavbar-expand-${'lg'}`}
-                    aria-labelledby={`offcanvasNavbarLabel-expand-${'lg'}`}
-                    placement="end"
-                    >
-                    <Offcanvas.Header closeButton className='nav-mobile text-light'>
-                        <Offcanvas.Title id={`offcanvasNavbarLabel-expand-${'lg'}`}>
-                        Menu
-                        </Offcanvas.Title>
-                    </Offcanvas.Header>
-                    <Offcanvas.Body className='nav-mobile'>
-                        <Nav className="justify-content-end flex-grow-1 pe-3">
-                            {authorized ? (
-                                <>
-                                    <Button variant="outline-light" onClick={handleShow} className='fw-bolder'>Edit Profil</Button>
-                                    <Nav.Link style={{ "cursor":"pointer" }} onClick={()=>logout()} className='text-light text-center'>Logout</Nav.Link>
-                                </>
-                            ):(
-                                <>
-                                    <Button variant="outline-light" onClick={()=>register()} className='fw-bolder'>Daftar</Button>
-                                    <Nav.Link href="/login" className='text-light text-center'>Masuk</Nav.Link>
-                                </>
-                            )}
+            <Navbar
+                expand="lg"
+                style={{
+                background: "#cc00cc",
+                boxShadow: "0 2px 12px rgba(204,0,204,0.09)",
+                }}
+                variant="dark"
+            >
+                <Container>
+                {!loading&&(
+                    <>
+                    <Navbar.Brand style={{ fontWeight: 700, fontSize: "1.5rem" }}>
+                        <span style={{ color: "#fff" }}>Hi AppS</span>
+                    </Navbar.Brand>
+                    <Navbar.Toggle />
+                    <Navbar.Collapse>
+                        <Nav className="ms-auto">
+                        {authorized?(
+                            <>
+                                <Nav.Link href="#" style={{ color: "#fff" }}>
+                                Kursus
+                                </Nav.Link>
+                                <Nav.Link href="#" style={{ color: "#fff" }}>
+                                Profil
+                                </Nav.Link>
+                            </>
+                        ) : (
+                            <>
+                                <Button variant="outline-light" onClick={()=>register()} className='fw-bolder'>Daftar</Button>
+                                <Nav.Link href="/login" className='text-light text-center'>Masuk</Nav.Link>
+                            </>
+                        )}
                         </Nav>
-                    </Offcanvas.Body>
-                    </Navbar.Offcanvas>
-                    </>)}
+                    </Navbar.Collapse>
+                </>
+                )}
                 </Container>
             </Navbar>
 
