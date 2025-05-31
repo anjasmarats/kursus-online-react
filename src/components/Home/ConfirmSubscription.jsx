@@ -1,4 +1,4 @@
-import { Button, Card, Col, Image, Modal, Row } from "react-bootstrap";
+import { Button, Card, Col, Modal, Row } from "react-bootstrap";
 import { FaBookOpen, FaCheckCircle, FaCrown, FaLightbulb, FaRocket, FaShoppingCart, FaStar,FaInfoCircle } from "react-icons/fa";
 import { server_url } from "../../scripts/url";
 
@@ -24,107 +24,133 @@ export default function ConfirmSubscription({ showModal,setShowModal,course,cour
                 </Modal.Title>
             </Modal.Header>
             <Modal.Body>
-                <Row className="mb-4">
-                    <Col md={12} className="text-center">
-                        <FaCrown size={40} color="#cc00cc" />
-                        <h3 className="mt-2 fw-bold">Paket Spesial Berlangganan Kursus</h3>
-                        <p className="text-muted">
-                            Dapatkan akses ke semua kursus premium dengan harga super hemat! Pilih paket terbaik untuk pengalaman belajar maksimal.
-                        </p>
-                    </Col>
-                </Row>
-
-                <Card className="mb-4 shadow-sm">
+                <Card className="mb-4 shadow border-0" style={{ background: accentColors[0] }}>
                     <Card.Body>
-                        <h5 className="fw-bold mb-3"><FaBookOpen color="#cc00cc" /> Daftar Kursus yang Tersedia:</h5>
-                        <ul className="list-group mb-3">
-                            {courses&&courses.map((c, idx) => (
-                                <li key={c.id} className="list-group-item d-flex justify-content-between align-items-center">
-                                    <span>
-                                        <FaStar color="#ffcc00" className="me-2" />
-                                        {c.title}
+                        <Row className="align-items-center">
+                            <Col className="text-center mb-3 mb-md-0">
+                                <img style={{
+                                        width: "100%",
+                                        height: "100%",
+                                        objectFit:"fill",
+                                        background: "#fff",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        margin: "0 auto",
+                                        boxShadow: "0 2px 12px rgba(204,0,204,0.08)",
+                                        border: "2px solid #cc00cc",
+                                    }} src={`${server_url}/courses/thumbnails/${course.image}`} alt="" />
+                            </Col>
+                            <Col xs={12} md={9}>
+                                <h4 className="fw-bold mb-1 text-primary">{course?.title}</h4>
+                                <div className="mb-2 text-muted" style={{ fontSize: "1.05em" }}>
+                                    {course?.description?.length > 120
+                                        ? course.description.slice(0, 120) + "..."
+                                        : course?.description || "Deskripsi kursus belum tersedia."}
+                                </div>
+                                <div className="d-flex flex-wrap align-items-center gap-3 mt-2">
+                                    <span className="fw-bold text-success" style={{ fontSize: "1.2em" }}>
+                                        <FaShoppingCart className="me-1" />
+                                        {course?.price}
                                     </span>
-                                    <span className="fw-semibold">{c.price}</span>
-                                </li>
-                            ))}
-                        </ul>
-                        <div className="d-flex justify-content-between align-items-center border-top pt-3">
-                            <span className="fw-bold">Total Harga Semua Kursus</span>
-                            <span className="fw-bold fs-5">
-                                {formatToIDR(
-                                    course?.allCourses?.reduce((acc, c) => acc + parseIDR(c.price), 0)
-                                )}
-                            </span>
-                        </div>
-                        <div className="d-flex justify-content-between align-items-center border-top pt-3">
-                            <span className="fw-bold text-success">
-                                <FaRocket className="me-1" />
-                                Diskon Spesial 50%
-                            </span>
-                            <span className="fw-bold fs-4 text-success">
-                                {formatToIDR(
-                                    (course?.allCourses?.reduce((acc, c) => acc + parseIDR(c.price), 0) / 2)
-                                )}
-                            </span>
-                        </div>
+                                    <span className="text-secondary" style={{ fontSize: "0.98em" }}>
+                                        <FaRocket className="me-1" color="#cc00cc" />
+                                        {course?.duration || "1 Bulan"}
+                                    </span>
+                                    {/* <span className="text-secondary" style={{ fontSize: "0.98em" }}>
+                                        <FaLightbulb className="me-1" color="#ffb400" />
+                                        {course?.lessons ? `${course.lessons} Materi` : "Materi variatif"}
+                                    </span> */}
+                                </div>
+                            </Col>
+                        </Row>
                     </Card.Body>
                 </Card>
-
-                <Row>
-                    <Col md={6}>
-                        <Card className="mb-3 border-primary shadow-sm">
-                            <Card.Body>
-                                <h5 className="fw-bold text-primary mb-2">
-                                    <FaCheckCircle className="me-2" />
-                                    Paket Paling Direkomendasikan!
-                                </h5>
-                                <p>
-                                    <strong>Akses SEMUA kursus</strong> selama <strong>1 bulan</strong> hanya dengan <span className="text-success fw-bold">
-                                        {formatToIDR(
-                                            (course?.allCourses?.reduce((acc, c) => acc + parseIDR(c.price), 0) / 2)
-                                        )}
-                                    </span>! 
-                                </p>
-                                <Button variant="success" className="w-100 mb-2">
-                                    <FaCrown className="me-2" />
-                                    Langganan Semua Kursus (Diskon 50%)
-                                </Button>
-                                <small className="text-muted">
-                                    Hemat biaya, akses materi lengkap, dan tingkatkan skill Anda tanpa batas!
-                                </small>
-                            </Card.Body>
-                        </Card>
-                    </Col>
-                    <Col md={6}>
-                        <Card className="mb-3 border-secondary shadow-sm">
-                            <Card.Body>
-                                <h5 className="fw-bold text-secondary mb-2">
-                                    <FaLightbulb className="me-2" />
-                                    Coba Satu Kursus Dulu
-                                </h5>
-                                <p>
-                                    Ingin mencoba dulu? Dapatkan akses <strong>1 kursus</strong> selama <strong>1 bulan</strong> dengan harga normal <span className="fw-bold">{course?.price}</span>.
-                                </p>
-                                <Button variant="outline-primary" className="w-100 mb-2">
-                                    <FaShoppingCart className="me-2" />
-                                    Langganan Kursus Ini Saja
-                                </Button>
-                                <small className="text-muted">
-                                    Cocok untuk percobaan pertama kali. Jika puas, Anda bisa memperpanjang atau upgrade ke paket semua kursus!
-                                </small>
-                            </Card.Body>
-                        </Card>
-                    </Col>
-                </Row>
-
-                <Row className="mt-3">
-                    <Col md={12} className="text-center">
-                        <p className="fw-semibold text-success">
-                            <FaCheckCircle className="me-1" />
-                            Nikmati pengalaman belajar terbaik, materi terlengkap, dan harga paling hemat hanya di sini!
-                        </p>
-                    </Col>
-                </Row>
+                <div>
+                    <h5 className="mb-4 text-center">
+                        <FaStar color="#ffb400" /> Penawaran Spesial untuk Anda!
+                    </h5>
+                    <Card className="mb-4 shadow-sm">
+                        <Card.Body>
+                            <h6 className="mb-3"><FaBookOpen /> Daftar Kursus Premium:</h6>
+                            <ul className="list-group mb-3">
+                                {courses.map((c, idx) => (
+                                    <li
+                                        key={idx}
+                                        className={`list-group-item d-flex justify-content-between align-items-center ${c.id === course?.id ? "bg-light" : ""}`}
+                                    >
+                                        <span>
+                                            <FaLightbulb className="me-2" color={c.id === course?.id ? "#cc00cc" : "#888"} />
+                                            {c.title}
+                                        </span>
+                                        <span className="fw-bold text-primary">{c.price}</span>
+                                    </li>
+                                ))}
+                            </ul>
+                            <Row className="mb-2">
+                                <Col xs={7} className="text-end fw-bold">Total Harga Semua Kursus:</Col>
+                                <Col xs={5} className="fw-bold text-danger">
+                                    {(() => {
+                                        const total = courses.reduce((sum, c) => sum + parseIDR(c.price), 0);
+                                        return `Rp${total.toLocaleString("id-ID")},00`;
+                                    })()}
+                                </Col>
+                            </Row>
+                            <Row className="mb-2">
+                                <Col xs={7} className="text-end fw-bold">
+                                    <FaCrown color="#cc00cc" /> Diskon Spesial 50%:
+                                </Col>
+                                <Col xs={5} className="fw-bold text-success">
+                                    {(() => {
+                                        const total = courses.reduce((sum, c) => sum + parseIDR(c.price), 0);
+                                        const diskon = total / 2;
+                                        return `Rp${diskon.toLocaleString("id-ID")},00`;
+                                    })()}
+                                </Col>
+                            </Row>
+                            <hr />
+                            <div className="mb-3">
+                                <div className="alert alert-info d-flex align-items-center" role="alert">
+                                    <FaRocket className="me-2" color="#cc00cc" />
+                                    <div>
+                                        <b>Paling Direkomendasikan!</b> Dapatkan akses <u>semua kursus</u> hanya dengan <b>50% dari total harga</b> untuk 1 bulan penuh. Maksimalkan pembelajaran Anda dengan harga super hemat!
+                                    </div>
+                                </div>
+                                <div className="alert alert-secondary d-flex align-items-center" role="alert">
+                                    <FaCheckCircle className="me-2" color="#00b894" />
+                                    <div>
+                                        Atau, Anda bisa mencoba <b>berlangganan satu kursus</b> (<span className="text-primary">{course?.title}</span>) dengan harga normal <b>{course?.price}</b> untuk 1 bulan. Cocok untuk percobaan pertama!
+                                    </div>
+                                </div>
+                            </div>
+                            <Row className="g-2">
+                                <Col xs={12} md={6}>
+                                    <Button
+                                        variant="success"
+                                        className="w-100 fw-bold"
+                                        size="lg"
+                                        onClick={() => alert("Langganan semua kursus dengan diskon 50%!")}
+                                    >
+                                        <FaCrown className="me-2" /> Langganan Semua Kursus (Diskon 50%)
+                                    </Button>
+                                </Col>
+                                <Col xs={12} md={6}>
+                                    <Button
+                                        variant="outline-primary"
+                                        className="w-100 fw-bold"
+                                        size="lg"
+                                        onClick={() => alert("Langganan satu kursus saja")}
+                                    >
+                                        <FaBookOpen className="me-2" /> Langganan Kursus Ini Saja
+                                    </Button>
+                                </Col>
+                            </Row>
+                            <div className="mt-4 text-center text-muted" style={{ fontSize: "0.95em" }}>
+                                <FaInfoCircle className="me-1" /> Anda dapat memperpanjang langganan kapan saja jika merasa puas dan ingin terus belajar!
+                            </div>
+                        </Card.Body>
+                    </Card>
+                </div>
             </Modal.Body>
         </Modal>
     )

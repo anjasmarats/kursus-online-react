@@ -167,8 +167,16 @@ export default function App() {
     <div style={{ background: accentColors[0], minHeight: "100vh" }}>
       <NavbarComponent {...{editUser,loading,authorized,fetchData,setEditUser,isAdmin}}/>
       <Container style={{ maxWidth: 1200, marginTop: 30 }}>
-        <BrandHeader {...{isAdmin,authorized,profileData}} />
-        <InfoSection />
+        {loading ? (
+          <>
+            <div className="bg-secondary loading-main p-5">&nbsp;</div>
+            <div className="bg-secondary loading-main p-5">&nbsp;</div>
+            <div className="bg-secondary loading-main p-5">&nbsp;</div>
+          </>
+        ) : (
+          <BrandHeader {...{isAdmin,authorized,profileData}} />
+        )}
+        <InfoSection {...{loading}}/>
         <SubscriptionOffer />
         <hr style={{ borderColor: mainPurple, margin: "40px 0" }} />
         <div className="d-flex justify-content-between align-items-center mb-4">
@@ -272,7 +280,7 @@ export default function App() {
             </Col>
           ))}
         </Row>
-        <ConfirmSubscription {...{showModal,setShowModal,course:selectedCourse,formatToIDR,courses:data}}/>
+        <ConfirmSubscription {...{showModal,setShowModal,course:selectedCourse,courses:data}}/>
       </Container>
       <footer
         className="text-center py-4 mt-5"

@@ -1,24 +1,42 @@
 import { Alert, Col, Image, Row } from "react-bootstrap";
 import { FaWhatsapp } from "react-icons/fa";
 
-export default function InfoSection() {
+export default function InfoSection({loading}) {
   const mainPurple = "#cc00cc";
   const accentColors = ["#f3e6ff", "#e0b3ff", "#e0b3ff", "#fff0f6"];
   return (
     <Row className="my-5 align-items-center">
       <Col md={6}>
-        <h2 style={{ color: mainPurple, fontWeight: 700 }}>
-          Kursus Programming yang Santai, Menyenangkan, dan Lengkap!
+        <h2 style={{ color: mainPurple, fontWeight: 700 }} className={loading?"bg-secondary p-3 loading":""}>
+          {loading?"Kursus Programming yang Santai, Menyenangkan, dan Lengkap!":"&nbsp;"}
         </h2>
         <ul style={{ fontSize: "1.1rem", marginTop: 20 }}>
-          <li>
-            <strong>Pembelajaran santai & menyenangkan</strong> – Materi disampaikan dengan penuh semangat dan mudah dipahami.
+          <li className={loading?"bg-secondary p-3 loading":""}>
+            {loading ? (
+              <>$nbsp;</>
+            ) : (
+              <>
+                <strong>Pembelajaran santai & menyenangkan</strong> – Materi disampaikan dengan penuh semangat dan mudah dipahami.
+              </>
+            )}
           </li>
-          <li>
-            <strong>Materi lengkap & detail</strong> – Semua topik dibahas mulai dari dasar hingga praktik nyata.
+          <li className={loading?"bg-secondary p-3 loading":""}>
+            {loading ? (
+              <>$nbsp;</>
+            ) : (
+              <>
+                <strong>Materi lengkap & detail</strong> – Semua topik dibahas mulai dari dasar hingga praktik nyata.
+              </>
+            )}
           </li>
-          <li>
-            <strong>Grup WhatsApp eksklusif</strong> – Dapatkan akses ke grup kursus untuk sharing, diskusi, dan tanya jawab kapan saja.
+          <li className={loading?"bg-secondary p-3 loading":""}>
+            {loading ? (
+              <>$nbsp;</>
+            ) : (
+              <>
+                <strong>Grup WhatsApp eksklusif</strong> – Dapatkan akses ke grup kursus untuk sharing, diskusi, dan tanya jawab kapan saja.
+              </>
+            )}
           </li>
         </ul>
         <Alert
