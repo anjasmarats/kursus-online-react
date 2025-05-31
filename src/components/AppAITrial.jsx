@@ -1,372 +1,284 @@
-import React, { useState } from "react";
-import {
-    Container,
-    Row,
-    Col,
-    Card,
-    Button,
-    Modal,
-    Badge,
-    Navbar,
-    Nav,
-} from "react-bootstrap";
-import { FaInfoCircle, FaStar, FaPlayCircle } from "react-icons/fa";
+import { useEffect, useState } from 'react'
+import '../styles/App.css'
+import NavbarComponent from './NavbarComponent.jsx'
+import axios from 'axios'
+import auth from '../scripts/auth.js'
+import { server_url } from '../scripts/url.js'
+import { Card,Button } from 'react-bootstrap'
+import Swal from 'sweetalert2'
 
-// Dummy data for courses
-const courses = [
-    {
-        id: 1,
-        title: "Dasar Pemrograman Web",
-        poster:
-            "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&w=400&q=80",
-        description:
-            "Pelajari dasar-dasar pemrograman web dengan HTML, CSS, dan JavaScript secara interaktif dan mudah dipahami.",
-        level: "Beginner",
-        rating: 4.8,
-        lessons: 24,
-        duration: "12 Jam",
-        instructor: "Rizky Pratama",
-    },
-    {
-        id: 2,
-        title: "Logika Pemrograman untuk Pemula",
-        poster:
-            "https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=400&q=80",
-        description:
-            "Bangun fondasi logika pemrograman yang kuat untuk memulai perjalanan coding Anda.",
-        level: "Beginner",
-        rating: 4.7,
-        lessons: 18,
-        duration: "8 Jam",
-        instructor: "Dewi Lestari",
-    },
-    {
-        id: 3,
-        title: "Belajar Python dari Nol",
-        poster:
-            "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80",
-        description:
-            "Mulai belajar Python dengan cara yang mudah, menyenangkan, dan penuh praktik.",
-        level: "Beginner",
-        rating: 4.9,
-        lessons: 30,
-        duration: "15 Jam",
-        instructor: "Andi Wijaya",
-    },
-];
+function App() {
+  const [data, setData] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [authorized, setAuthorized] = useState(false)
+  const [error, setError] = useState(null)
+  const [isAdmin, setIsAdmin] = useState(false)
+  const [photo, setPhoto] = useState(null)
+  const [profileData, setProfileData] = useState({
+    name: "",
+    email: "",
+    start_time: "",
+    duration: "",
+    photo: "",
+  })
 
-const brandStyle = {
-    background: "linear-gradient(90deg, #cc00cc 60%, #fff 100%)",
-    borderRadius: "1.5rem",
-    padding: "2.5rem 2rem",
-    color: "#fff",
-    marginBottom: "2.5rem",
-    boxShadow: "0 8px 32px rgba(204,0,204,0.15)",
-};
+  const [editUser, setEditUser] = useState({
+    name: "",
+    email: "",
+    password: "",
+    photo: "",
+  })
 
-const infoButtonStyle = {
-    backgroundColor: "#cc00cc",
-    border: "none",
-    color: "#fff",
-};
+  const formatToIDR = (number) => {
+    // Pastikan input berupa angka
+    const num = typeof number === 'string' ? parseFloat(number) : number;
+    
+    // Memformat angka dengan memisahkan ribuan menggunakan titik dan desimal menggunakan koma
+    return num.toLocaleString('id-ID', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+  }
 
-const App = () => {
-    const [showModal, setShowModal] = useState(false);
-    const [selectedCourse, setSelectedCourse] = useState(null);
+  // const getPhoto = async()=>{
+  //   try {
+  //     const res = await fetch(`${server_url}/api/user/photo`, {
+  //       method: 'GET',
+  //       headers: {
+  //         "Authorization": `Bearer ${localStorage.getItem("session")}`
+  //       }
+  //     })
+      
+  //     if (res.status === 500) {
+  //       setError("Internal Server Error")
+  //       return
+  //     }
 
-    const handleShowModal = (course) => {
-        setSelectedCourse(course);
-        setShowModal(true);
-    };
+  //     if (res.status===200) {
+  //       const blob = await res.blob()
+  //       setPhoto(URL.createObjectURL(blob))
+  //     }
+  //   } catch (error) {
+  //     setError("Error")
+  //     console.error(`error app ${error}`)
+  //     setLoading(false)
+  //   } finally {
+  //     setLoading(false)
+  //   }
+  // }
 
-    const handleCloseModal = () => {
-        setShowModal(false);
-        setSelectedCourse(null);
-    };
+  // const getThumbnail = async(data)=>{
+  //   try {
+  //     const res = await fetch(`${server_url}/api/course/photo`, {
+  //       method: 'GET',
+  //       headers: {
+  //         "Authorization": `Bearer ${data}`
+  //       }
+  //     })
+      
+  //     if (res.status === 500) {
+  //       setError("Internal Server Error")
+  //       return
+  //     }
 
-    return (
-        <div style={{ background: "#f8f0fa", minHeight: "100vh" }}>
-            {/* Navbar */}
-            <Navbar
-                expand="lg"
-                style={{
-                    background: "#cc00cc",
-                    color: "#fff",
-                    marginBottom: "2rem",
-                    borderBottomLeftRadius: "1.5rem",
-                    borderBottomRightRadius: "1.5rem",
-                }}
-                variant="dark"
-            >
-                <Container>
-                    <Navbar.Brand style={{ fontWeight: "bold", fontSize: "1.5rem" }}>
-                        <FaPlayCircle style={{ marginRight: 8 }} />
-                        KursusOnline.id
-                    </Navbar.Brand>
-                    <Nav className="ms-auto">
-                        <Nav.Link href="#" style={{ color: "#fff" }}>
-                            Beranda
-                        </Nav.Link>
-                        <Nav.Link href="#" style={{ color: "#fff" }}>
-                            Kursus
-                        </Nav.Link>
-                        <Nav.Link href="#" style={{ color: "#fff" }}>
-                            Tentang
-                        </Nav.Link>
-                    </Nav>
-                </Container>
-            </Navbar>
+  //     if (res.status===200) {
+  //       const blob = await res.blob()
+  //       return URL.createObjectURL(blob)
+  //     }
+  //   } catch (error) {
+  //     setError("Error")
+  //     console.error(`error app ${error}`)
+  //     setLoading(false)
+  //   } finally {
+  //     setLoading(false)
+  //   }
+  // }
 
-            <Container>
-                {/* Brand Section */}
-                <Row className="align-items-center" style={brandStyle}>
-                    <Col md={7}>
-                        <h1 style={{ fontWeight: 700, fontSize: "2.5rem", color: "#fff" }}>
-                            Belajar Membuat Program Software dengan Mudah dan Nyaman
-                        </h1>
-                        <p style={{ fontSize: "1.25rem", color: "#f3e6f7" }}>
-                            Mulai perjalanan coding Anda bersama kami. Materi interaktif, mentor berpengalaman, dan komunitas suportif siap membantu Anda berkembang dari nol!
-                        </p>
-                        <Button
-                            size="lg"
-                            style={{
-                                background: "#fff",
-                                color: "#cc00cc",
-                                border: "none",
-                                fontWeight: "bold",
-                                marginTop: "1rem",
-                                boxShadow: "0 4px 16px rgba(204,0,204,0.12)",
-                            }}
-                        >
-                            Mulai Belajar Sekarang
-                        </Button>
-                    </Col>
-                    <Col md={5} className="text-center">
-                        <img
-                            src="https://undraw.co/api/illustrations/6b6e1b0e-7c7d-4e2e-8e7b-2e1e2e1e2e1e"
-                            alt="Belajar Programming"
-                            style={{
-                                width: "90%",
-                                maxWidth: 350,
-                                borderRadius: "1.5rem",
-                                boxShadow: "0 8px 32px rgba(204,0,204,0.15)",
-                                border: "4px solid #fff",
-                            }}
-                        />
-                    </Col>
-                </Row>
+      const deleteCourse = async(id,title) => {
+          try {
+              const confirm = await Swal.fire({
+                  title:`Hapus course ${title}`,
+                  showCancelButton:true,
+                  cancelButtonColor:"blue",
+                  showConfirmButton:true,
+                  confirmButtonColor:"red",
+                  confirmButtonText:"Hapus",
+                  cancelButtonText:"Batal"
+              }).then(res=>res.isConfirmed)
+              if (!confirm) {
+                  return
+              }
+              const session = localStorage.getItem("session")
+              await axios.delete(`${server_url}/api/course/${id}`,{
+                  headers:{
+                      Authorization:"Bearer "+session
+                  }
+              })
+              await fetchData()
+          } catch (error) {
+              console.error(`error xchapter ${error}`)
+          }
+      }
 
-                {/* Courses Section */}
-                <div style={{ marginTop: "3rem", marginBottom: "2rem" }}>
-                    <h2
-                        style={{
-                            color: "#cc00cc",
-                            fontWeight: 700,
-                            marginBottom: "1.5rem",
-                            textAlign: "center",
-                        }}
-                    >
-                        Pilihan Kursus Online Untuk Pemula
-                    </h2>
-                    <Row xs={1} md={3} className="g-4">
-                        {courses.map((course) => (
-                            <Col key={course.id}>
-                                <Card
-                                    style={{
-                                        border: "none",
-                                        borderRadius: "1.25rem",
-                                        boxShadow: "0 4px 24px rgba(204,0,204,0.08)",
-                                        background: "#fff",
-                                        transition: "transform 0.2s",
-                                    }}
-                                    className="h-100"
-                                >
-                                    <Card.Img
-                                        variant="top"
-                                        src={course.poster}
-                                        alt={course.title}
-                                        style={{
-                                            borderTopLeftRadius: "1.25rem",
-                                            borderTopRightRadius: "1.25rem",
-                                            height: 180,
-                                            objectFit: "cover",
-                                        }}
-                                    />
-                                    <Card.Body>
-                                        <Badge
-                                            bg="light"
-                                            text="dark"
-                                            style={{
-                                                color: "#cc00cc",
-                                                border: "1px solid #cc00cc",
-                                                marginBottom: 8,
-                                                fontWeight: 600,
-                                            }}
-                                        >
-                                            {course.level}
-                                        </Badge>
-                                        <Card.Title
-                                            style={{
-                                                color: "#cc00cc",
-                                                fontWeight: 700,
-                                                fontSize: "1.15rem",
-                                                marginBottom: 8,
-                                            }}
-                                        >
-                                            {course.title}
-                                        </Card.Title>
-                                        <Card.Text style={{ minHeight: 60 }}>
-                                            {course.description}
-                                        </Card.Text>
-                                        <div
-                                            style={{
-                                                display: "flex",
-                                                alignItems: "center",
-                                                gap: 12,
-                                                marginBottom: 8,
-                                                color: "#cc00cc",
-                                                fontSize: "0.95rem",
-                                            }}
-                                        >
-                                            <span>
-                                                <FaStar color="#cc00cc" /> {course.rating}
-                                            </span>
-                                            <span>
-                                                <FaPlayCircle /> {course.lessons} Materi
-                                            </span>
-                                            <span>
-                                                <FaInfoCircle /> {course.duration}
-                                            </span>
-                                        </div>
-                                        <Button
-                                            variant="primary"
-                                            style={infoButtonStyle}
-                                            onClick={() => handleShowModal(course)}
-                                        >
-                                            <FaInfoCircle style={{ marginRight: 6 }} />
-                                            Info Selengkapnya
-                                        </Button>
-                                    </Card.Body>
-                                    <Card.Footer
-                                        style={{
-                                            background: "#f8f0fa",
-                                            borderBottomLeftRadius: "1.25rem",
-                                            borderBottomRightRadius: "1.25rem",
-                                            border: "none",
-                                            color: "#cc00cc",
-                                            fontWeight: 500,
-                                            fontSize: "0.95rem",
-                                        }}
-                                    >
-                                        Mentor: {course.instructor}
-                                    </Card.Footer>
-                                </Card>
-                            </Col>
-                        ))}
-                    </Row>
+  const fetchData = async () => {
+    try {
+      setLoading(true)
+      const {result,adminuser} = await auth()
+      if (result) {
+        const res = await axios.get(`${server_url}/api/user`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("session")}`
+          }
+        })
+        const result = await res.data
+        const { name,email,activation_time,photo } = result.user
+        if (activation_time) {
+          const { time,date } = JSON.parse(activation_time)
+          setProfileData({
+            ...profileData,
+            start_time: date,
+            duration: time?JSON.parse(time).month:"",
+          })
+        }
+        setProfileData({
+          ...profileData,
+          name,
+          email,
+          photo
+        })
+
+        setEditUser({
+          ...editUser,
+          name,
+          email,
+          photo
+        })
+
+        // await getPhoto()
+        if (adminuser) {
+          setIsAdmin(true)
+        }
+        setAuthorized(true)
+      }
+      const response = await axios.get(`${server_url}/api/courses`)
+      const res = await response.data
+      for (let i = 0; i < res.courses.length; i++) {
+        const price = res.courses[i].price
+        res.courses[i].price = formatToIDR(price)
+      }
+      setData(res.courses)
+      setLoading(false)
+    } catch (error) {
+      if (error.response && error.response.status === 500) {
+        setError("Internal Server Error")
+      }
+      console.error(`error app ${error}`)
+      setLoading(false)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchData()
+  }, [])
+
+  const a = ''
+
+  console.log("data = ",data)
+  return (
+    <>
+      <main className='app'>
+        <NavbarComponent {...{editUser,loading,authorized,fetchData,setEditUser,isAdmin}}/>
+        <section className={`${isAdmin?'':'my-5 p-3'} brand ${loading?'container mx-auto w-100 loading bg-secondary rounded-5':isAdmin?`d-none`:`d-lg-flex flex-row-reverse justify-content-between align-items-center`}`}>
+          <aside className='text-center col-12 col-lg-6 my-4'>
+            <img src="/dev-hiapps.jpg" className={`img rounded-circle ${loading?'d-none':''}`} alt=""/>
+          </aside>
+          <aside className={`col-12 col-lg-6 ${loading?'mx-auto w-25 loading bg-secondary rounded-5':''} text-center ${!authorized&&'font-brand'}`}>
+            {loading?<>&nbsp;</>:authorized ?
+            (
+            <>
+              {/* <div className="name">
+              </div>
+              <div className="email">
+              <h5 className={`${authorized?'profiledata-email text-wrap':'fw-bolder display-5'} text-center`}>{profileData.email}</h5>
+              </div> */}
+              <div className={`${authorized?'profiledata-name':'display-4'} text-center fw-bolder`}>
+                Halo, {profileData.name} <br />Selamat Belajar
+              </div>
+              <div className="periode">
+                {profileData.duration&&profileData.start_time&&<h5 className={`${authorized?'':'text-center'} fw-bolder display-5`}>Masa berlaku {profileData.duration} (sejak {profileData.start_time})</h5>}
+              </div>
+            </>
+          ):(
+            <>
+              Hi AppS<br/>Belajar Membuat Program Software<br/>dengan Mudah dan Nyaman
+            </>
+          )}
+          </aside>
+        </section>
+        <section className="courses container-fluid">
+          <div className={`container ${isAdmin?'':'my-5'}`}>
+              {isAdmin ?
+              (
+                <div className={`d-flex justify-content-between align-items-center py-4 container`}>
+                  <span className='fw-bolder fs-3'>Courses</span>
+                  <a href="/post/course" className='btn btn-primary'>Kursus Baru</a>
                 </div>
-            </Container>
-
-            {/* Modal for Course Info */}
-            <Modal
-                show={showModal}
-                onHide={handleCloseModal}
-                size="lg"
-                centered
-                backdrop="static"
-            >
-                {selectedCourse && (
-                    <>
-                        <Modal.Header
-                            closeButton
-                            style={{ background: "#cc00cc", color: "#fff" }}
-                        >
-                            <Modal.Title>
-                                <FaInfoCircle style={{ marginRight: 8 }} />
-                                {selectedCourse.title}
-                            </Modal.Title>
-                        </Modal.Header>
-                        <Modal.Body style={{ background: "#f8f0fa" }}>
-                            <Row>
-                                <Col md={5} className="mb-3 mb-md-0">
-                                    <img
-                                        src={selectedCourse.poster}
-                                        alt={selectedCourse.title}
-                                        style={{
-                                            width: "100%",
-                                            borderRadius: "1rem",
-                                            boxShadow: "0 4px 16px rgba(204,0,204,0.10)",
-                                        }}
-                                    />
-                                </Col>
-                                <Col md={7}>
-                                    <h4 style={{ color: "#cc00cc", fontWeight: 700 }}>
-                                        {selectedCourse.title}
-                                    </h4>
-                                    <p>{selectedCourse.description}</p>
-                                    <ul style={{ paddingLeft: 18 }}>
-                                        <li>
-                                            <strong>Level:</strong> {selectedCourse.level}
-                                        </li>
-                                        <li>
-                                            <strong>Rating:</strong> {selectedCourse.rating} / 5
-                                        </li>
-                                        <li>
-                                            <strong>Jumlah Materi:</strong> {selectedCourse.lessons}
-                                        </li>
-                                        <li>
-                                            <strong>Durasi:</strong> {selectedCourse.duration}
-                                        </li>
-                                        <li>
-                                            <strong>Mentor:</strong> {selectedCourse.instructor}
-                                        </li>
-                                    </ul>
-                                    <Button
-                                        variant="outline-primary"
-                                        style={{
-                                            borderColor: "#cc00cc",
-                                            color: "#cc00cc",
-                                            fontWeight: "bold",
-                                        }}
-                                    >
-                                        Daftar Kursus Ini
-                                    </Button>
-                                </Col>
-                            </Row>
-                        </Modal.Body>
-                    </>
-                )}
-            </Modal>
-
-            {/* Footer */}
-            <footer
-                style={{
-                    background: "#cc00cc",
-                    color: "#fff",
-                    textAlign: "center",
-                    padding: "1.5rem 0 0.5rem 0",
-                    marginTop: "3rem",
-                    borderTopLeftRadius: "1.5rem",
-                    borderTopRightRadius: "1.5rem",
-                }}
-            >
-                <div>
-                    <strong>KursusOnline.id</strong> &copy; {new Date().getFullYear()} &mdash; Belajar Programming Mudah & Nyaman
+              )
+              :
+              (
+                <h1 className={`text-center fw-bolder display-4 ${loading&&'loading bg-secondary rounded-5'}`}>{!loading&&'Courses'}</h1>
+              )}
+              {loading ? 
+              <div className='row loading-main my-5'>
+                <div className="col-lg-4 col-sm-6 col-11">
+                  <div className="w-100 bg-secondary m-4 rounded-3">&nbsp;</div>
                 </div>
-                <div style={{ fontSize: "0.95rem", marginTop: 4 }}>
-                    Temukan kami di{" "}
-                    <a
-                        href="https://instagram.com/"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        style={{ color: "#fff", textDecoration: "underline" }}
-                    >
-                        Instagram
-                    </a>
+                <div className="col-lg-4 col-sm-6 col-11">
+                  <div className="w-100 bg-secondary m-4 rounded-3">&nbsp;</div>
                 </div>
-            </footer>
-        </div>
-    );
-};
+                <div className="col-lg-4 col-sm-6 col-11">
+                  <div className="w-100 bg-secondary m-4 rounded-3">&nbsp;</div>
+                </div>
+              </div>
+              :
+              error ? 
+              <div className='fw-bolder text-danger display-5 text-center mx-auto mt-5'>{error}</div>
+              : (
+                <>
+                  <aside className='row overflow-auto'>
+                    {data&&data.length>0&&data.map((v,k) => (
+                      <div key={k} className='col-12 col-lg-4'>
+                        <Card className='mb-3'>
+                          <Card.Img variant="top" src={`${server_url}/courses/thumbnails/${v.image}`} className='rounded-top-3'/>
+                          <Card.Body>
+                            <Card.Title className='fs-4'>{v.price}</Card.Title>
+                            <Card.Text className='d-flex flex-column justify-content-center'>
+                              <span className='text-wrap course-description'>{v.title}</span>
+                              <span className='my-2 text-wrap'>{v.description}</span>
+                            </Card.Text>
+                            {isAdmin?(
+                              <aside className='d-flex justify-content-between'>
+                                <Button variant="danger" className='w-100 mx-2' onClick={()=>deleteCourse(v.courseId,v.title)}>Hapus</Button>
+                                <Button variant="primary" className='w-100 mx-2' href={`/edit/course/${v.courseId}`}>Edit</Button>
+                              </aside>
+                            ):(
+                              <Button variant="success w-100 fw-bolder fs-4">Beli</Button>
+                            )}
+                          </Card.Body>
+                        </Card>
+                      </div>
+                    ))}
+                  </aside>
+                </>
+              )
+              }
+          </div>
+        </section>
+      </main>
+    </>
+  )
+}
 
-export default App;
+export default App
