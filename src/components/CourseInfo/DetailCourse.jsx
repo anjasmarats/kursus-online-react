@@ -25,9 +25,11 @@ import auth from "../../scripts/auth";
 import { server_url } from "../../scripts/url";
 import ListChapters from "./ListChapters";
 import ModalDetailVideo from "./ModalDetailVideo";
+import { useAppSelector } from "../../app/hooks";
 
 // Main component
 const DetailCourse = () => {
+    const profileData = useAppSelector((state) => state.account_data);
     const [loading,setLoading] = useState(false)
     const [currentVideo, setCurrentVideo] = useState({});
     const [thumbnail,setThumbnail] = useState()
@@ -137,87 +139,10 @@ const DetailCourse = () => {
             }
         } catch (error) {
             console.error("error edit course",error)            
+        } finally {
+            setLoading(false)
         }
     },[chapter.title,chapter.chapterNote,chapter.video])
-
-    // const getChapterVideo = async(data)=>{
-    //     try {
-    //         console.log("idCourse",idCourse)
-    //         const { courseId,chapterId } = data
-    //         // const res = await fetch(`${server_url}/api/course/${courseId}/chapter/${chapterId}/video`, {
-    //         //     method: 'GET',
-    //         //     headers: {
-    //         //     "Authorization": `Bearer ${localStorage.getItem("session")}`
-    //         //     }
-    //         // })
-
-    //         const response = await axios.get(`${server_url}/api/course/${courseId}/chapter/${chapterId}/video`, {
-    //             responseType: 'blob', // Ini sangat penting!
-    //             headers:{
-    //                 Authorization:`Bearer ${localStorage.getItem("session")}`
-    //             }
-    //         });
-        
-    //         if (response.status===200) {
-    //             // Ekstrak nama file dari header Content-Disposition jika ada,
-    //             // atau gunakan nama file yang kita minta.
-    //             // Header Content-Disposition biasanya seperti: "attachment; filename="nama-asli-file.ekstensi""
-    //             const contentDisposition = response.headers['content-disposition'];
-    //             let actualFileName = fileNameToDownload; // Default
-
-    //             if (contentDisposition) {
-    //                 const filenameMatch = contentDisposition.match(/filename="?(.+?)"?$/);
-    //                 if (filenameMatch && filenameMatch.length > 1) {
-    //                 actualFileName = filenameMatch[1];
-    //                 }
-    //             }
-                
-    //             console.log('Response headers:', response.headers);
-    //             console.log('Nama file yang akan diunduh:', actualFileName);
-
-    //             // Buat URL objek dari blob
-    //             // Blob adalah objek mirip file yang berisi data mentah (immutable).
-    //             const url = window.URL.createObjectURL(new Blob([response.data]));
-    //             return url
-    //         }
-    //     } catch (error) {
-    //       setError("Error")
-    //       if (error.response) {
-    //         console.error("error app = "+error)
-    //       }
-    //       console.error(`error app ${error}`)
-    //       setLoading(false)
-    //     } finally {
-    //       setLoading(false)
-    //     }
-    //   }
-
-    //   const getThumbnail = async(data)=>{
-    //     try {
-    //       const res = await fetch(`${server_url}/api/course/photo`, {
-    //         method: 'GET',
-    //         headers: {
-    //           "Authorization": `Bearer ${data}`
-    //         }
-    //       })
-          
-    //       if (res.status === 500) {
-    //         setError("Internal Server Error")
-    //         return
-    //       }
-    
-    //       if (res.status===200) {
-    //         const blob = await res.blob()
-    //         return URL.createObjectURL(blob)
-    //       }
-    //     } catch (error) {
-    //       setError("Error")
-    //       console.error(`error app ${error}`)
-    //       setLoading(false)
-    //     } finally {
-    //       setLoading(false)
-    //     }
-    //   }
 
     const fetchData = useCallback(async () => {
         try {
@@ -297,18 +222,6 @@ const DetailCourse = () => {
         setIsPlaying(true);
     },[]);
 
-    // // Handler to toggle play/pause
-    // const handlePlayPause = () => {
-    //     setIsPlaying((prev) => !prev);
-    // };
-
-    // // Handler to toggle favorite
-    // const handleFavorite = (id) => {
-    //     setFavorites((prev) =>
-    //         prev.includes(id) ? prev.filter((fid) => fid !== id) : [...prev, id]
-    //     );
-    // };
-
     // Handler for next/previous video
     const handleNextPrev = useCallback((direction) => {
         const idx = course.chapters.findIndex((v) => v.id === currentVideo.id);
@@ -327,6 +240,8 @@ const DetailCourse = () => {
             thumbnail,
         });
     },[course])
+
+    console.log("profileData",profileData)
 
     return (
         <Container
@@ -356,9 +271,9 @@ const DetailCourse = () => {
                                 {!loading&&course.title}
                             </h2>
                         </Col>
-                        <Col className="text-end">
+                        {profileData.role==="admin"&&(<Col className="text-end">
                             <FaEdit size={36} onClick={()=>courseEdit()} style={{cursor:"pointer"}}/>
-                        </Col>
+                        </Col>)}
                     </Row>
                 </Card.Title>
 

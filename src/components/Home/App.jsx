@@ -15,6 +15,9 @@ import auth from "../../scripts/auth";
 import axios from "axios";
 import { server_url } from "../../scripts/url";
 import ConfirmSubscription from "./ConfirmSubscription";
+import { useAppSelector,useAppDispatch } from "../../app/hooks";
+import { set_name,set_email,set_start_time,set_duration, set_photo, set_role } from "../../scripts/profiledataedit";
+import { Link } from "react-router-dom";
 
 const mainPurple = "#cc00cc";
 const accentColors = ["#f3e6ff", "#e0b3ff", "#e0b3ff", "#fff0f6"];
@@ -35,13 +38,8 @@ export default function App() {
   const [error, setError] = useState(null)
   const [isAdmin, setIsAdmin] = useState(false)
   const [photo, setPhoto] = useState(null)
-  const [profileData, setProfileData] = useState({
-    name: "",
-    email: "",
-    start_time: "",
-    duration: "",
-    photo: "",
-  })
+  const profileData = useAppSelector((state) => state.account_data);
+  const dispatch = useAppDispatch();
 
   const [editUser, setEditUser] = useState({
     name: "",
@@ -106,18 +104,12 @@ export default function App() {
         const { name,email,activation_time,photo } = result.user
         if (activation_time) {
           const { time,date } = JSON.parse(activation_time)
-          setProfileData({
-            ...profileData,
-            start_time: date,
-            duration: time?JSON.parse(time).month:"",
-          })
+          dispatch(set_start_time(time))
+          dispatch(set_duration(date))
         }
-        setProfileData({
-          ...profileData,
-          name,
-          email,
-          photo
-        })
+        dispatch(set_name(name))
+        dispatch(set_email(email))
+        dispatch(set_photo(photo))
 
         setEditUser({
           ...editUser,
@@ -128,7 +120,10 @@ export default function App() {
 
         // await getPhoto()
         if (adminuser) {
+          dispatch(set_role("admin"))
           setIsAdmin(true)
+        } else {
+          dispatch(set_role("user"))
         }
         setAuthorized(true)
       }
@@ -139,7 +134,7 @@ export default function App() {
         res.courses[i].price = formatToIDR(price)
       }
       setData(res.courses)
-      // setLoading(false)
+      setLoading(false)
     } catch (error) {
       if (error.response && error.response.status === 500) {
         setError("Internal Server Error")
@@ -147,7 +142,7 @@ export default function App() {
       console.error(`error app ${error}`)
       setLoading(false)
     } finally {
-      // setLoading(false)
+      setLoading(false)
     }
   }
 
@@ -185,32 +180,35 @@ export default function App() {
               Daftar Kursus
             </h3>
           )}
-          <Button
-            variant={loading?"secondary":""}
-            style={{
-              background: loading?"":mainPurple,
-              border: "none",
-              fontWeight: "bold",
-              borderRadius: 24,
-              boxShadow: "0 2px 8px rgba(204,0,204,0.10)",
-              display: "flex",
-              alignItems: "center",
-              gap: 8,
-              fontSize: 18,
-              padding: "8px 20px",
-            }}
-            href="/post/course"
-            disabled={loading}
-            className={loading?"loading":""}
-          >
-            {loading ? (
-              <div className="bg-secondary loading px-5">&nbsp;</div>
-            ) : (
-              <>
-                <FaPlusCircle className="me-2" /> Tambah Kursus Baru
-              </>
+            {isAdmin&&(
+              <Link to={"/post/course"} className="text-decoration-none">
+                <Button
+                  variant={loading?"secondary":""}
+                  style={{
+                    background: loading?"":mainPurple,
+                    border: "none",
+                    fontWeight: "bold",
+                    borderRadius: 24,
+                    boxShadow: "0 2px 8px rgba(204,0,204,0.10)",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 8,
+                    fontSize: 18,
+                    padding: "8px 20px",
+                  }}
+                  disabled={loading}
+                  className={loading?"loading":""}
+                >
+                  {loading ? (
+                    <div className="bg-secondary loading px-5">&nbsp;</div>
+                  ) : (
+                    <div className="text-light">
+                      <FaPlusCircle className="me-2" /> Tambah Kursus Baru
+                    </div>
+                  )}
+                </Button>
+              </Link>
             )}
-          </Button>
         </div>
         <Row className="g-4">
           {data&&data.length>0&&data.map((course,key) => (
@@ -253,22 +251,25 @@ export default function App() {
                         </Button>
                         {isAdmin && (
                           <div className="d-flex gap-2 m-2">
-                            <Button
-                              variant="outline-success"
-                              size="sm"
-                              style={{
-                                borderRadius: 20,
-                                fontWeight: "bold",
-                                borderWidth: 2,
-                                borderColor: "#28a745",
-                                color: "#28a745",
-                                background: "#eaffea",
-                                transition: "background 0.2s, color 0.2s",
-                              }}
-                              href={`edit/course/${course.id}`}
+                            <Link
+                              to={`edit/course/${course.courseId}`}
                             >
-                              <FaEdit className="me-1" /> Edit
-                            </Button>
+                              <Button
+                                variant="outline-success"
+                                size="sm"
+                                style={{
+                                  borderRadius: 20,
+                                  fontWeight: "bold",
+                                  borderWidth: 2,
+                                  borderColor: "#28a745",
+                                  color: "#28a745",
+                                  background: "#eaffea",
+                                  transition: "background 0.2s, color 0.2s",
+                                }}
+                              >
+                                <FaEdit className="me-1" /> Edit
+                              </Button>
+                            </Link>
                             <Button
                               variant="outline-danger"
                               size="sm"

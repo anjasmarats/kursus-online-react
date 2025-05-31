@@ -1,10 +1,11 @@
 import React from "react";
 import { ListGroup,Card,OverlayTrigger,Tooltip, Row,Col,Button } from "react-bootstrap";
-import { FaPlayCircle,FaChevronRight,FaChevronLeft } from "react-icons/fa";
+import { FaPlayCircle,FaChevronRight,FaChevronLeft, FaPlusCircle } from "react-icons/fa";
 import { MdModeEditOutline } from "react-icons/md";
 import { RiDeleteBin5Fill } from "react-icons/ri";
 import { server_url } from "../../scripts/url";
 import "../../styles/ListChapters.css"
+import { useAppSelector } from "../../app/hooks";
 
 const ListChapters=React.memo(({
         isPlaying,
@@ -22,7 +23,8 @@ const ListChapters=React.memo(({
         setShow,
         thumbnail
     })=>{
-
+    const profileData = useAppSelector((state) => state.account_data);
+    
     return (
         <Row>
                 {/* Playlist Sidebar */}
@@ -90,7 +92,7 @@ const ListChapters=React.memo(({
                                             {video.duration}
                                         </div>
                                     </Col>
-                                    <Col xs={3} className="text-end">
+                                    {profileData.role==="admin"&&(<Col xs={3} className="text-end">
                                         <OverlayTrigger
                                             placement="top"
                                             overlay={
@@ -130,10 +132,28 @@ const ListChapters=React.memo(({
                                                 <RiDeleteBin5Fill color={currentVideo.id === video.id?"white":"#cc00cc"} size={28}/>
                                             </span>
                                         </OverlayTrigger>
-                                    </Col>
+                                    </Col>)}
                                 </Row>
                             </ListGroup.Item>
                         ))}
+                        <div className="d-flex justify-content-end my-4">
+                            <button
+                                className="btn btn-gradient-primary d-flex align-items-center px-4 py-2 shadow rounded-pill border-0"
+                                style={{
+                                    background: "linear-gradient(90deg, #6366f1 0%, #60a5fa 100%)",
+                                    color: "#fff",
+                                    fontWeight: 600,
+                                    fontSize: "1.1rem",
+                                    transition: "transform 0.15s, box-shadow 0.15s",
+                                    boxShadow: "0 4px 16px rgba(99,102,241,0.15)",
+                                }}
+                                onMouseOver={e => (e.currentTarget.style.transform = "scale(1.05)")}
+                                onMouseOut={e => (e.currentTarget.style.transform = "scale(1)")}
+                            >
+                                <FaPlusCircle className="me-2" size={22} />
+                                Buat Chapter Baru
+                            </button>
+                        </div>
                     </ListGroup>
                 </Col>
 
