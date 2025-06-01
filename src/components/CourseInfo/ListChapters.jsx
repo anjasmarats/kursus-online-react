@@ -37,111 +37,140 @@ const ListChapters=React.memo(({
                         background: "rgba(255,255,255,0.7)",
                         borderRadius: "18px 0 0 18px",
                         boxShadow: "2px 0 16px #e0e7ff",
+                        display: "flex",
+                        flexDirection: "column",
+                        padding: 0,
                     }}
                 >
-                    <ListGroup variant="flush">
-                        {loading&&(
-                            <>
-                                <Row className="bg-secondary py-4 rounded-3 m-2" style={{ animation:"loading 1.5s infinite" }}>&nbsp;</Row>
-                                <Row className="bg-secondary py-4 rounded-3 m-2" style={{ animation:"loading 1.5s infinite" }}>&nbsp;</Row>
-                                <Row className="bg-secondary py-4 rounded-3 m-2" style={{ animation:"loading 1.5s infinite" }}>&nbsp;</Row>
-                                <Row className="bg-secondary py-4 rounded-3 m-2" style={{ animation:"loading 1.5s infinite" }}>&nbsp;</Row>
-                            </>
-                        )}
-                        {!loading&&chapters.map((video, idx) => (
-                            <ListGroup.Item
-                                key={video.id}
-                                active={currentVideo.id === video.id}
-                                onClick={() => handleSelectVideo(video)}
-                                style={{
-                                    cursor: "pointer",
-                                    background:
-                                        currentVideo.id === video.id
-                                            ? "#cc00cc"
-                                            : hovered === video.id
-                                            ? "#f1f5f9"
-                                            : "transparent",
-                                    color: currentVideo.id === video.id ? "#fff" : "#3b3b5c",
-                                    border: "none",
-                                    borderRadius: "12px",
-                                    marginBottom: "8px",
-                                    transition: "background 0.2s",
-                                    boxShadow:
-                                        currentVideo.id === video.id
-                                            ? "0 2px 12px #a5b4fc"
-                                            : "none",
-                                }}
-                                onMouseEnter={() => setHovered(video.id)}
-                                onMouseLeave={() => setHovered(null)}
-                            >
-                                <Row className="align-items-center">
-                                    <Col xs={2} className="text-center">
-                                        <FaPlayCircle color={currentVideo.id === video.id?"white":"#cc00cc"} size={22} />
-                                    </Col>
-                                    <Col>
-                                        <div className="fw-semibold">{video.title}</div>
-                                        <div
-                                            className="small"
-                                            style={{
-                                                color:
-                                                    currentVideo.id === video.id
-                                                        ? "#e0e7ff"
-                                                        : "#64748b",
-                                            }}
-                                        >
-                                            {video.duration}
-                                        </div>
-                                    </Col>
-                                    {profileData.role==="admin"&&(<Col xs={3} className="text-end">
-                                        <OverlayTrigger
-                                            placement="top"
-                                            overlay={
-                                                <Tooltip>
-                                                    Edit chapter
-                                                </Tooltip>
-                                            }
-                                        >
-                                            <span
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    viewChapter(video.title,video.video,video.chapterNote,video.id)
+                    <ListGroup
+                        variant="flush"
+                        style={{
+                            flex: 1,
+                            display: "flex",
+                            flexDirection: "column",
+                            position: "relative",
+                            minHeight: "70vh",
+                        }}
+                    >
+                        <div style={{ flex: 1 }}>
+                            {loading && (
+                                <>
+                                    <Row className="bg-secondary py-4 rounded-3 m-2" style={{ animation: "loading 1.5s infinite" }}>&nbsp;</Row>
+                                    <Row className="bg-secondary py-4 rounded-3 m-2" style={{ animation: "loading 1.5s infinite" }}>&nbsp;</Row>
+                                    <Row className="bg-secondary py-4 rounded-3 m-2" style={{ animation: "loading 1.5s infinite" }}>&nbsp;</Row>
+                                    <Row className="bg-secondary py-4 rounded-3 m-2" style={{ animation: "loading 1.5s infinite" }}>&nbsp;</Row>
+                                </>
+                            )}
+                            {!loading && chapters.map((video, idx) => (
+                                <ListGroup.Item
+                                    key={video.id}
+                                    active={currentVideo.id === video.id}
+                                    onClick={() => handleSelectVideo(video)}
+                                    style={{
+                                        cursor: "pointer",
+                                        background:
+                                            currentVideo.id === video.id
+                                                ? "#cc00cc"
+                                                : hovered === video.id
+                                                ? "#f1f5f9"
+                                                : "transparent",
+                                        color: currentVideo.id === video.id ? "#fff" : "#3b3b5c",
+                                        border: "none",
+                                        borderRadius: "12px",
+                                        marginBottom: "8px",
+                                        transition: "background 0.2s",
+                                        boxShadow:
+                                            currentVideo.id === video.id
+                                                ? "0 2px 12px #a5b4fc"
+                                                : "none",
+                                    }}
+                                    onMouseEnter={() => setHovered(video.id)}
+                                    onMouseLeave={() => setHovered(null)}
+                                >
+                                    <Row className="align-items-center">
+                                        <Col xs={2} className="text-center">
+                                            <FaPlayCircle color={currentVideo.id === video.id ? "white" : "#cc00cc"} size={22} />
+                                        </Col>
+                                        <Col>
+                                            <div className="fw-semibold">{video.title}</div>
+                                            <div
+                                                className="small"
+                                                style={{
+                                                    color:
+                                                        currentVideo.id === video.id
+                                                            ? "#e0e7ff"
+                                                            : "#64748b",
                                                 }}
-                                                style={{ cursor: "pointer" }}
                                             >
-                                                <MdModeEditOutline color={currentVideo.id === video.id?"white":"#cc00cc"} size={28} onClick={()=>{
-                                                    setChapter({...chapter, title:video.title, video:video.video, chapterNote:video.chapterNote})
-                                                    setShow(true)
-                                                }}/>
-                                            </span>
-                                        </OverlayTrigger>
-                                        <OverlayTrigger
-                                            placement="top"
-                                            overlay={
-                                                <Tooltip>
-                                                    Hapus chapter
-                                                </Tooltip>
-                                            }
-                                        >
-                                            <span
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    deleteChapter(video.title,video.id)
-                                                }}
-                                                style={{ cursor: "pointer" }}
-                                            >
-                                                <RiDeleteBin5Fill color={currentVideo.id === video.id?"white":"#cc00cc"} size={28}/>
-                                            </span>
-                                        </OverlayTrigger>
-                                    </Col>)}
-                                </Row>
-                            </ListGroup.Item>
-                        ))}
-                        <div className="d-flex justify-content-end my-4">
+                                                {video.duration}
+                                            </div>
+                                        </Col>
+                                        {profileData.role === "admin" && (
+                                            <Col xs={3} className="text-end">
+                                                <OverlayTrigger
+                                                    placement="top"
+                                                    overlay={
+                                                        <Tooltip>
+                                                            Edit chapter
+                                                        </Tooltip>
+                                                    }
+                                                >
+                                                    <span
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            viewChapter(video.title, video.video, video.chapterNote, video.id)
+                                                        }}
+                                                        style={{ cursor: "pointer" }}
+                                                    >
+                                                        <MdModeEditOutline color={currentVideo.id === video.id ? "white" : "#cc00cc"} size={28} onClick={() => {
+                                                            setChapter({ ...chapter, title: video.title, video: video.video, chapterNote: video.chapterNote })
+                                                            setShow(true)
+                                                        }} />
+                                                    </span>
+                                                </OverlayTrigger>
+                                                <OverlayTrigger
+                                                    placement="top"
+                                                    overlay={
+                                                        <Tooltip>
+                                                            Hapus chapter
+                                                        </Tooltip>
+                                                    }
+                                                >
+                                                    <span
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            deleteChapter(video.title, video.id)
+                                                        }}
+                                                        style={{ cursor: "pointer" }}
+                                                    >
+                                                        <RiDeleteBin5Fill color={currentVideo.id === video.id ? "white" : "#cc00cc"} size={28} />
+                                                    </span>
+                                                </OverlayTrigger>
+                                            </Col>
+                                        )}
+                                    </Row>
+                                </ListGroup.Item>
+                            ))}
+                        </div>
+                        <div
+                            className={loading?"d-flex justify-content-center bg-secondary loading":"d-flex justify-content-center"}
+                            style={{
+                                position: "sticky",
+                                bottom: 0,
+                                left: 0,
+                                width: "100%",
+                                background: loading?"none":"rgba(255,255,255,0.9)",
+                                zIndex: 2,
+                                paddingTop: "16px",
+                                paddingBottom: "16px",
+                                borderRadius: "0 0 18px 0",
+                            }}
+                        >
                             <button
-                                className="btn btn-gradient-primary d-flex align-items-center px-4 py-2 shadow rounded-pill border-0"
+                                className={loading?"btn loading btn-secondary d-flex align-items-center px-4 py-2 shadow rounded-pill border-0":"btn btn-gradient-primary d-flex align-items-center px-4 py-2 shadow rounded-pill border-0"}
                                 style={{
-                                    background: "linear-gradient(90deg, #6366f1 0%, #60a5fa 100%)",
-                                    color: "#fff",
+                                    background: loading?"secondary":"linear-gradient(90deg, #6366f1 0%, #60a5fa 100%)",
+                                    color: loading?"":"#fff",
                                     fontWeight: 600,
                                     fontSize: "1.1rem",
                                     transition: "transform 0.15s, box-shadow 0.15s",
@@ -150,14 +179,18 @@ const ListChapters=React.memo(({
                                 onMouseOver={e => (e.currentTarget.style.transform = "scale(1.05)")}
                                 onMouseOut={e => (e.currentTarget.style.transform = "scale(1)")}
                             >
-                                <FaPlusCircle className="me-2" size={22} />
-                                Buat Chapter Baru
+                                {loading ? (
+                                    <div className="bg-secondary loading p-2">&nbsp;</div>
+                                ) : (
+                                    <>
+                                        <FaPlusCircle className="me-2" size={22} />
+                                        Buat Chapter Baru
+                                    </>
+                                )}
                             </button>
                         </div>
                     </ListGroup>
                 </Col>
-
-                {/* Video Player Section */}
                 {loading?(
                     <Col md={8} style={{ animation:"loading 1.5s infinite" }} className="bg-secondary p-5"></Col>
                 ) : (

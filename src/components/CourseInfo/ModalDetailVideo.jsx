@@ -13,7 +13,8 @@ const ModalDetailVideo = ({
         course,
         changeThumbnail,
         closeViewChapter,
-        loading
+        loading,
+        setThumbnail
     }) =>{
     return (
         <Modal
@@ -243,6 +244,7 @@ const ModalDetailVideo = ({
                                         ...chapter,
                                         video: e.target.files[0],
                                     });
+                                    setThumbnail(e.target.files[0])
                                 }
                             }}
                             style={{

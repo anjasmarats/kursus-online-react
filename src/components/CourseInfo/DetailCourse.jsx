@@ -346,7 +346,8 @@ const DetailCourse = () => {
                 setChapter,
                 course,
                 changeThumbnail,
-                loading
+                loading,
+                setThumbnail
             }}/>
         </Container>
     );
