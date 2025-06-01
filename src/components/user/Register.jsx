@@ -1,12 +1,12 @@
-import NavbarComponent from './NavbarComponent';
+import NavbarComponent from '../NavbarComponent';
 import { Form,Button, InputGroup, Alert } from 'react-bootstrap';
-import auth from '../scripts/auth';
-import { useNavigate } from 'react-router-dom'
-import { useEffect, useState } from 'react';
+import auth from '../../scripts/auth';
+import { Link, useNavigate } from 'react-router-dom'
+import { useState } from 'react';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import axios from 'axios';
-import { server_url } from '../scripts/url';
-import { set_duration, set_email, set_name, set_role } from '../scripts/profiledataedit';
+import { server_url } from '../../scripts/url';
+import { set_duration, set_email, set_name, set_role } from '../../scripts/profiledataedit';
 import { useDispatch } from 'react-redux';
 
 function Register(props) {
@@ -14,7 +14,7 @@ function Register(props) {
     const navigate = useNavigate()
     const [error, setError] = useState(null)
     const [showPassword, setShowPassword] = useState(false)
-    const [register,setRegister] = useState(true)
+    const [register,setRegister] = useState(false)
     const [data, setData] = useState({
         name: "",
         email: "",
@@ -135,12 +135,10 @@ function Register(props) {
         }
     }
 
-    useEffect(() => {
-        cekAuth()
-        if (loginPage) {
-            setRegister(false)
-        }
-    }, [])
+    console.log("register&&!loginPage",register&&!loginPage)
+    console.log("loginPage",loginPage)
+
+    console.log("register",register)
     return(
         <main className='register'>
             <NavbarComponent/>
@@ -148,8 +146,8 @@ function Register(props) {
                 {error&&(<Alert variant='danger' key={"danger"} className='col-lg-4 col-sm-8 col-10 mx-auto mt-5 mb-3'>{error}</Alert>)}
                 <section className='row'>
                 <aside className={`col-lg-4 col-sm-8 col-10 mx-auto ${error&&'my-5'} shadow-lg rounded-3 py-3 px-2`}>
-                    <Form onSubmit={register?Register:Login}>
-                        {register&&(
+                    <Form onSubmit={register&&!loginPage?Register:Login}>
+                        {register&&!loginPage&&(
                             <Form.Group className="mb-3" controlId="formBasicName">
                                 <Form.Label>Nama</Form.Label>
                                 <Form.Control required={true} type="search" onChange={(e)=>setData({...data,name:e.target.value})} placeholder="Nama" />
@@ -171,10 +169,10 @@ function Register(props) {
                             </InputGroup>
                         </Form.Group>
                         <Button variant="primary" type="submit">
-                            {register?"Daftar":"Login"}
+                            {register&&!loginPage?"Daftar":"Login"}
                         </Button>
                     </Form>
-                    <div className='text-center my-3'>{register?"Sudah punya akun?":"Belum punya akun?"} <a onClick={()=>setRegister(!register)} style={{ "cursor":"pointer" }} className='text-success text-decoration-none'>{register?"Login di sini":"Daftar di sini"}</a></div>
+                    <div className='text-center my-3'>{register&&!loginPage?"Sudah punya akun?":"Belum punya akun?"} <a style={{ "cursor":"pointer" }} onClick={()=>setRegister(!register)} className='text-success text-decoration-none'>{register&&!loginPage?"Login di sini":"Daftar di sini"}</a></div>
                 </aside>
                 </section>
             </article>

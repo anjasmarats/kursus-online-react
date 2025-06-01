@@ -14,18 +14,20 @@ const ModalDetailVideo = ({
         changeThumbnail,
         closeViewChapter,
         loading,
-        setThumbnail
+        setThumbnail,
+        postChapter,
+        showNewChapter,
     }) =>{
     return (
         <Modal
-            show={show}
+            show={show||showNewChapter}
             onHide={closeViewChapter}
             centered
             size="lg"
             backdrop="static"
             contentClassName="border-0"
         >
-            <form onSubmit={showFormEditCourse?editCourse:editChapter}>
+            <form onSubmit={postChapter!==null?postChapter:showFormEditCourse?editCourse:editChapter}>
                 <Modal.Header
                 closeButton
                 style={{
@@ -43,7 +45,7 @@ const ModalDetailVideo = ({
                         fontSize: "1.5rem",
                     }}
                 >
-                    {showFormEditCourse?"Edit Course":"Edit Chapter"}
+                    {postChapter!==null?"Chapter Baru":showFormEditCourse?"Edit Course":"Edit Chapter"}
                 </Modal.Title>
                 </Modal.Header>
                 <Modal.Body
@@ -117,9 +119,9 @@ const ModalDetailVideo = ({
                         value={showFormEditCourse?(course.title||""):(chapter.title||"")}
                         onChange={e =>{
                                 if (showFormEditCourse) {
-                                setCourse({...course, title: e.target.value})
+                                    setCourse({...course, title: e.target.value})
                                 } else {
-                                setChapter({ ...chapter, title: e.target.value })
+                                    setChapter({ ...chapter, title: e.target.value })
                                 }
                             }
                         }
@@ -134,65 +136,66 @@ const ModalDetailVideo = ({
                         }}
                         />
                     </div>
+                    {showFormEditCourse&&(
+                        <div className="mb-3">
+                            <label
+                                htmlFor="coursePrice"
+                                className="form-label fw-semibold"
+                                style={{ color: "#cc00cc" }}
+                            >
+                            {"Harga course"}
+                            </label>
+                            <input
+                                type="number"
+                                className="form-control"
+                                id="coursePrice"
+                                placeholder={"Enter course price"}
+                                value={course.price||""}
+                                onChange={e =>
+                                    setCourse({...course, price: e.target.value})
+                                }
+                                autoFocus
+                                required
+                                style={{
+                                    border: "2px solid #cc00cc",
+                                    borderRadius: 8,
+                                    background: "#fff0fa",
+                                    color: "#3b3b5c",
+                                    fontWeight: 500,
+                                }}
+                            />
+                        </div>
+                    )}
                     <div className="mb-3">
                         <label
-                        htmlFor="coursePrice"
-                        className="form-label fw-semibold"
-                        style={{ color: "#cc00cc" }}
-                        >
-                        {"Harga course"}
-                        </label>
-                        <input
-                        type="number"
-                        className="form-control"
-                        id="coursePrice"
-                        placeholder={"Enter course price"}
-                        value={course.price||""}
-                        onChange={e =>
-                            setCourse({...course, price: e.target.value})
-                        }
-                        autoFocus
-                        required
-                        style={{
-                            border: "2px solid #cc00cc",
-                            borderRadius: 8,
-                            background: "#fff0fa",
-                            color: "#3b3b5c",
-                            fontWeight: 500,
-                        }}
-                        />
-                    </div>
-                    <div className="mb-3">
-                        <label
-                        htmlFor="chapterNote"
-                        className="form-label fw-semibold"
-                        style={{ color: "#cc00cc" }}
+                            htmlFor="chapterNote"
+                            className="form-label fw-semibold"
+                            style={{ color: "#cc00cc" }}
                         >
                         Chapter Note
                         </label>
                         <textarea
-                        required={showFormEditCourse}
-                        className="form-control"
-                        id="chapterNote"
-                        maxLength={250}
-                        rows={3}
-                        placeholder={showFormEditCourse?"Write notes or description for this course":"Write notes or description for this chapter"}
-                        value={showFormEditCourse?(course.description||""):(chapter.chapterNote||"")}
-                        onChange={e =>{
+                            required={showFormEditCourse}
+                            className="form-control"
+                            id="chapterNote"
+                            maxLength={250}
+                            rows={3}
+                            placeholder={showFormEditCourse?"Write notes or description for this course":"Write notes or description for this chapter"}
+                            value={showFormEditCourse?(course.description||""):(chapter.chapterNote||"")}
+                            onChange={e =>{
                                 if (showFormEditCourse) {
-                                setCourse({...course, description: e.target.value})
+                                    setCourse({...course, description: e.target.value})
                                 } else {
-                                setChapter({ ...chapter, chapterNote: e.target.value })
+                                    setChapter({ ...chapter, chapterNote: e.target.value })
                                 }
-                            }
-                        }
-                        style={{
-                            border: "2px solid #cc00cc",
-                            borderRadius: 8,
-                            background: "#fff0fa",
-                            color: "#3b3b5c",
-                            fontWeight: 500,
-                        }}
+                            }}
+                            style={{
+                                border: "2px solid #cc00cc",
+                                borderRadius: 8,
+                                background: "#fff0fa",
+                                color: "#3b3b5c",
+                                fontWeight: 500,
+                            }}
                         />
                     </div>
                     {showFormEditCourse?(
@@ -244,7 +247,9 @@ const ModalDetailVideo = ({
                                         ...chapter,
                                         video: e.target.files[0],
                                     });
-                                    setThumbnail(e.target.files[0])
+                                    if (showFormEditCourse) {
+                                        setThumbnail(e.target.files[0])
+                                    }
                                 }
                             }}
                             style={{

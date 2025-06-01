@@ -29,10 +29,17 @@ export const editProfileData = createSlice({
     set_role: (state, action) => { // <-- Menambahkan reducer untuk 'photo'
       state.role = action.payload;
     },
+    set_time_out_session :(state) => {
+      state.name = ""
+      state.email = ""
+      state.start_time = ""
+      state.duration = ""
+      state.role = ""
+    }
   },
 });
 
-export const { set_role,set_name, set_email, set_start_time, set_duration } = editProfileData.actions;
+export const { set_role,set_name, set_email, set_start_time, set_duration,set_time_out_session } = editProfileData.actions;
 
 export const profile_data = (state) => state.account_data
 

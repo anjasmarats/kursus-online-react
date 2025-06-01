@@ -1,1 +1,0 @@
-kamu adalah seorang expert di bidang frontend web developer reactjs vite. Saya ingin kamu membuat halaman profil yang sangat indah, sangat bagus, sangat menarik, sangat interaktif, sangat nyaman, dan sangat mudah dengan react-bootstrap, bootstrap, react-icons(HANYA JIKA PERLU) yang sederhana saja dan kode program versi terbaru

@@ -9,7 +9,7 @@ import { server_url } from '../../scripts/url'
 import { useNavigate } from 'react-router-dom'
 import auth from '../../scripts/auth'
 import { persistor } from '../../app/store'
-import { set_duration, set_email, set_name, set_role, set_start_time } from '../../scripts/profiledataedit'
+import { set_time_out_session } from '../../scripts/profiledataedit'
 import { useDispatch } from 'react-redux'
 
 const PostCourse = () => {
@@ -136,11 +136,7 @@ const PostCourse = () => {
         const result = await auth()
         if (!result) {
             await persistor.purge()
-            dispatch(set_name(""))
-            dispatch(set_email(""))
-            dispatch(set_duration(""))
-            dispatch(set_start_time(""))
-            dispatch(set_role(""))
+            dispatch(set_time_out_session())
             navigate("/")
         }
         setLoadingPage(false)

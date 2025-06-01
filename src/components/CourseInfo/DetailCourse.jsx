@@ -1,14 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import {
-
-// EditCourse.jsx
-// UI/UX Online Course Video Player - Unique, Modern, and User-Friendly
-// Uses React, React-Bootstrap, Bootstrap, and React-Icons
-// This design features a visually distinct, comfortable, and easy-to-use interface
-// for displaying a list of course videos and the currently playing video.
-
-// Import React and necessary libraries
     Container,
     Row,
     Col,
@@ -26,7 +18,7 @@ import { server_url } from "../../scripts/url";
 import ListChapters from "./ListChapters";
 import ModalDetailVideo from "./ModalDetailVideo";
 import { persistor } from "../../app/store";
-import { profile_data, set_duration, set_email, set_name, set_role, set_start_time } from "../../scripts/profiledataedit";
+import { profile_data, set_time_out_session } from "../../scripts/profiledataedit";
 import { useDispatch, useSelector } from "react-redux";
 
 // Main component
@@ -52,6 +44,7 @@ const DetailCourse = () => {
     const navigate = useNavigate()
 
     const [show,setShow] = useState(false)
+    const [showNewChapter,setShowNewChapter] = useState(false)
 
     const [chapter,setChapter] = useState({
         id:0,
@@ -88,11 +81,7 @@ const DetailCourse = () => {
             const result = await auth()
             if (!result) {
                 await persistor.purge()
-                dispatch(set_name(""))
-                dispatch(set_email(""))
-                dispatch(set_duration(""))
-                dispatch(set_start_time(""))
-                dispatch(set_role(""))
+                dispatch(set_time_out_session())
                 navigate("/")
             }
             console.log("editCourse")
@@ -130,11 +119,47 @@ const DetailCourse = () => {
             const result = await auth()
             if (!result) {
                 await persistor.purge()
-                dispatch(set_name(""))
-                dispatch(set_email(""))
-                dispatch(set_duration(""))
-                dispatch(set_start_time(""))
-                dispatch(set_role(""))
+                dispatch(set_time_out_session())
+                navigate("/")
+            }
+            setLoading(true)
+            if (!chapter.title) {
+                return
+            }
+
+            const session = localStorage.getItem("session")
+
+            const formData = new FormData()
+            formData.append("title",chapter.title)
+            formData.append("video",chapter.video)
+            formData.append("chapterNote",chapter.chapterNote)
+            formData.append("courseTitle",course.title)
+
+            console.log("chapter edit",chapter)
+
+            const res = await axios.put(`${server_url}/api/course/${idCourse}/chapter/${chapter.id}`,formData,{
+                headers:{
+                    Authorization:"Bearer "+session
+                }
+            })
+            if (res.status===200) {
+                closeViewChapter()
+                await fetchData()
+            }
+        } catch (error) {
+            console.error("error edit course",error)            
+        } finally {
+            setLoading(false)
+        }
+    },[chapter.title,chapter.chapterNote,chapter.video])
+
+    const postChapter = useCallback(async(e) => {
+        try {
+            e.preventDefault()
+            const result = await auth()
+            if (!result) {
+                await persistor.purge()
+                dispatch(set_time_out_session())
                 navigate("/")
             }
             setLoading(true)
@@ -175,11 +200,7 @@ const DetailCourse = () => {
           const result = await auth()
           if (!result) {
             await persistor.purge()
-            dispatch(set_name(""))
-            dispatch(set_email(""))
-            dispatch(set_duration(""))
-            dispatch(set_start_time(""))
-            dispatch(set_role(""))
+            dispatch(set_time_out_session())
           }
           const response = await axios.get(`${server_url}/api/course/${id}`)
           const res = await response.data
@@ -356,8 +377,13 @@ const DetailCourse = () => {
                 chapters:course.chapters,
                 currentVideo,
                 chapter,
-                setShow,
-                thumbnail:course.thumbnail
+                setShowNewChapter,
+                thumbnail:course.thumbnail,
+                showNewChapter,
+                setLoading,
+                setChapter,
+                idCourse,
+                courseTitle:course.title
             }}/>
 
             {/* Edit Chapter Modal (already implemented below, but here's a standalone, improved version for clarity) */}
@@ -381,56 +407,3 @@ const DetailCourse = () => {
 };
 
 export default DetailCourse;
-
-/*
-================================================================================
-EXPLANATION (Highly Detailed):
-
-1. Layout:
-     - Uses React-Bootstrap's Container, Row, and Col for responsive layout.
-     - Left sidebar (Playlist) and right main area (Video Player).
-     - Modern, soft color gradients and rounded corners for a unique, comfortable look.
-
-2. Playlist Sidebar:
-     - ListGroup displays all course videos.
-     - Each item shows:
-         - Play/Check icon (watched or not).
-         - Title and duration.
-         - Favorite icon (toggleable, with tooltip).
-     - Active video is highlighted with a gradient and shadow.
-     - Hover effect for better interactivity.
-     - Clicking an item plays that video.
-
-3. Video Player Section:
-     - Card with gradient background and rounded corners.
-     - Video element with custom play/pause overlay button.
-     - Next/Previous buttons for easy navigation.
-     - Video title, duration badge, and description shown below the player.
-
-4. Progress Bar:
-     - Shows course completion based on watched videos.
-
-5. Icons:
-     - Uses react-icons for modern, visually appealing icons.
-
-6. Accessibility & Usability:
-     - Large clickable areas, clear contrasts, tooltips for icons.
-     - Responsive design for desktop and tablet.
-
-7. Customization:
-     - Replace `videoList` with your own data or API.
-     - Easily extendable for more features (e.g., notes, comments).
-
-8. Uniqueness:
-     - The combination of gradients, rounded corners, shadow, and icon usage
-         creates a fresh, modern look not commonly found in other course platforms.
-
-================================================================================
-INSTRUCTIONS:
-- Install dependencies:
-        npm install react-bootstrap bootstrap react-icons
-- Import Bootstrap CSS in your main.jsx or App.jsx:
-- Place this component in your route/page as needed.
-
-================================================================================
-*/

@@ -3,73 +3,35 @@ import Container from 'react-bootstrap/Container';
 import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
 import "../styles/NavbarComponent.css";
-import { Link, useNavigate } from 'react-router-dom';
-import { useState } from 'react';
-import Modal from 'react-bootstrap/Modal'
-import { Alert, Form } from 'react-bootstrap';
-import { InputGroup } from 'react-bootstrap';
-import { FaEye,FaEyeSlash } from 'react-icons/fa';
-import axios from 'axios';
-import { server_url } from '../scripts/url';
+import { Link} from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import auth from '../scripts/auth';
+import { persistor } from '../app/store';
+import { useDispatch } from 'react-redux';
+import { set_time_out_session } from '../scripts/profiledataedit';
 
-const NavbarComponent = (props) => {
-    const { editUser,loading,authorized,fetchData,setEditUser,isAdmin } = props
+const NavbarComponent = () => {
 
-    const { name,email,photo,password } = editUser||{}
+    const [loading,setLoading] = useState(false)
+    const [authorized,setAuthorized] = useState(false)
+    const dispatch = useDispatch()
 
-    // console.log(editUser)
-
-    const [show, setShow] = useState(false);
-    const [error,setError] = useState(null)
-
-    const handleClose = () => setShow(false);
-    const handleShow = () => setShow(true);
-
-    const [showPassword, setShowPassword] = useState(false)
-
-    const update = async(e) => {
-        e.preventDefault()
-        try {
-            const formData = new FormData()
-            const { name,email,password,photo } = editUser
-            formData.append("name",name)
-            formData.append("email",email)
-            formData.append("password",password)
-            formData.append("photo",photo)
-            await axios.put(`${server_url}/api/user`,formData, {
-                headers: {
-                    "Content-Type":"multipart/form-data",
-                    Authorization: `Bearer ${localStorage.getItem("session")}`
-                }
-            })
-            // console.log(editUser)
-            
-            await fetchData()
-            handleClose()
-        } catch (error) {
-            if (error.response) {
-                if (error.response.status===500) {
-                    setError("Internal Server Error")
-                }
-            }
-            setError("Error")
-            console.error(error)
+    const cekauth =async()=>{
+        setLoading(true)
+        const result = await auth()
+        if (!result) {
+            await persistor.purge()
+            dispatch(set_time_out_session())
         }
+        console.log("result",result)
+        setAuthorized(result)
+        setLoading(false)
     }
-    
-    const handleShowPassword = () => {
-        setShowPassword(!showPassword)
-    }
-    
-    const navigate = useNavigate()
+    console.log("authorized",authorized)
 
-    const logout =()=>{
-        localStorage.removeItem("session")
-        localStorage.removeItem("expiration")
-        navigate('/logout')
-    }
-
-    console.log("loading",loading)
+    useEffect(()=>{
+        cekauth()
+    },[])
 
     return (
         <>
@@ -94,16 +56,16 @@ const NavbarComponent = (props) => {
                         <Nav className="ms-auto">
                         {authorized?(
                             <>
-                                <Nav.Link href="#" style={{ color: "#fff" }}>
-                                Kursus
-                                </Nav.Link>
-                                <Nav.Link href="#" style={{ color: "#fff" }}>
-                                Profil
-                                </Nav.Link>
+                                <Link className='mx-2 text-decoration-none' to={"#"} style={{ color: "#fff" }}>
+                                    Kursus
+                                </Link>
+                                <Link className='mx-2 text-decoration-none' to={"/profile"} style={{ color: "#fff" }}>
+                                    Profil
+                                </Link>
                             </>
                         ) : (
                             <div className='align-items-center'>
-                                <Link to={"register"}>
+                                <Link to={"/register"}>
                                     <Button variant="outline-light" className='fw-bolder'>Daftar</Button>
                                 </Link>
                                 <Link to={"/login"} className='text-light text-center m-3 text-decoration-none'>Masuk</Link>
@@ -115,41 +77,6 @@ const NavbarComponent = (props) => {
                 )}
                 </Container>
             </Navbar>
-
-            <Modal show={show} onHide={handleClose}>
-                <Form onSubmit={update}>
-                <Modal.Header closeButton>
-                <Modal.Title>Data Profil</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    {error&&(<Alert variant='danger' key={"danger"} className='w-100 mx-auto mt-5 mb-3'>{error}</Alert>)}
-                    <Form.Group className="mb-3" controlId="formBasicName">
-                        <Form.Label>Nama</Form.Label>
-                        <Form.Control required={true} value={name} type="search" onChange={(e)=>setEditUser({...editUser,name:e.target.value})} placeholder="Nama" />
-                    </Form.Group>
-                                        
-                    <Form.Group className="mb-3" controlId="formBasicEmail">
-                        <Form.Label>Email address</Form.Label>
-                        <Form.Control required={true} type="email" value={email} onChange={(e)=>setEditUser({...editUser,email:e.target.value})} placeholder="email" />
-                    </Form.Group>
-
-                    <Form.Group className="mb-3" controlId="formBasicPassword">
-                        <Form.Label>Password</Form.Label>
-                        <InputGroup className="mb-3 mt-2">
-                            <Form.Control type={showPassword?'text':'password'} onChange={(e)=>setEditUser({...editUser,password:e.target.value})} placeholder="Password" />
-                            <Button variant="btn btn-secondary" onClick={handleShowPassword}>
-                                {showPassword ? <FaEyeSlash size={32}/> : <FaEye size={32}/>}
-                            </Button>
-                        </InputGroup>
-                    </Form.Group>
-                </Modal.Body>
-                <Modal.Footer>
-                <Button variant="primary" type='submit'>
-                    Simpan
-                </Button>
-                </Modal.Footer>
-                </Form>
-            </Modal>
         </>
     )
 }
