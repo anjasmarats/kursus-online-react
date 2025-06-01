@@ -25,11 +25,13 @@ import auth from "../../scripts/auth";
 import { server_url } from "../../scripts/url";
 import ListChapters from "./ListChapters";
 import ModalDetailVideo from "./ModalDetailVideo";
-import { useAppSelector } from "../../app/hooks";
+import { persistor } from "../../app/store";
+import { profile_data, set_duration, set_email, set_name, set_role, set_start_time } from "../../scripts/profiledataedit";
+import { useDispatch, useSelector } from "react-redux";
 
 // Main component
 const DetailCourse = () => {
-    const profileData = useAppSelector((state) => state.account_data);
+    const profileData = useSelector(profile_data);
     const [loading,setLoading] = useState(false)
     const [currentVideo, setCurrentVideo] = useState({});
     const [thumbnail,setThumbnail] = useState()
@@ -83,6 +85,16 @@ const DetailCourse = () => {
     const editCourse = useCallback(async(e) => {
         try {
             e.preventDefault()
+            const result = await auth()
+            if (!result) {
+                await persistor.purge()
+                dispatch(set_name(""))
+                dispatch(set_email(""))
+                dispatch(set_duration(""))
+                dispatch(set_start_time(""))
+                dispatch(set_role(""))
+                navigate("/")
+            }
             console.log("editCourse")
             if (!course.title||!course.price||!course.description) {
                 return
@@ -110,9 +122,21 @@ const DetailCourse = () => {
         }
     },[course.title,course.description,course.thumbnail,course.price])
 
+    const dispatch = useDispatch()
+
     const editChapter = useCallback(async(e) => {
         try {
             e.preventDefault()
+            const result = await auth()
+            if (!result) {
+                await persistor.purge()
+                dispatch(set_name(""))
+                dispatch(set_email(""))
+                dispatch(set_duration(""))
+                dispatch(set_start_time(""))
+                dispatch(set_role(""))
+                navigate("/")
+            }
             setLoading(true)
             if (!chapter.title) {
                 return
@@ -148,9 +172,14 @@ const DetailCourse = () => {
         try {
             // let chapters=[]
           setLoading(true)
-          const {adminuser} = await auth()
-          if (!adminuser) {
-            navigate('/')
+          const result = await auth()
+          if (!result) {
+            await persistor.purge()
+            dispatch(set_name(""))
+            dispatch(set_email(""))
+            dispatch(set_duration(""))
+            dispatch(set_start_time(""))
+            dispatch(set_role(""))
           }
           const response = await axios.get(`${server_url}/api/course/${id}`)
           const res = await response.data
@@ -240,8 +269,6 @@ const DetailCourse = () => {
             thumbnail,
         });
     },[course])
-
-    console.log("profileData",profileData)
 
     return (
         <Container

@@ -6,6 +6,8 @@ import { useEffect, useState } from 'react';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import axios from 'axios';
 import { server_url } from '../scripts/url';
+import { set_duration, set_email, set_name, set_role } from '../scripts/profiledataedit';
+import { useDispatch } from 'react-redux';
 
 function Register(props) {
     const { loginPage } = props
@@ -22,16 +24,31 @@ function Register(props) {
         setShowPassword(!showPassword)
     }
 
+    const dispatch = useDispatch();
+
     const formData = new FormData()
 
     const Login = async(e) => {
         try {
             e.preventDefault()
             const res = await axios.post(`${server_url}/api/login`, data)
-            const data_response = await res.data
-            const expiration = new Date().getTime() + 1000* 60 * 10 
-            localStorage.setItem("session", data_response.data)
+            const data_response = res.data.data
+            const expiration = new Date().getTime() + 1000* 60 * 10
+            console.log("dataresponse",data_response)
+            localStorage.setItem("session", data_response.logind)
             localStorage.setItem("expiration", expiration)
+            if (data_response.role==="admin") {
+                dispatch(set_role("admin"))
+            } else {
+                dispatch(set_role("user"))
+            }
+            if (data_response.activation_time!=null) {
+                const { time,date } = JSON.parse(data_response.activation_time)
+                dispatch(set_start_time(time))
+                dispatch(set_duration(date))
+            }
+            dispatch(set_name(data_response.name))
+            dispatch(set_email(data_response.email))
             setError(null)
             navigate('/')
         } catch (e) {
@@ -56,10 +73,15 @@ function Register(props) {
         try {
             e.preventDefault()
             const res = await axios.post(`${server_url}/api/user`, data)
-            const data_response = await res.data
+            const data_response = await res.data.data
             const expiration = new Date().getTime() + 1000* 60 * 10
-            localStorage.setItem("session", data_response.data)
+            localStorage.setItem("session", data_response.logind)
             localStorage.setItem("expiration", expiration)
+            if (data_response.activation_time!=null) {
+                const { time,date } = JSON.parse(data_response.activation_time)
+                dispatch(set_start_time(time))
+                dispatch(set_duration(date))
+            }
             setError(null)
             navigate('/')
         } catch (error) {
@@ -101,7 +123,7 @@ function Register(props) {
 
     const cekAuth = async () => {
         try {
-            const { data } = await auth()
+            const data = await auth()
             if (data) {
                 navigate('/')
             }

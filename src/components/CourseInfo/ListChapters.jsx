@@ -5,7 +5,8 @@ import { MdModeEditOutline } from "react-icons/md";
 import { RiDeleteBin5Fill } from "react-icons/ri";
 import { server_url } from "../../scripts/url";
 import "../../styles/ListChapters.css"
-import { useAppSelector } from "../../app/hooks";
+import { useSelector } from "react-redux";
+import { profile_data } from "../../scripts/profiledataedit";
 
 const ListChapters=React.memo(({
         isPlaying,
@@ -23,7 +24,7 @@ const ListChapters=React.memo(({
         setShow,
         thumbnail
     })=>{
-    const profileData = useAppSelector((state) => state.account_data);
+    const profileData = useSelector(profile_data);
     
     return (
         <Row>

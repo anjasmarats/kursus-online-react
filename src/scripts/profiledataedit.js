@@ -14,11 +14,11 @@ export const editProfileData = createSlice({
   name: 'account_data',
   initialState, // <-- Perubahan di sini: Menggunakan initialState
   reducers: {
-    set_name: (state, action) => {
-      state.name = action.payload; // <-- Perubahan di sini: Langsung akses properti state
+    set_name: (state, action) => { // <-- Menambahkan reducer untuk 'photo'
+      state.name = action.payload;
     },
-    set_email: (state, action) => {
-      state.email = action.payload; // <-- Perubahan di sini
+    set_email: (state, action) => { // <-- Menambahkan reducer untuk 'photo'
+      state.email = action.payload;
     },
     set_start_time: (state, action) => {
       state.start_time = action.payload; // <-- Perubahan di sini
@@ -26,15 +26,14 @@ export const editProfileData = createSlice({
     set_duration: (state, action) => {
       state.duration = action.payload; // <-- Perubahan di sini
     },
-    set_photo: (state, action) => { // <-- Menambahkan reducer untuk 'photo'
-      state.photo = action.payload;
-    },
     set_role: (state, action) => { // <-- Menambahkan reducer untuk 'photo'
       state.role = action.payload;
     },
   },
 });
 
-export const { set_role,set_name, set_email, set_start_time, set_duration, set_photo } = editProfileData.actions;
+export const { set_role,set_name, set_email, set_start_time, set_duration } = editProfileData.actions;
+
+export const profile_data = (state) => state.account_data
 
 export default editProfileData.reducer;

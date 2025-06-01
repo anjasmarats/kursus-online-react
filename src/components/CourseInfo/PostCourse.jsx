@@ -1,13 +1,16 @@
 import { useEffect, useState } from 'react'
 import { Form,FloatingLabel,Modal,Button, Spinner,Alert } from 'react-bootstrap'
-import NavbarComponent from './NavbarComponent'
+import NavbarComponent from '../NavbarComponent'
 import Swal from 'sweetalert2'
 import { MdOutlineEdit } from 'react-icons/md'
 import { IoClose } from 'react-icons/io5'
 import axios from 'axios'
-import { server_url } from '../scripts/url'
+import { server_url } from '../../scripts/url'
 import { useNavigate } from 'react-router-dom'
-import auth from '../scripts/auth'
+import auth from '../../scripts/auth'
+import { persistor } from '../../app/store'
+import { set_duration, set_email, set_name, set_role, set_start_time } from '../../scripts/profiledataedit'
+import { useDispatch } from 'react-redux'
 
 const PostCourse = () => {
     const [course,setCourse] = useState({
@@ -126,11 +129,18 @@ const PostCourse = () => {
             setLoading(false)
         }
     }
+    const dispatch = useDispatch()
     
     const cekauth =async()=>{
         setLoadingPage(true)
-        const { result } = await auth()
+        const result = await auth()
         if (!result) {
+            await persistor.purge()
+            dispatch(set_name(""))
+            dispatch(set_email(""))
+            dispatch(set_duration(""))
+            dispatch(set_start_time(""))
+            dispatch(set_role(""))
             navigate("/")
         }
         setLoadingPage(false)

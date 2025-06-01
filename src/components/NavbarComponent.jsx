@@ -3,7 +3,7 @@ import Container from 'react-bootstrap/Container';
 import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
 import "../styles/NavbarComponent.css";
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import Modal from 'react-bootstrap/Modal'
 import { Alert, Form } from 'react-bootstrap';
@@ -63,10 +63,6 @@ const NavbarComponent = (props) => {
     
     const navigate = useNavigate()
 
-    const register = () => {
-        navigate('/register')
-    }
-
     const logout =()=>{
         localStorage.removeItem("session")
         localStorage.removeItem("expiration")
@@ -89,7 +85,9 @@ const NavbarComponent = (props) => {
                 {!loading&&(
                     <>
                     <Navbar.Brand style={{ fontWeight: 700, fontSize: "1.5rem" }}>
-                        <span style={{ color: "#fff" }}>Hi AppS</span>
+                        <Link to={"/"} className='text-decoration-none'>
+                            <span style={{ color: "#fff" }}>Hi AppS</span>
+                        </Link>
                     </Navbar.Brand>
                     <Navbar.Toggle />
                     <Navbar.Collapse>
@@ -104,10 +102,12 @@ const NavbarComponent = (props) => {
                                 </Nav.Link>
                             </>
                         ) : (
-                            <>
-                                <Button variant="outline-light" onClick={()=>register()} className='fw-bolder'>Daftar</Button>
-                                <Nav.Link href="/login" className='text-light text-center'>Masuk</Nav.Link>
-                            </>
+                            <div className='align-items-center'>
+                                <Link to={"register"}>
+                                    <Button variant="outline-light" className='fw-bolder'>Daftar</Button>
+                                </Link>
+                                <Link to={"/login"} className='text-light text-center m-3 text-decoration-none'>Masuk</Link>
+                            </div>
                         )}
                         </Nav>
                     </Navbar.Collapse>
