@@ -220,7 +220,7 @@ export default function App() {
                     />
                     <Card.Body>
                       <Card.Title style={{ color: mainPurple }}>{course.title}</Card.Title>
-                      <Card.Text>{course.description.substring(0,100)}....</Card.Text>
+                      <Card.Text>{course.description.length>100?`${course.description.substring(0,100)}....`:course.description}</Card.Text>
                       <div className="d-flex justify-content-between align-items-center mt-3">
                         <Link to={`/detail/course/${course.courseId}`}>
                           <Button
