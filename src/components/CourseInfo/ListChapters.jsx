@@ -180,10 +180,7 @@ const ListChapters=React.memo(({
                                                 }}
                                                 style={{ cursor: "pointer" }}
                                             >
-                                                <MdModeEditOutline color={currentVideo.id === video.id ? "white" : "#cc00cc"} size={28} onClick={() => {
-                                                    setChapter({ ...chapter, title: video.title, video: video.video, chapterNote: video.chapterNote })
-                                                    setShowNewChapter(true)
-                                                }} />
+                                                <MdModeEditOutline color={currentVideo.id === video.id ? "white" : "#cc00cc"} size={28}/>
                                             </span>
                                         </OverlayTrigger>
                                         <OverlayTrigger

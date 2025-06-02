@@ -9,12 +9,10 @@ import { server_url } from '../../scripts/url';
 import { set_duration, set_email, set_name, set_role } from '../../scripts/profiledataedit';
 import { useDispatch } from 'react-redux';
 
-function Register(props) {
-    const { loginPage } = props
+function Authentication({register}) {
     const navigate = useNavigate()
     const [error, setError] = useState(null)
     const [showPassword, setShowPassword] = useState(false)
-    const [register,setRegister] = useState(false)
     const [data, setData] = useState({
         name: "",
         email: "",
@@ -69,7 +67,7 @@ function Register(props) {
         }
     }
 
-    const Register = async (e) => {
+    const registerUser = async (e) => {
         try {
             e.preventDefault()
             const res = await axios.post(`${server_url}/api/user`, data)
@@ -96,6 +94,7 @@ function Register(props) {
             console.error(error)
         }
     }
+    console.log("register",register)
 
     const authGoogle = async (e) => {
         try {
@@ -135,10 +134,6 @@ function Register(props) {
         }
     }
 
-    console.log("register&&!loginPage",register&&!loginPage)
-    console.log("loginPage",loginPage)
-
-    console.log("register",register)
     return(
         <main className='register'>
             <NavbarComponent/>
@@ -146,8 +141,8 @@ function Register(props) {
                 {error&&(<Alert variant='danger' key={"danger"} className='col-lg-4 col-sm-8 col-10 mx-auto mt-5 mb-3'>{error}</Alert>)}
                 <section className='row'>
                 <aside className={`col-lg-4 col-sm-8 col-10 mx-auto ${error&&'my-5'} shadow-lg rounded-3 py-3 px-2`}>
-                    <Form onSubmit={register&&!loginPage?Register:Login}>
-                        {register&&!loginPage&&(
+                    <Form onSubmit={register?registerUser:Login}>
+                        {register&&(
                             <Form.Group className="mb-3" controlId="formBasicName">
                                 <Form.Label>Nama</Form.Label>
                                 <Form.Control required={true} type="search" onChange={(e)=>setData({...data,name:e.target.value})} placeholder="Nama" />
@@ -169,10 +164,10 @@ function Register(props) {
                             </InputGroup>
                         </Form.Group>
                         <Button variant="primary" type="submit">
-                            {register&&!loginPage?"Daftar":"Login"}
+                            {register?"Daftar":"Login"}
                         </Button>
                     </Form>
-                    <div className='text-center my-3'>{register&&!loginPage?"Sudah punya akun?":"Belum punya akun?"} <a style={{ "cursor":"pointer" }} onClick={()=>setRegister(!register)} className='text-success text-decoration-none'>{register&&!loginPage?"Login di sini":"Daftar di sini"}</a></div>
+                    <div className='text-center my-3'>{register?"Sudah punya akun?":"Belum punya akun?"} <Link to={register?"/login":"/register"} style={{ "cursor":"pointer" }} className='text-success text-decoration-none'>{register?"Login di sini":"Daftar di sini"}</Link></div>
                 </aside>
                 </section>
             </article>
@@ -180,4 +175,4 @@ function Register(props) {
     )    
 }
 
-export default Register;
+export default Authentication;
