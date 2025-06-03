@@ -3,14 +3,8 @@ import { server_url } from "./url"
 
 const auth = async ()=>{
     try {
-        const session = localStorage.getItem("session")
-        const expiration = localStorage.getItem("expiration")
-        const now = new Date().getTime()
-        if (!session || (expiration && now > expiration)) {
-            localStorage.removeItem("session")
-            localStorage.removeItem("expiration")
-            return false
-        }
+        const session = localStorage.getItem('session')
+        if (!session) return false
         const res = await axios.get(`${server_url}/api/auth`, {
             headers: {
                 Authorization: `Bearer ${session}`

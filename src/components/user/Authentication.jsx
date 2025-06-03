@@ -72,14 +72,7 @@ function Authentication({register}) {
             e.preventDefault()
             const res = await axios.post(`${server_url}/api/user`, data)
             const data_response = await res.data.data
-            const expiration = new Date().getTime() + 1000* 60 * 10
             localStorage.setItem("session", data_response.logind)
-            localStorage.setItem("expiration", expiration)
-            if (data_response.activation_time!=null) {
-                const { time,date } = JSON.parse(data_response.activation_time)
-                dispatch(set_start_time(time))
-                dispatch(set_duration(date))
-            }
             setError(null)
             navigate('/')
         } catch (error) {
