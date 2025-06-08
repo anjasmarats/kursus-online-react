@@ -16,8 +16,12 @@ const auth = async ()=>{
         console.log(data)
 
         return data
-    } catch (e) {
-        console.error(`auth : ${e}`)
+    } catch (error) {
+        if (error.response) {
+            const data = error.response.data.data
+            return data
+        }
+        console.error(`auth : ${error}`)
         return false
     }
 }

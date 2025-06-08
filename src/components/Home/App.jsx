@@ -95,7 +95,7 @@ export default function App() {
           }
         })
         const result = await res.data
-        const { name,email,activation_time,photo,role } = result.user
+        const { name,email,activation_time,role } = result.data
         if (activation_time) {
           const { time,date } = JSON.parse(activation_time)
           dispatch(set_start_time(time))

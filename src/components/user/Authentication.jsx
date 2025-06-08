@@ -31,23 +31,21 @@ function Authentication({register}) {
             e.preventDefault()
             const res = await axios.post(`${server_url}/api/login`, data)
             const data_response = res.data.data
-            const expiration = new Date().getTime() + 1000* 60 * 10
-            console.log("dataresponse",data_response)
-            localStorage.setItem("session", data_response.logind)
-            localStorage.setItem("expiration", expiration)
-            if (data_response.role==="admin") {
-                dispatch(set_role("admin"))
-            } else {
-                dispatch(set_role("user"))
-            }
-            if (data_response.activation_time!=null) {
-                const { time,date } = JSON.parse(data_response.activation_time)
-                dispatch(set_start_time(time))
-                dispatch(set_duration(date))
-            }
-            dispatch(set_name(data_response.name))
-            dispatch(set_email(data_response.email))
-            setError(null)
+            console.log("data_response",data_response)
+            localStorage.setItem("session", data_response)
+            // if (data_response.role==="admin") {
+            //     dispatch(set_role("admin"))
+            // } else {
+            //     dispatch(set_role("user"))
+            // }
+            // if (data_response.activation_time!=null) {
+            //     const { time,date } = JSON.parse(data_response.activation_time)
+            //     dispatch(set_start_time(time))
+            //     dispatch(set_duration(date))
+            // }
+            // dispatch(set_name(data_response.name))
+            // dispatch(set_email(data_response.email))
+            // setError(null)
             navigate('/')
         } catch (e) {
             if (e.response) {
