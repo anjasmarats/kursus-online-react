@@ -1,7 +1,8 @@
 import { Modal,Button, Spinner } from "react-bootstrap"
 import { server_url } from "../../scripts/url"
+import React from "react"
 
-const ModalDetailVideo = ({
+const ModalDetailVideo = React.memo(({
         show,
         showFormEditCourse,
         editCourse,
@@ -309,6 +310,6 @@ const ModalDetailVideo = ({
             </form>
         </Modal>
     )
-}
+})
 
 export default ModalDetailVideo
