@@ -27,6 +27,7 @@ const ListChapters=React.memo(({
         chapter,
         setShowNewChapter,
         thumbnail,
+        setThumbnail,
         showNewChapter,
         setLoading,
         idCourse,
@@ -292,7 +293,7 @@ const ListChapters=React.memo(({
                                     objectFit: "cover",
                                     background: "#000",
                                 }}
-                                poster="https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=800&q=80"
+                                poster={`${server_url}/courses/thumbnails/${thumbnail}`}
                             />
                             </div>
                             {/* Video Info & Controls */}
@@ -347,14 +348,15 @@ const ListChapters=React.memo(({
                     </Col>
                 )}
             </Row>
-            <ModalDetailVideo {...{
+            {showNewChapter&&(<ModalDetailVideo {...{
                 showNewChapter,
                 postChapter,
                 chapter,
                 closeViewChapter,
                 loading,
-                setChapter
-            }}/>
+                setChapter,
+                setThumbnail
+            }}/>)}
         </>
     )
 })

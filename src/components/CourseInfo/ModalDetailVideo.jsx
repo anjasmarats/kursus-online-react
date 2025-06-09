@@ -19,6 +19,11 @@ const ModalDetailVideo = React.memo(({
         postChapter,
         showNewChapter,
     }) =>{
+        console.log("thumbnail",thumbnail?URL.createObjectURL(thumbnail):`${server_url}/courses/videos/${chapter.video}`)
+        // console.log("showFormEditCourse",showFormEditCourse)
+        // console.log("editCourse ada = \n",editCourse==null)
+        // console.log("editChapter ada = \n",editChapter==null)
+        // console.log("postChapter!==null?postChapter:showFormEditCourse?editCourse:editChapter = \n",showNewChapter?postChapter:showFormEditCourse?editCourse:editChapter)
     return (
         <Modal
             show={show||showNewChapter}
@@ -28,7 +33,7 @@ const ModalDetailVideo = React.memo(({
             backdrop="static"
             contentClassName="border-0"
         >
-            <form onSubmit={postChapter!==null?postChapter:showFormEditCourse?editCourse:editChapter}>
+            <form onSubmit={showNewChapter?postChapter:showFormEditCourse?editCourse:editChapter}>
                 <Modal.Header
                 closeButton
                 style={{
@@ -73,7 +78,7 @@ const ModalDetailVideo = React.memo(({
                         />
                     ) : chapter.video ? (
                         <video
-                        src={`${server_url}/courses/videos/${chapter.video}`}
+                        src={thumbnail?URL.createObjectURL(thumbnail):`${server_url}/courses/videos/${chapter.video}`}
                         controls
                         style={{
                             width: "100%",
@@ -248,9 +253,7 @@ const ModalDetailVideo = React.memo(({
                                         ...chapter,
                                         video: e.target.files[0],
                                     });
-                                    if (showFormEditCourse) {
-                                        setThumbnail(e.target.files[0])
-                                    }
+                                    setThumbnail(e.target.files[0])
                                 }
                             }}
                             style={{

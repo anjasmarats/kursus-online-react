@@ -26,7 +26,7 @@ const DetailCourse = () => {
     const profileData = useSelector(profile_data);
     const [loading,setLoading] = useState(false)
     const [currentVideo, setCurrentVideo] = useState({});
-    const [thumbnail,setThumbnail] = useState()
+    const [thumbnail,setThumbnail] = useState(null)
     const [isPlaying, setIsPlaying] = useState(true);
     const [hovered, setHovered] = useState(null);
     const [showFullDescription, setShowFullDescription] = useState(false);
@@ -44,6 +44,9 @@ const DetailCourse = () => {
     const navigate = useNavigate()
 
     const [show,setShow] = useState(false)
+    // const [showEditChapter,setShowEditChapter] = useState(false)
+    // const [showPostChapter,setShowPostChapter] = useState(false)
+    // const [show,setShow] = useState(false)
     const [showNewChapter,setShowNewChapter] = useState(false)
 
     const [chapter,setChapter] = useState({
@@ -142,6 +145,7 @@ const DetailCourse = () => {
                     Authorization:"Bearer "+session
                 }
             })
+            console.log("status",res.status)
             if (res.status===200) {
                 closeViewChapter()
                 await fetchData()
@@ -252,6 +256,9 @@ const DetailCourse = () => {
         setShowFormEditCourse(true)
         setShow(true)
     }
+
+    console.log("show",show)
+    console.log("showNewChapter",showNewChapter)
   
     // 3. Tentukan apakah deskripsi perlu dipotong atau tidak
     // Ini akan menjadi 'true' jika panjang deskripsi melebihi batas yang ditentukan
@@ -383,25 +390,28 @@ const DetailCourse = () => {
                 setLoading,
                 setChapter,
                 idCourse,
-                courseTitle:course.title
+                courseTitle:course.title,
+                setThumbnail
             }}/>
 
             {/* Edit Chapter Modal (already implemented below, but here's a standalone, improved version for clarity) */}
-            <ModalDetailVideo {...{
-                show,
-                closeViewChapter,
-                showFormEditCourse,
-                editCourse,
-                editChapter,
-                thumbnail,
-                chapter,
-                setCourse,
-                setChapter,
-                course,
-                changeThumbnail,
-                loading,
-                setThumbnail
-            }}/>
+            {show && (
+                <ModalDetailVideo {...{
+                    show,
+                    closeViewChapter,
+                    showFormEditCourse,
+                    editCourse,
+                    editChapter,
+                    thumbnail,
+                    chapter,
+                    setCourse,
+                    setChapter,
+                    course,
+                    changeThumbnail,
+                    loading,
+                    setThumbnail,
+                }}/>
+            )}
         </Container>
     );
 };
