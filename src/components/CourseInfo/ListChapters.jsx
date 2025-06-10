@@ -31,7 +31,8 @@ const ListChapters=React.memo(({
         showNewChapter,
         setLoading,
         idCourse,
-        courseTitle
+        courseTitle,
+        courseThumbnail
     })=>{
     const profileData = useSelector(profile_data);
     const dispatch = useDispatch()
@@ -256,7 +257,7 @@ const ListChapters=React.memo(({
                         className="d-flex flex-column align-items-center justify-content-center"
                     >
                         {currentVideo.video==null ? (
-                            <img src={`${server_url}/courses/thumbnails/${thumbnail}`} style={{
+                            <img src={thumbnail?URL.createObjectURL(thumbnail):`${server_url}/courses/thumbnails/${courseThumbnail}`} style={{
                             width: "100%",
                             objectFit: "cover",
                             background: "#000",

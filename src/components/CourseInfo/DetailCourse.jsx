@@ -256,10 +256,6 @@ const DetailCourse = () => {
         setShowFormEditCourse(true)
         setShow(true)
     }
-
-    console.log("show",show)
-    console.log("showNewChapter",showNewChapter)
-  
     // 3. Tentukan apakah deskripsi perlu dipotong atau tidak
     // Ini akan menjadi 'true' jika panjang deskripsi melebihi batas yang ditentukan
     
@@ -385,13 +381,14 @@ const DetailCourse = () => {
                 currentVideo,
                 chapter,
                 setShowNewChapter,
-                thumbnail:course.thumbnail,
+                courseThumbnail:course.thumbnail,
                 showNewChapter,
                 setLoading,
                 setChapter,
                 idCourse,
                 courseTitle:course.title,
-                setThumbnail
+                setThumbnail,
+                thumbnail
             }}/>
 
             {/* Edit Chapter Modal (already implemented below, but here's a standalone, improved version for clarity) */}

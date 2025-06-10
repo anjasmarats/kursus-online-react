@@ -19,7 +19,7 @@ const ModalDetailVideo = React.memo(({
         postChapter,
         showNewChapter,
     }) =>{
-        console.log("thumbnail",thumbnail?URL.createObjectURL(thumbnail):`${server_url}/courses/videos/${chapter.video}`)
+        console.log("thumbnail",thumbnail?thumbnail:`${server_url}/courses/videos/${chapter.video}`)
         // console.log("showFormEditCourse",showFormEditCourse)
         // console.log("editCourse ada = \n",editCourse==null)
         // console.log("editChapter ada = \n",editChapter==null)
@@ -65,7 +65,7 @@ const ModalDetailVideo = React.memo(({
                 <div className="mb-4 text-center">
                     {showFormEditCourse ? (
                         <img
-                        src={thumbnail||""}
+                        src={thumbnail||`${server_url}/courses/thumbnails/${course.thumbnail}`}
                         controls
                         style={{
                             width: "100%",
@@ -78,7 +78,7 @@ const ModalDetailVideo = React.memo(({
                         />
                     ) : chapter.video ? (
                         <video
-                        src={thumbnail?URL.createObjectURL(thumbnail):`${server_url}/courses/videos/${chapter.video}`}
+                        src={thumbnail&&!showFormEditCourse?URL.createObjectURL(thumbnail):`${server_url}/courses/videos/${chapter.video}`}
                         controls
                         style={{
                             width: "100%",
