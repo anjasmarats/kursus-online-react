@@ -356,7 +356,6 @@ const ListChapters=React.memo(({
                 closeViewChapter,
                 loading,
                 setChapter,
-                setThumbnail
             }}/>)}
         </>
     )

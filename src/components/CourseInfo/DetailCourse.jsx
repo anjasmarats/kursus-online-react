@@ -252,7 +252,7 @@ const DetailCourse = () => {
     },[idCourse,fetchData])
 
     const courseEdit = ()=>{
-        setThumbnail(`${server_url}/courses/thumbnails/${course.thumbnail}`)
+        // setThumbnail(`${server_url}/courses/thumbnails/${course.thumbnail}`)
         setShowFormEditCourse(true)
         setShow(true)
     }
@@ -381,7 +381,6 @@ const DetailCourse = () => {
                 currentVideo,
                 chapter,
                 setShowNewChapter,
-                courseThumbnail:course.thumbnail,
                 showNewChapter,
                 setLoading,
                 setChapter,

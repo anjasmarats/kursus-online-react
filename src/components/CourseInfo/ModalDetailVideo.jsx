@@ -1,13 +1,12 @@
 import { Modal,Button, Spinner } from "react-bootstrap"
 import { server_url } from "../../scripts/url"
-import React from "react"
+import React, { useState } from "react"
 
 const ModalDetailVideo = React.memo(({
         show,
         showFormEditCourse,
         editCourse,
         editChapter,
-        thumbnail,
         chapter,
         setCourse,
         setChapter,
@@ -15,12 +14,14 @@ const ModalDetailVideo = React.memo(({
         changeThumbnail,
         closeViewChapter,
         loading,
-        setThumbnail,
         postChapter,
         showNewChapter,
     }) =>{
-        console.log("thumbnail",thumbnail?thumbnail:`${server_url}/courses/videos/${chapter.video}`)
-        // console.log("showFormEditCourse",showFormEditCourse)
+
+    const [thumbnail,setThumbnail] = useState(null)
+        console.log("thumbnail&&!showFormEditCourse",thumbnail&&!showFormEditCourse)
+        console.log("thumbnail",thumbnail)
+        console.log("showFormEditCourse",showFormEditCourse)
         // console.log("editCourse ada = \n",editCourse==null)
         // console.log("editChapter ada = \n",editChapter==null)
         // console.log("postChapter!==null?postChapter:showFormEditCourse?editCourse:editChapter = \n",showNewChapter?postChapter:showFormEditCourse?editCourse:editChapter)
@@ -65,7 +66,7 @@ const ModalDetailVideo = React.memo(({
                 <div className="mb-4 text-center">
                     {showFormEditCourse ? (
                         <img
-                        src={thumbnail||`${server_url}/courses/thumbnails/${course.thumbnail}`}
+                        src={courseThumbnail||`${server_url}/courses/thumbnails/${course.thumbnail}`}
                         controls
                         style={{
                             width: "100%",
