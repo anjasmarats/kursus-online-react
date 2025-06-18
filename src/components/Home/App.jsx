@@ -47,6 +47,7 @@ export default function App() {
   const [showModal, setShowModal] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState({});
 
+  // client
   const formatToIDR = (number) => {
     // Pastikan input berupa angka
     const num = typeof number === 'string' ? parseFloat(number) : number;
@@ -58,6 +59,7 @@ export default function App() {
     });
   }
 
+  // client
   const deleteCourse = async(id,title) => {
           try {
               const confirm = await Swal.fire({
@@ -132,6 +134,7 @@ export default function App() {
     }
   }
 
+  // client
   const handleShowModal = (course) => {
     console.log("course",course)
     setSelectedCourse({...selectedCourse,...course});

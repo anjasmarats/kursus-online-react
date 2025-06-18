@@ -263,6 +263,7 @@ const ListChapters=React.memo(({
                             background: "#000",
                             }} alt="" />
                         ) : (
+                            <>
                         <Card
                             className="shadow-lg"
                             style={{
@@ -345,7 +346,162 @@ const ListChapters=React.memo(({
                                 </Col>
                             </Row>
                             </Card.Body>
-                        </Card>)}
+                        </Card>
+                        <Card className="mt-4 shadow" style={{
+                            width: "100%",
+                            maxWidth: "720px",
+                            borderRadius: "20px",
+                            background: "linear-gradient(90deg, #cc00cc 0%, #6366f1 100%)",
+                            color: "#fff",
+                            border: "none",
+                            boxShadow: "0 8px 32px rgba(204,0,204,0.08)"
+                        }}>
+                            <Card.Body>
+                                <Row className="align-items-center mb-3">
+                                    <Col xs={12} md={4} className="text-center mb-2 mb-md-0">
+                                        <div style={{
+                                            fontSize: "2.8rem",
+                                            fontWeight: 800,
+                                            color: "#fff",
+                                            textShadow: "0 2px 8px #cc00cc99"
+                                        }}>
+                                            4.8
+                                            <span style={{ fontSize: "1.2rem", fontWeight: 500, marginLeft: 8, color: "#e0e7ff" }}>/5</span>
+                                        </div>
+                                        <div>
+                                            {[...Array(5)].map((_, i) => (
+                                                <span key={i}>
+                                                    {i < 4
+                                                        ? <FaPlayCircle color="#fff" size={26} style={{ filter: "drop-shadow(0 0 4px #cc00cc)" }} />
+                                                        : <FaPlayCircle color="#e0e7ff" size={26} style={{ opacity: 0.5 }} />
+                                                    }
+                                                </span>
+                                            ))}
+                                        </div>
+                                        <div className="mt-2" style={{ color: "#e0e7ff", fontSize: "1rem" }}>
+                                            1,234 ulasan
+                                        </div>
+                                    </Col>
+                                    <Col xs={12} md={8}>
+                                        {[5, 4, 3, 2, 1].map((star, idx) => (
+                                            <Row key={star} className="align-items-center mb-1">
+                                                <Col xs={2} className="text-end pe-0">
+                                                    <span style={{ fontWeight: 600, color: "#fff" }}>{star}</span>
+                                                    <FaPlayCircle color="#fff" size={16} className="ms-1" />
+                                                </Col>
+                                                <Col xs={8} className="px-0">
+                                                    <div style={{
+                                                        background: "rgba(255,255,255,0.15)",
+                                                        borderRadius: "8px",
+                                                        overflow: "hidden",
+                                                        height: "12px",
+                                                        position: "relative"
+                                                    }}>
+                                                        <div style={{
+                                                            width: `${[60, 25, 10, 3, 2][idx]}%`,
+                                                            background: "linear-gradient(90deg, #cc00cc 0%, #6366f1 100%)",
+                                                            height: "100%",
+                                                            borderRadius: "8px"
+                                                        }} />
+                                                    </div>
+                                                </Col>
+                                                <Col xs={2} className="ps-1" style={{ color: "#e0e7ff", fontSize: "0.95rem" }}>
+                                                    {["740", "310", "124", "38", "22"][idx]}
+                                                </Col>
+                                            </Row>
+                                        ))}
+                                    </Col>
+                                </Row>
+                                <hr style={{ borderColor: "#fff2", margin: "18px 0" }} />
+                                <div style={{ maxHeight: 220, overflowY: "auto" }}>
+                                    {[
+                                        {
+                                            name: "Ayu Pratiwi",
+                                            rating: 5,
+                                            date: "2 hari lalu",
+                                            review: "Materi sangat jelas dan mudah dipahami! Instruktur sangat komunikatif.",
+                                            avatar: "https://randomuser.me/api/portraits/women/44.jpg"
+                                        },
+                                        {
+                                            name: "Budi Santoso",
+                                            rating: 4,
+                                            date: "5 hari lalu",
+                                            review: "Kelasnya bagus, hanya saja ingin lebih banyak contoh studi kasus.",
+                                            avatar: "https://randomuser.me/api/portraits/men/32.jpg"
+                                        },
+                                        {
+                                            name: "Citra Lestari",
+                                            rating: 5,
+                                            date: "1 minggu lalu",
+                                            review: "Sangat membantu untuk pemula. Terima kasih!",
+                                            avatar: "https://randomuser.me/api/portraits/women/65.jpg"
+                                        }
+                                    ].map((item, idx) => (
+                                        <Card key={idx} className="mb-3 border-0" style={{
+                                            background: "rgba(255,255,255,0.08)",
+                                            borderRadius: "16px",
+                                            color: "#fff",
+                                            boxShadow: "0 2px 8px #cc00cc22"
+                                        }}>
+                                            <Card.Body className="d-flex align-items-start">
+                                                <img
+                                                    src={item.avatar}
+                                                    alt={item.name}
+                                                    style={{
+                                                        width: 48,
+                                                        height: 48,
+                                                        borderRadius: "50%",
+                                                        objectFit: "cover",
+                                                        border: "3px solid #cc00cc",
+                                                        marginRight: 18,
+                                                        boxShadow: "0 2px 8px #cc00cc44"
+                                                    }}
+                                                />
+                                                <div style={{ flex: 1 }}>
+                                                    <div className="d-flex align-items-center mb-1">
+                                                        <span style={{ fontWeight: 700, fontSize: "1.1rem" }}>{item.name}</span>
+                                                        <span className="ms-2" style={{ color: "#e0e7ff", fontSize: "0.95rem" }}>{item.date}</span>
+                                                        <span className="ms-auto">
+                                                            {[...Array(5)].map((_, i) => (
+                                                                <FaPlayCircle
+                                                                    key={i}
+                                                                    color={i < item.rating ? "#fff" : "#e0e7ff"}
+                                                                    size={18}
+                                                                    style={{ marginLeft: 1, opacity: i < item.rating ? 1 : 0.5 }}
+                                                                />
+                                                            ))}
+                                                        </span>
+                                                    </div>
+                                                    <div style={{
+                                                        fontSize: "1rem",
+                                                        color: "#e0e7ff",
+                                                        lineHeight: 1.5
+                                                    }}>
+                                                        {item.review}
+                                                    </div>
+                                                </div>
+                                            </Card.Body>
+                                        </Card>
+                                    ))}
+                                </div>
+                                <div className="d-flex justify-content-center mt-3">
+                                    <Button
+                                        variant="light"
+                                        style={{
+                                            color: "#cc00cc",
+                                            fontWeight: 700,
+                                            borderRadius: "30px",
+                                            padding: "8px 28px",
+                                            boxShadow: "0 2px 8px #cc00cc22",
+                                            background: "#fff"
+                                        }}
+                                    >
+                                        Lihat Semua Ulasan
+                                    </Button>
+                                </div>
+                            </Card.Body>
+                        </Card>
+                        </>)}
                     </Col>
                 )}
             </Row>
